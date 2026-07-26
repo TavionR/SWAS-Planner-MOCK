@@ -47,6 +47,13 @@ function App(){
   const concepts=CONCEPTS[dept]||Object.entries(CONCEPTS).flatMap(([d,arr])=>arr.slice(0,1).map(x=>[...x,d])).slice(0,4);
   const chosen=selected[dept]||[];
   const opportunity=concepts.reduce((a,x)=>a+x[2]*x[3]/100,0);
+  const isStoreOverview=dept==="Store Overview";
+  const scopedEndcaps=isStoreOverview?totals.front+totals.back:counts[dept].front+counts[dept].back;
+  const scopedActive=isStoreOverview
+    ? Math.max(0,scopedEndcaps-6)
+    : Object.values(assignments[dept]||{}).filter(Boolean).length;
+  const scopedOpen=Math.max(0,scopedEndcaps-scopedActive);
+  const scopedUtilization=scopedEndcaps?Math.round((scopedActive/scopedEndcaps)*100):0;
   const adjust=(where,delta)=>{if(dept==="Store Overview")return;setCounts(old=>({...old,[dept]:{...old[dept],[where]:Math.max(0,old[dept][where]+delta)}}))};
   const toggle=(name,targetDept=dept)=>{
     const already=(selected[targetDept]||[]).includes(name);
@@ -92,7 +99,7 @@ function App(){
     <main>
       <header><div><span className="eyebrow">STORE 2487 · LAKEVIEW</span><h1>{dept==="Store Overview"?"Total store endcap performance":`${dept} endcap plan`}</h1><p>{dept==="Store Overview"?"See what is live, what is working, and where the next margin opportunity is.":"Set your endcap capacity and build a department-specific seasonal plan."}</p></div><div className="headerActions"><select value={dept} onChange={e=>setDept(e.target.value)}>{Object.keys(DEPARTMENTS).map(x=><option key={x}>{x}</option>)}</select><button onClick={()=>window.print()}>Export plan ↗</button></div></header>
 
-      <section className="statusBar"><span className="live">● LIVE STORE VIEW</span><div><b>{totals.front+totals.back}</b><small>Total endcaps</small></div><div><b>{totals.front+totals.back-6}</b><small>Active displays</small></div><div><b>6</b><small>Open opportunities</small></div><div><b>{Math.round(((totals.front+totals.back-6)/(totals.front+totals.back))*100)}%</b><small>Space utilization</small></div><p>Last refreshed with fictional data · Today, 8:15 AM</p></section>
+      <section className="statusBar"><span className="live">● {isStoreOverview?"LIVE TOTAL STORE VIEW":`LIVE ${dept.toUpperCase()} VIEW`}</span><div><b>{scopedEndcaps}</b><small>{isStoreOverview?"All store endcaps":"Department endcaps"}</small></div><div><b>{scopedActive}</b><small>Active displays</small></div><div><b>{scopedOpen}</b><small>Open opportunities</small></div><div><b>{scopedUtilization}%</b><small>Space utilization</small></div><p>{isStoreOverview?"All departments combined":`${dept} department only`} · Fictional live data</p></section>
 
       <section className="metrics">
         <Metric label="Endcap sales · 4 weeks" value={fmt(current.sales)} sub="+12.8% vs prior period" color="green"/>
@@ -101,7 +108,7 @@ function App(){
         <Metric label="Average gross margin" value={`${current.margin}%`} sub="+2.4 pts vs aisle average" color="amber"/>
       </section>
 
-      {dept==="Store Overview"?<StoreView setDept={setDept}/>:<DepartmentView dept={dept} count={counts[dept]} adjust={adjust} assignments={assignments[dept]||{}} prefill={prefill} assignEndcap={assignEndcap}/>}
+      {dept==="Store Overview"?<StoreView setDept={setDept}/>:<DepartmentView key={dept} dept={dept} count={counts[dept]} adjust={adjust} assignments={assignments[dept]||{}} prefill={prefill} assignEndcap={assignEndcap}/>}
 
       <div className="sectionHead"><div><span className="eyebrow">AI-RANKED OPPORTUNITIES</span><h2>{dept==="Store Overview"?"Recommended concepts across the store":`Recommended ${dept} endcap concepts`}</h2></div><span>Ranked by demand · margin · seasonality</span></div>
       <section className="concepts">{concepts.map((x,i)=>{const owner=dept==="Store Overview"?x[5]:dept;const isAdded=(selected[owner]||[]).includes(x[0]);return <Concept key={x[0]} item={x} rank={i+1} added={isAdded} toggle={()=>toggle(x[0],owner)} overview={dept==="Store Overview"}/>})}</section>
