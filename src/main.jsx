@@ -57,13 +57,20 @@ function App(){
     if(where==="both"||where==="back")fill("back",counts[dept].back,2);
     setAssignments(old=>({...old,[dept]:next}));
   };
+  const assignEndcap=(slot,value)=>{
+    if(dept==="Store Overview")return;
+    setAssignments(old=>({
+      ...old,
+      [dept]:{...(old[dept]||{}),[slot]:value}
+    }));
+  };
 
   return <div className="app">
     <aside>
       <div className="brand"><span>SW</span><div><b>SWAS Planning</b><small>ENDCAP INTELLIGENCE</small></div></div>
       <nav>{["Dashboard","Department plan","Performance","Calendar"].map((x,i)=><button key={x} className={view===x?"active":""} onClick={()=>setView(x)}><i>{["⌂","✦","↗","□"][i]}</i>{x}</button>)}</nav>
       <div className="deptNav"><small>DEPARTMENTS</small>{Object.entries(DEPARTMENTS).map(([name,d])=><button key={name} className={dept===name?"selected":""} onClick={()=>setDept(name)}><span>{d.icon}</span>{name}<em>{name==="Store Overview"?totals.front+totals.back:counts[name].front+counts[name].back}</em></button>)}</div>
-      <div className="profile"><span>JM</span><div><b>Jordan Mitchell</b><small>Store leadership</small></div></div>
+      <div className="profile"><span>TR</span><div><b>Tavion Robinson</b><small>Store leadership</small></div></div>
     </aside>
     <main>
       <header><div><span className="eyebrow">STORE 2487 · LAKEVIEW</span><h1>{dept==="Store Overview"?"Total store endcap performance":`${dept} endcap plan`}</h1><p>{dept==="Store Overview"?"See what is live, what is working, and where the next margin opportunity is.":"Set your endcap capacity and build a department-specific seasonal plan."}</p></div><div className="headerActions"><select value={dept} onChange={e=>setDept(e.target.value)}>{Object.keys(DEPARTMENTS).map(x=><option key={x}>{x}</option>)}</select><button onClick={()=>window.print()}>Export plan ↗</button></div></header>
@@ -77,7 +84,7 @@ function App(){
         <Metric label="Average gross margin" value={`${current.margin}%`} sub="+2.4 pts vs aisle average" color="amber"/>
       </section>
 
-      {dept==="Store Overview"?<StoreView setDept={setDept}/>:<DepartmentView dept={dept} count={counts[dept]} adjust={adjust} assignments={assignments[dept]||{}} prefill={prefill}/>}
+      {dept==="Store Overview"?<StoreView setDept={setDept}/>:<DepartmentView dept={dept} count={counts[dept]} adjust={adjust} assignments={assignments[dept]||{}} prefill={prefill} assignEndcap={assignEndcap}/>}
 
       <div className="sectionHead"><div><span className="eyebrow">AI-RANKED OPPORTUNITIES</span><h2>{dept==="Store Overview"?"Recommended concepts across the store":`Recommended ${dept} endcap concepts`}</h2></div><span>Ranked by demand · margin · seasonality</span></div>
       <section className="concepts">{concepts.map((x,i)=>{const owner=dept==="Store Overview"?x[5]:dept;const isAdded=(selected[owner]||[]).includes(x[0]);return <Concept key={x[0]} item={x} rank={i+1} added={isAdded} toggle={()=>toggle(x[0],owner)} overview={dept==="Store Overview"}/>})}</section>
@@ -96,15 +103,16 @@ function StoreView({setDept}){
  <div className="panel placement"><div className="panelHead"><div><span className="eyebrow">SPACE MIX</span><h2>Placement performance</h2></div></div><div className="donut"><div><strong>64</strong><small>endcaps</small></div></div><div className="placeRow"><span><i className="front"/>Front endcaps</span><b>34</b><em>$3,480 avg.</em></div><div className="placeRow"><span><i className="back"/>Back endcaps</span><b>30</b><em>$2,740 avg.</em></div><div className="insight">Front placements are generating <b>27% more sales</b> per endcap.</div></div></section>
 }
 
-function DepartmentView({dept,count,adjust,assignments,prefill}){
+function DepartmentView({dept,count,adjust,assignments,prefill,assignEndcap}){
  const [open,setOpen]=useState(true);
  const sellers=TOP_SELLERS[dept]||[];
+ const recommendations=CONCEPTS[dept]||[];
  return <><section className="departmentWorkspace">
    <div className={`planBox ${open?"open":""}`}>
      <button className="planBoxHead" onClick={()=>setOpen(!open)}><div><span className="eyebrow">DEPARTMENT SETUP</span><h2>{dept} department plan</h2><p>Click to {open?"hide":"open"} your front and back endcap map.</p></div><span className="expand">{open?"−":"+"}</span></button>
      {open&&<div className="endcapSections">
-       <EndcapSection title="Front endcaps" side="front" count={count.front} assignments={assignments} add={()=>adjust("front",1)} prefill={()=>prefill("front")} description="Highest visibility and customer traffic"/>
-       <EndcapSection title="Back endcaps" side="back" count={count.back} assignments={assignments} add={()=>adjust("back",1)} prefill={()=>prefill("back")} description="Destination traffic and aisle transitions"/>
+       <EndcapSection title="Front endcaps" side="front" count={count.front} assignments={assignments} recommendations={recommendations} sellers={sellers} assignEndcap={assignEndcap} add={()=>adjust("front",1)} prefill={()=>prefill("front")} description="Highest visibility and customer traffic"/>
+       <EndcapSection title="Back endcaps" side="back" count={count.back} assignments={assignments} recommendations={recommendations} sellers={sellers} assignEndcap={assignEndcap} add={()=>adjust("back",1)} prefill={()=>prefill("back")} description="Destination traffic and aisle transitions"/>
      </div>}
    </div>
    <div className="topSellers">
@@ -116,8 +124,25 @@ function DepartmentView({dept,count,adjust,assignments,prefill}){
  </section><CyclePlanner dept={dept} sellers={sellers}/></>
 }
 
-function EndcapSection({title,side,count,assignments,add,prefill,description}){
- return <div className={`endcapSection ${side}`}><div className="endcapTitle"><div><i /><span><b>{title}</b><small>{description}</small></span></div><div><button onClick={prefill}>Prefill</button><strong>{count}</strong></div></div><div className="endcapGrid">{Array.from({length:count},(_,i)=><button className={assignments[`${side}-${i}`]?"filled":""} key={i}><span>{side==="front"?"F":"B"}{i+1}</span><b>{assignments[`${side}-${i}`]||"Open endcap"}</b><small>{assignments[`${side}-${i}`]?"Top seller assigned":"+ Choose an item"}</small></button>)}<button className="addEndcap" onClick={add}><span>+</span><b>Add endcap</b><small>Expand this section</small></button></div></div>
+function EndcapSection({title,side,count,assignments,recommendations,sellers,assignEndcap,add,prefill,description}){
+ return <div className={`endcapSection ${side}`}><div className="endcapTitle"><div><i /><span><b>{title}</b><small>{description}</small></span></div><div><button onClick={prefill}>Prefill</button><strong>{count}</strong></div></div><div className="endcapGrid">{Array.from({length:count},(_,i)=>{
+   const slot=`${side}-${i}`;
+   const value=assignments[slot]||"";
+   return <div className={`endcapSlot ${value?"filled":""}`} key={slot}>
+     <span>{side==="front"?"F":"B"}{i+1}</span>
+     <b>{value||"Open endcap"}</b>
+     <small>{value?"Feature selected":"AI suggestions ready"}</small>
+     <select aria-label={`Choose feature for ${side} endcap ${i+1}`} value={value} onChange={e=>assignEndcap(slot,e.target.value)}>
+       <option value="">Choose an AI feature...</option>
+       <optgroup label="AI recommended concepts">
+         {recommendations.map(x=><option key={`concept-${x[0]}`} value={x[0]}>{x[0]} · {x[4]} fit</option>)}
+       </optgroup>
+       <optgroup label="Top-selling items">
+         {sellers.map(x=><option key={`seller-${x[0]}`} value={x[0]}>{x[0]} · {x[1]}</option>)}
+       </optgroup>
+     </select>
+   </div>
+ })}<button className="addEndcap" onClick={add}><span>+</span><b>Add endcap</b><small>Expand this section</small></button></div></div>
 }
 
 function CyclePlanner({dept,sellers}){
