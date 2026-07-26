@@ -51,19 +51,18 @@ function App(){
   const toggle=(name,targetDept=dept)=>{
     const already=(selected[targetDept]||[]).includes(name);
     setSelected(old=>({...old,[targetDept]:already?(old[targetDept]||[]).filter(x=>x!==name):[...(old[targetDept]||[]),name]}));
-    setAssignments(old=>{
+    if(!already)setAssignments(old=>{
       const next={...(old[targetDept]||{})};
-      if(already){
-        Object.keys(next).forEach(slot=>{if(next[slot]===name)delete next[slot]});
-      }else{
-        const capacity=counts[targetDept];
-        const slots=[
-          ...Array.from({length:capacity.front},(_,i)=>`front-${i}`),
-          ...Array.from({length:capacity.back},(_,i)=>`back-${i}`)
-        ];
-        const openSlot=slots.find(slot=>!next[slot]);
-        if(openSlot)next[openSlot]=name;
-      }
+      const capacity=counts[targetDept];
+      const sellers=TOP_SELLERS[targetDept]||[];
+      const fillOpen=(side,total,offset)=>{
+        for(let i=0;i<total;i++){
+          const slot=`${side}-${i}`;
+          if(!next[slot])next[slot]=sellers[(i+offset)%sellers.length]?.[0]||"Open";
+        }
+      };
+      fillOpen("front",capacity.front,0);
+      fillOpen("back",capacity.back,Math.ceil(sellers.length/2));
       return {...old,[targetDept]:next};
     });
   };
@@ -135,7 +134,7 @@ function DepartmentView({dept,count,adjust,assignments,prefill,assignEndcap}){
    </div>
    <div className="topSellers">
      <div className="topSellersHead"><div><span className="eyebrow">PAST 2 YEARS + SEASON</span><h2>Top-selling {dept} items</h2></div><button onClick={()=>prefill("both")}>✦ Prefill all endcaps</button></div>
-     <div className="sellerList">{sellers.map((x,i)=><div className="seller" key={x[0]}><span>{i+1}</span><div><b>{x[0]}</b><small>{x[1]} sold · {x[4]}</small></div><strong>Est. retail {x[3]}</strong></div>)}</div>
+     <div className="sellerList">{sellers.map((x,i)=><div className="seller" key={x[0]}><span>{i+1}</span><div><b>{x[0]}</b><small>{x[1]} sold · Est. retail {x[3]} · {x[4]}</small></div><strong>{x[2]}</strong></div>)}</div>
      <p className="prefillNote">Prefill ranks two years of fictional sales history and current seasonal relevance, then rotates endcap-appropriate items between front and back placements.</p>
      {dept==="Grocery"&&<div className="stackbaseRule"><span>▦</span><div><b>Action-alley stackbase rule</b><p>Bulky products such as bottled-water cases, charcoal, large pet food, and oversized paper goods are excluded from endcaps. Plan those as pallet stacks on stackbases in the action alley.</p></div></div>}
    </div>
