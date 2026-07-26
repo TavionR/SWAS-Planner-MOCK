@@ -36,6 +36,15 @@ const STACKBASE_ITEMS = {
   "Grocery":[["Great Value Water 40 Pack","31,480 units","$173K","$5.48 ea","Summer"],["Kingsford Charcoal Twin Pack","18,920 units","$378K","$19.98 ea","Grilling"],["Gatorade 24 Pack","17,640 units","$317K","$17.98 ea","Summer"],["Bounty Paper Towels 12 Pack","15,280 units","$428K","$27.98 ea","Stock-up"],["Purina Dog Chow 44 lb","12,940 units","$414K","$31.98 ea","Stock-up"],["Great Value Sports Drinks 24 Pack","11,860 units","$142K","$11.98 ea","Summer"]],
 };
 
+const ROLLBACK_ITEMS = {
+  "Grocery":[["Kellogg's Family Cereal","$5.48","$4.98","9% off"],["Heinz Ketchup 38 oz","$4.98","$4.48","10% off"],["Nature Valley Variety Pack","$7.48","$6.98","7% off"],["Folgers Classic Roast","$12.98","$11.98","8% off"]],
+  "Home":[["Mainstays Sheet Set","$16.98","$14.98","12% off"],["Sterilite Drawer Cart","$24.98","$22.98","8% off"],["Mainstays Bath Towel Set","$14.98","$13.48","10% off"],["Better Homes Table Lamp","$29.98","$26.98","10% off"]],
+  "Seasonal":[["Mainstays Solar Lights","$9.88","$8.88","10% off"],["Ozark Trail Pool Towel","$9.98","$8.98","10% off"],["OFF! Deep Woods Twin Pack","$13.98","$12.48","11% off"],["Backpack Value Set","$18.98","$16.98","11% off"]],
+  "Automotive":[["Armor All Protectant","$7.44","$6.88","8% off"],["Auto Drive Phone Mount","$17.98","$15.98","11% off"],["Meguiar's Car Wash","$13.98","$12.48","11% off"],["Auto Drive USB Charger","$11.98","$10.98","8% off"]],
+  "Apparel":[["Athletic Works Tee","$9.98","$8.98","10% off"],["Time and Tru Sandals","$15.98","$14.48","9% off"],["Hanes Sock Pack","$13.98","$12.48","11% off"],["No Boundaries Crossbody","$15.98","$14.98","6% off"]],
+  "Electronics":[["Onn. Power Bank","$19.98","$17.98","10% off"],["Onn. Bluetooth Speaker","$19.98","$17.48","13% off"],["Onn. Power Strip","$14.98","$13.48","10% off"],["Onn. Wall Charger","$11.98","$10.98","8% off"]],
+};
+
 const fmt = n => new Intl.NumberFormat("en-US",{style:"currency",currency:"USD",maximumFractionDigits:0}).format(n);
 
 function App(){
@@ -87,6 +96,11 @@ function App(){
     if(where==="stackbases"){
       const stackItems=STACKBASE_ITEMS[dept]||sellers;
       for(let i=0;i<counts[dept].stackbases;i++)next[`stackbase-${i}`]=stackItems[i%stackItems.length]?.[0]||"Open";
+    }
+    if(where==="rollbacks"){
+      const rollbackItems=ROLLBACK_ITEMS[dept]||[];
+      for(let i=0;i<counts[dept].front;i++)next[`front-${i}`]=rollbackItems[i%rollbackItems.length]?.[0]||"Open";
+      for(let i=0;i<counts[dept].back;i++)next[`back-${i}`]=rollbackItems[(i+2)%rollbackItems.length]?.[0]||"Open";
     }
     setAssignments(old=>({...old,[dept]:next}));
   };
@@ -141,25 +155,29 @@ function DepartmentView({dept,count,adjust,assignments,prefill,assignEndcap}){
  const sellers=TOP_SELLERS[dept]||[];
  const recommendations=CONCEPTS[dept]||[];
  const stackbaseItems=STACKBASE_ITEMS[dept]||sellers;
+ const rollbackItems=ROLLBACK_ITEMS[dept]||[];
  return <><section className="departmentWorkspace">
    <div className={`planBox ${open?"open":""}`}>
      <button className="planBoxHead" onClick={()=>setOpen(!open)}><div><span className="eyebrow">DEPARTMENT SETUP</span><h2>{dept} department plan</h2><p>Click to {open?"hide":"open"} your front and back endcap map.</p></div><span className="expand">{open?"−":"+"}</span></button>
      {open&&<div className="endcapSections">
-       <EndcapSection title="Front endcaps" side="front" count={count.front} assignments={assignments} recommendations={recommendations} sellers={sellers} assignEndcap={assignEndcap} add={()=>adjust("front",1)} prefill={()=>prefill("front")} description="Highest visibility and customer traffic"/>
-       <EndcapSection title="Back endcaps" side="back" count={count.back} assignments={assignments} recommendations={recommendations} sellers={sellers} assignEndcap={assignEndcap} add={()=>adjust("back",1)} prefill={()=>prefill("back")} description="Destination traffic and aisle transitions"/>
-       <EndcapSection title="Action-alley stackbases" side="stackbase" count={count.stackbases} assignments={assignments} recommendations={[]} sellers={stackbaseItems} assignEndcap={assignEndcap} add={()=>adjust("stackbases",1)} prefill={()=>prefill("stackbases")} description="Palletized and bulky seasonal merchandise"/>
+       <EndcapSection title="Front endcaps" side="front" count={count.front} assignments={assignments} recommendations={recommendations} sellers={sellers} rollbackItems={rollbackItems} assignEndcap={assignEndcap} add={()=>adjust("front",1)} prefill={()=>prefill("front")} description="Highest visibility and customer traffic"/>
+       <EndcapSection title="Back endcaps" side="back" count={count.back} assignments={assignments} recommendations={recommendations} sellers={sellers} rollbackItems={rollbackItems} assignEndcap={assignEndcap} add={()=>adjust("back",1)} prefill={()=>prefill("back")} description="Destination traffic and aisle transitions"/>
+       <EndcapSection title="Action-alley stackbases" side="stackbase" count={count.stackbases} assignments={assignments} recommendations={[]} sellers={stackbaseItems} rollbackItems={[]} assignEndcap={assignEndcap} add={()=>adjust("stackbases",1)} prefill={()=>prefill("stackbases")} description="Palletized and bulky seasonal merchandise"/>
      </div>}
    </div>
    <div className="topSellers">
      <div className="topSellersHead"><div><span className="eyebrow">PAST 2 YEARS + SEASON</span><h2>Top-selling {dept} items</h2></div><button onClick={()=>prefill("both")}>✦ Prefill all endcaps</button></div>
      <div className="sellerList">{sellers.map((x,i)=><div className="seller" key={x[0]}><span>{i+1}</span><div><b>{x[0]}</b><small>{x[1]} sold · Est. retail {x[3]} · {x[4]}</small></div><strong>{x[2]}</strong></div>)}</div>
      <p className="prefillNote">Prefill ranks two years of fictional sales history and current seasonal relevance, then rotates endcap-appropriate items between front and back placements.</p>
+     <div className="rollbackHead"><div><span className="eyebrow">ACTIVE ROLLBACKS</span><h2>Value-priced features</h2></div><button onClick={()=>prefill("rollbacks")}>↓ Prefill rollbacks</button></div>
+     <div className="rollbackList">{rollbackItems.map((x,i)=><div className="rollbackItem" key={x[0]}><span>{i+1}</span><div><b>{x[0]}</b><small>Was {x[1]} · Rollback {x[2]}</small></div><strong>{x[3]}</strong></div>)}</div>
+     <p className="rollbackNote"><b>Rollback, not clearance:</b> These are temporary value prices on active merchandise expected to remain in the assortment.</p>
      {dept==="Grocery"&&<div className="stackbaseRule"><span>▦</span><div><b>Action-alley stackbase rule</b><p>Bulky products such as bottled-water cases, charcoal, large pet food, and oversized paper goods are excluded from endcaps. Plan those as pallet stacks on stackbases in the action alley.</p></div></div>}
    </div>
  </section><CyclePlanner dept={dept} sellers={sellers}/></>
 }
 
-function EndcapSection({title,side,count,assignments,recommendations,sellers,assignEndcap,add,prefill,description}){
+function EndcapSection({title,side,count,assignments,recommendations,sellers,rollbackItems,assignEndcap,add,prefill,description}){
  const [openSlot,setOpenSlot]=useState(null);
  const choose=(slot,value)=>{assignEndcap(slot,value);setOpenSlot(null)};
  return <div className={`endcapSection ${side}`}><div className="endcapTitle"><div><i /><span><b>{title}</b><small>{description}</small></span></div><div><button onClick={prefill}>Prefill</button><strong>{count}</strong></div></div><div className="endcapGrid">{Array.from({length:count},(_,i)=>{
@@ -176,6 +194,7 @@ function EndcapSection({title,side,count,assignments,recommendations,sellers,ass
      {isOpen&&<div className="featureMenu">
        <div className="menuLabel">✦ Two-year top sellers · seasonal fit</div>
        {sellers.map(x=><button className={value===x[0]?"selected":""} key={`seller-${x[0]}`} onClick={()=>choose(slot,x[0])}><span><b>{x[0]}</b><small>{x[1]} · {x[4]}</small></span><em>{x[3]}</em></button>)}
+       {rollbackItems.length>0&&<><div className="menuLabel rollbackLabel">↓ Active rollbacks · not clearance</div>{rollbackItems.map(x=><button className={value===x[0]?"selected":""} key={`rollback-${x[0]}`} onClick={()=>choose(slot,x[0])}><span><b>{x[0]}</b><small>Was {x[1]} · Rollback {x[2]}</small></span><em>{x[3]}</em></button>)}</>}
        {value&&<button className="clearFeature" onClick={()=>choose(slot,"")}>Clear this endcap</button>}
      </div>}
    </div>
