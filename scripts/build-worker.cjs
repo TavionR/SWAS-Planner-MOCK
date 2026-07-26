@@ -32,11 +32,11 @@ const html = `<!doctype html>
   <meta name="theme-color" content="#081522">
   <meta name="description" content="SWAS Planning — AI-assisted retail endcap planning demonstration.">
   <title>SWAS Planning Demo</title>
-  <link rel="stylesheet" href="/app.css">
+  <link rel="stylesheet" href="/app.css?v=4">
 </head>
 <body>
   <div id="root"></div>
-  <script type="module" src="/app.js"></script>
+  <script type="module" src="/app.js?v=4"></script>
 </body>
 </html>`;
 
@@ -54,7 +54,7 @@ export default {
     return new Response(asset.body, {
       headers: {
         "content-type": asset.type,
-        "cache-control": pathname === "/" ? "no-cache" : "public, max-age=3600",
+        "cache-control": "no-store, no-cache, must-revalidate",
         "x-content-type-options": "nosniff",
       },
     });
