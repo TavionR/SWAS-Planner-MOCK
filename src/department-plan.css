@@ -9,10 +9,12 @@
 .endcapSection{background:white;border:1px solid #dfe6ea;border-radius:10px;padding:14px}
 .endcapSection.front{border-left:3px solid #4fc9a7}
 .endcapSection.back{border-left:3px solid #5d9fe3}
+.endcapSection.stackbase{border-left:3px solid #e3a94f}
 .endcapTitle{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
 .endcapTitle>div{display:flex;align-items:center;gap:8px}
 .endcapTitle i{width:9px;height:9px;border-radius:50%;background:#4fc9a7}
 .back .endcapTitle i{background:#5d9fe3}
+.stackbase .endcapTitle i{background:#e3a94f}
 .endcapTitle b,.endcapTitle small{display:block}
 .endcapTitle b{font-size:11px}
 .endcapTitle small{font-size:8px;color:#8592a0;margin-top:2px}

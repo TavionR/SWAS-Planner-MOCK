@@ -32,26 +32,31 @@ const TOP_SELLERS = {
   "Electronics":[["Onn. USB-C Cable","36,820 units","$294K","$7.98 ea","Travel"],["Onn. Power Bank","23,520 units","$470K","$19.98 ea","Travel"],["JBL Wireless Earbuds","17,880 units","$716K","$39.98 ea","Back to school"],["Onn. Power Strip","16,240 units","$244K","$14.98 ea","Dorm"],["Xbox Gift Card","15,360 units","$384K","$25.00 ea","Gaming"],["Onn. Bluetooth Speaker","14,740 units","$295K","$19.98 ea","Summer"],["Onn. Wall Charger","13,920 units","$167K","$11.98 ea","Travel"],["LED Desk Lamp","12,860 units","$257K","$19.98 ea","Dorm"]],
 };
 
+const STACKBASE_ITEMS = {
+  "Grocery":[["Great Value Water 40 Pack","31,480 units","$173K","$5.48 ea","Summer"],["Kingsford Charcoal Twin Pack","18,920 units","$378K","$19.98 ea","Grilling"],["Gatorade 24 Pack","17,640 units","$317K","$17.98 ea","Summer"],["Bounty Paper Towels 12 Pack","15,280 units","$428K","$27.98 ea","Stock-up"],["Purina Dog Chow 44 lb","12,940 units","$414K","$31.98 ea","Stock-up"],["Great Value Sports Drinks 24 Pack","11,860 units","$142K","$11.98 ea","Summer"]],
+};
+
 const fmt = n => new Intl.NumberFormat("en-US",{style:"currency",currency:"USD",maximumFractionDigits:0}).format(n);
 
 function App(){
   const [dept,setDept]=useState("Store Overview");
-  const [counts,setCounts]=useState(Object.fromEntries(Object.keys(DEPARTMENTS).filter(k=>k!=="Store Overview").map(k=>[k,{front:4,back:4}])));
+  const [counts,setCounts]=useState(Object.fromEntries(Object.keys(DEPARTMENTS).filter(k=>k!=="Store Overview").map(k=>[k,{front:4,back:4,stackbases:4}])));
   const [placement,setPlacement]=useState("Front endcap");
   const [selected,setSelected]=useState({});
   const [view,setView]=useState("Dashboard");
   const [assignments,setAssignments]=useState({});
 
-  const totals=useMemo(()=>Object.values(counts).reduce((a,v)=>({front:a.front+v.front,back:a.back+v.back}),{front:0,back:0}),[counts]);
+  const totals=useMemo(()=>Object.values(counts).reduce((a,v)=>({front:a.front+v.front,back:a.back+v.back,stackbases:a.stackbases+v.stackbases}),{front:0,back:0,stackbases:0}),[counts]);
   const current=dept==="Store Overview"?{...DEPARTMENTS[dept],...totals}:DEPARTMENTS[dept];
   const concepts=CONCEPTS[dept]||Object.entries(CONCEPTS).flatMap(([d,arr])=>arr.slice(0,1).map(x=>[...x,d])).slice(0,4);
   const chosen=selected[dept]||[];
   const opportunity=concepts.reduce((a,x)=>a+x[2]*x[3]/100,0);
   const isStoreOverview=dept==="Store Overview";
   const scopedEndcaps=isStoreOverview?totals.front+totals.back:counts[dept].front+counts[dept].back;
-  const scopedActive=isStoreOverview
-    ? Math.max(0,scopedEndcaps-6)
-    : Object.values(assignments[dept]||{}).filter(Boolean).length;
+  const scopedStackbases=isStoreOverview?totals.stackbases:counts[dept].stackbases;
+  const scopedActiveStackbases=isStoreOverview
+    ? Object.values(assignments).reduce((sum,department)=>sum+Object.entries(department).filter(([slot,value])=>slot.startsWith("stackbase-")&&value).length,0)
+    : Object.entries(assignments[dept]||{}).filter(([slot,value])=>slot.startsWith("stackbase-")&&value).length;
   const scopedOpen=Math.max(0,scopedEndcaps-scopedActive);
   const scopedUtilization=scopedEndcaps?Math.round((scopedActive/scopedEndcaps)*100):0;
   const adjust=(where,delta)=>{if(dept==="Store Overview")return;setCounts(old=>({...old,[dept]:{...old[dept],[where]:Math.max(0,old[dept][where]+delta)}}))};
@@ -79,6 +84,10 @@ function App(){
     const fill=(side,total,offset)=>{for(let i=0;i<total;i++)next[`${side}-${i}`]=sellers[(i+offset)%sellers.length]?.[0]||"Open";};
     if(where==="both"||where==="front")fill("front",counts[dept].front,0);
     if(where==="both"||where==="back")fill("back",counts[dept].back,2);
+    if(where==="stackbases"){
+      const stackItems=STACKBASE_ITEMS[dept]||sellers;
+      for(let i=0;i<counts[dept].stackbases;i++)next[`stackbase-${i}`]=stackItems[i%stackItems.length]?.[0]||"Open";
+    }
     setAssignments(old=>({...old,[dept]:next}));
   };
   const assignEndcap=(slot,value)=>{
@@ -99,7 +108,7 @@ function App(){
     <main>
       <header><div><span className="eyebrow">STORE 2487 · LAKEVIEW</span><h1>{dept==="Store Overview"?"Total store endcap performance":`${dept} endcap plan`}</h1><p>{dept==="Store Overview"?"See what is live, what is working, and where the next margin opportunity is.":"Set your endcap capacity and build a department-specific seasonal plan."}</p></div><div className="headerActions"><select value={dept} onChange={e=>setDept(e.target.value)}>{Object.keys(DEPARTMENTS).map(x=><option key={x}>{x}</option>)}</select><button onClick={()=>window.print()}>Export plan ↗</button></div></header>
 
-      <section className="statusBar"><span className="live">● {isStoreOverview?"LIVE TOTAL STORE VIEW":`LIVE ${dept.toUpperCase()} VIEW`}</span><div><b>{scopedEndcaps}</b><small>{isStoreOverview?"All store endcaps":"Department endcaps"}</small></div><div><b>{scopedActive}</b><small>Active displays</small></div><div><b>{scopedOpen}</b><small>Open opportunities</small></div><div><b>{scopedUtilization}%</b><small>Space utilization</small></div><p>{isStoreOverview?"All departments combined":`${dept} department only`} · Fictional live data</p></section>
+      <section className="statusBar"><span className="live">● {isStoreOverview?"LIVE TOTAL STORE VIEW":`LIVE ${dept.toUpperCase()} VIEW`}</span><div><b>{scopedEndcaps}</b><small>{isStoreOverview?"All store endcaps":"Department endcaps"}</small></div><div><b>{scopedActiveStackbases}/{scopedStackbases}</b><small>Active stackbases</small></div><div><b>{scopedOpen}</b><small>Open endcaps</small></div><div><b>{scopedUtilization}%</b><small>Endcap utilization</small></div><p>{isStoreOverview?"All departments combined":`${dept} department only`} · Fictional live data</p></section>
 
       <section className="metrics">
         <Metric label="Endcap sales · 4 weeks" value={fmt(current.sales)} sub="+12.8% vs prior period" color="green"/>
@@ -131,12 +140,14 @@ function DepartmentView({dept,count,adjust,assignments,prefill,assignEndcap}){
  const [open,setOpen]=useState(true);
  const sellers=TOP_SELLERS[dept]||[];
  const recommendations=CONCEPTS[dept]||[];
+ const stackbaseItems=STACKBASE_ITEMS[dept]||sellers;
  return <><section className="departmentWorkspace">
    <div className={`planBox ${open?"open":""}`}>
      <button className="planBoxHead" onClick={()=>setOpen(!open)}><div><span className="eyebrow">DEPARTMENT SETUP</span><h2>{dept} department plan</h2><p>Click to {open?"hide":"open"} your front and back endcap map.</p></div><span className="expand">{open?"−":"+"}</span></button>
      {open&&<div className="endcapSections">
        <EndcapSection title="Front endcaps" side="front" count={count.front} assignments={assignments} recommendations={recommendations} sellers={sellers} assignEndcap={assignEndcap} add={()=>adjust("front",1)} prefill={()=>prefill("front")} description="Highest visibility and customer traffic"/>
        <EndcapSection title="Back endcaps" side="back" count={count.back} assignments={assignments} recommendations={recommendations} sellers={sellers} assignEndcap={assignEndcap} add={()=>adjust("back",1)} prefill={()=>prefill("back")} description="Destination traffic and aisle transitions"/>
+       <EndcapSection title="Action-alley stackbases" side="stackbase" count={count.stackbases} assignments={assignments} recommendations={[]} sellers={stackbaseItems} assignEndcap={assignEndcap} add={()=>adjust("stackbases",1)} prefill={()=>prefill("stackbases")} description="Palletized and bulky seasonal merchandise"/>
      </div>}
    </div>
    <div className="topSellers">
@@ -157,9 +168,9 @@ function EndcapSection({title,side,count,assignments,recommendations,sellers,ass
    const isOpen=openSlot===slot;
    return <div className={`endcapSlot ${value?"filled":""} ${isOpen?"menuOpen":""}`} key={slot}>
      <button className="slotTrigger" aria-expanded={isOpen} onClick={()=>setOpenSlot(isOpen?null:slot)}>
-       <span>{side==="front"?"F":"B"}{i+1}</span>
-       <b>{value||"Open endcap"}</b>
-       <small>{value?"✓ Feature saved":"Click to choose an AI feature"}</small>
+       <span>{side==="front"?"F":side==="back"?"B":"S"}{i+1}</span>
+       <b>{value||`Open ${side==="stackbase"?"stackbase":"endcap"}`}</b>
+       <small>{value?"✓ Feature saved":`Click to choose ${side==="stackbase"?"merchandise":"an AI feature"}`}</small>
        <em>{isOpen?"▲":"▼"}</em>
      </button>
      {isOpen&&<div className="featureMenu">
