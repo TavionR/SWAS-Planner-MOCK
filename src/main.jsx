@@ -24,12 +24,12 @@ const CONCEPTS = {
 };
 
 const TOP_SELLERS = {
-  "Grocery":[["Liquid I.V. Hydration","19,840 units","$278K"],["Sweet Baby Ray's Sauce","18,210 units","$146K"],["Doritos Variety Pack","17,960 units","$154K"],["Great Value Paper Plates","16,840 units","$121K"],["McCormick Grill Seasoning","14,630 units","$103K"]],
-  "Home":[["Sterilite Storage Tote","14,920 units","$238K"],["Mainstays Sheet Set","12,410 units","$211K"],["Better Homes Patio Cushion","9,870 units","$197K"],["Mainstays Desk Lamp","9,310 units","$142K"],["Rubbermaid Shelf Unit","7,840 units","$126K"]],
-  "Seasonal":[["OFF! Deep Woods","21,340 units","$192K"],["Mainstays Solar Lights","17,820 units","$176K"],["Ozark Trail Pool Towel","14,160 units","$141K"],["Lasko Box Fan","11,730 units","$329K"],["Backpack Value Set","10,950 units","$208K"]],
-  "Automotive":[["Super Tech Washer Fluid","24,810 units","$98K"],["Armor All Protectant","16,940 units","$126K"],["EverStart Jump Pack","8,730 units","$349K"],["Auto Drive Phone Mount","8,120 units","$146K"],["Microfiber Towel Pack","7,860 units","$71K"]],
-  "Apparel":[["No Boundaries Sunglasses","13,480 units","$108K"],["Athletic Works Tee","11,920 units","$119K"],["Time and Tru Sandals","10,760 units","$172K"],["Hanes Sock Pack","9,840 units","$137K"],["George Baseball Cap","8,310 units","$83K"]],
-  "Electronics":[["Onn. USB-C Cable","18,410 units","$147K"],["Onn. Power Bank","11,760 units","$235K"],["JBL Wireless Earbuds","8,940 units","$358K"],["Onn. Power Strip","8,120 units","$122K"],["Xbox Gift Card","7,680 units","$192K"]],
+  "Grocery":[["Liquid I.V. Hydration","39,680 units","$556K","$13.98 ea","Summer"],["Sweet Baby Ray's Sauce","36,420 units","$292K","$3.98 ea","Grilling"],["Doritos Variety Pack","35,920 units","$308K","$8.58 ea","Summer"],["Great Value Paper Plates","33,680 units","$242K","$7.18 ea","Cookout"],["McCormick Grill Seasoning","29,260 units","$206K","$4.98 ea","Grilling"],["Gatorade Powder Tub","27,440 units","$247K","$8.98 ea","Summer"],["Nature Valley Snack Bars","25,810 units","$181K","$6.98 ea","Back to school"],["Jif To Go Cups","22,940 units","$160K","$6.98 ea","Back to school"]],
+  "Home":[["Sterilite Storage Tote","29,840 units","$476K","$15.98 ea","Dorm"],["Mainstays Sheet Set","24,820 units","$422K","$16.98 ea","Back to school"],["Better Homes Patio Cushion","19,740 units","$394K","$19.98 ea","Summer"],["Mainstays Desk Lamp","18,620 units","$284K","$15.28 ea","Dorm"],["Rubbermaid Shelf Unit","15,680 units","$252K","$15.98 ea","Organization"],["Mainstays Laundry Hamper","14,930 units","$149K","$9.98 ea","Dorm"],["Command Hook Value Pack","13,880 units","$153K","$10.98 ea","Dorm"],["Mainstays Bath Towel Set","12,760 units","$191K","$14.98 ea","Back to school"]],
+  "Seasonal":[["OFF! Deep Woods","42,680 units","$384K","$8.98 ea","Summer"],["Mainstays Solar Lights","35,640 units","$352K","$9.88 ea","Summer"],["Ozark Trail Pool Towel","28,320 units","$282K","$9.98 ea","Pool"],["Lasko Box Fan","23,460 units","$658K","$27.98 ea","Heat"],["Backpack Value Set","21,900 units","$416K","$18.98 ea","Back to school"],["Citronella Candle Trio","20,440 units","$245K","$11.98 ea","Summer"],["School Supply Bundle","19,810 units","$238K","$11.98 ea","Back to school"],["Ozark Trail Sunscreen","18,620 units","$149K","$7.98 ea","Summer"]],
+  "Automotive":[["Super Tech Washer Fluid","49,620 units","$196K","$3.98 ea","Road trip"],["Armor All Protectant","33,880 units","$252K","$7.44 ea","Summer"],["EverStart Jump Pack","17,460 units","$698K","$39.98 ea","Emergency"],["Auto Drive Phone Mount","16,240 units","$292K","$17.98 ea","Road trip"],["Microfiber Towel Pack","15,720 units","$142K","$8.98 ea","Car care"],["Meguiar's Car Wash","14,860 units","$208K","$13.98 ea","Summer"],["Slime Tire Gauge","13,920 units","$97K","$6.98 ea","Road trip"],["Auto Drive USB Charger","12,740 units","$153K","$11.98 ea","Road trip"]],
+  "Apparel":[["No Boundaries Sunglasses","26,960 units","$216K","$7.98 ea","Summer"],["Athletic Works Tee","23,840 units","$238K","$9.98 ea","Summer"],["Time and Tru Sandals","21,520 units","$344K","$15.98 ea","Summer"],["Hanes Sock Pack","19,680 units","$274K","$13.98 ea","Back to school"],["George Baseball Cap","16,620 units","$166K","$9.98 ea","Summer"],["No Boundaries Crossbody","15,840 units","$253K","$15.98 ea","Back to school"],["Athletic Works Shorts","14,960 units","$179K","$11.98 ea","Summer"],["Time and Tru Basics","13,780 units","$193K","$13.98 ea","Back to school"]],
+  "Electronics":[["Onn. USB-C Cable","36,820 units","$294K","$7.98 ea","Travel"],["Onn. Power Bank","23,520 units","$470K","$19.98 ea","Travel"],["JBL Wireless Earbuds","17,880 units","$716K","$39.98 ea","Back to school"],["Onn. Power Strip","16,240 units","$244K","$14.98 ea","Dorm"],["Xbox Gift Card","15,360 units","$384K","$25.00 ea","Gaming"],["Onn. Bluetooth Speaker","14,740 units","$295K","$19.98 ea","Summer"],["Onn. Wall Charger","13,920 units","$167K","$11.98 ea","Travel"],["LED Desk Lamp","12,860 units","$257K","$19.98 ea","Dorm"]],
 };
 
 const fmt = n => new Intl.NumberFormat("en-US",{style:"currency",currency:"USD",maximumFractionDigits:0}).format(n);
@@ -48,7 +48,25 @@ function App(){
   const chosen=selected[dept]||[];
   const opportunity=concepts.reduce((a,x)=>a+x[2]*x[3]/100,0);
   const adjust=(where,delta)=>{if(dept==="Store Overview")return;setCounts(old=>({...old,[dept]:{...old[dept],[where]:Math.max(0,old[dept][where]+delta)}}))};
-  const toggle=(name,targetDept=dept)=>setSelected(old=>({...old,[targetDept]:(old[targetDept]||[]).includes(name)?(old[targetDept]||[]).filter(x=>x!==name):[...(old[targetDept]||[]),name]}));
+  const toggle=(name,targetDept=dept)=>{
+    const already=(selected[targetDept]||[]).includes(name);
+    setSelected(old=>({...old,[targetDept]:already?(old[targetDept]||[]).filter(x=>x!==name):[...(old[targetDept]||[]),name]}));
+    setAssignments(old=>{
+      const next={...(old[targetDept]||{})};
+      if(already){
+        Object.keys(next).forEach(slot=>{if(next[slot]===name)delete next[slot]});
+      }else{
+        const capacity=counts[targetDept];
+        const slots=[
+          ...Array.from({length:capacity.front},(_,i)=>`front-${i}`),
+          ...Array.from({length:capacity.back},(_,i)=>`back-${i}`)
+        ];
+        const openSlot=slots.find(slot=>!next[slot]);
+        if(openSlot)next[openSlot]=name;
+      }
+      return {...old,[targetDept]:next};
+    });
+  };
   const prefill=(where="both")=>{
     const sellers=TOP_SELLERS[dept]||[];
     const next={...(assignments[dept]||{})};
@@ -116,9 +134,9 @@ function DepartmentView({dept,count,adjust,assignments,prefill,assignEndcap}){
      </div>}
    </div>
    <div className="topSellers">
-     <div className="topSellersHead"><div><span className="eyebrow">PAST 12 MONTHS</span><h2>Top-selling {dept} items</h2></div><button onClick={()=>prefill("both")}>✦ Prefill all endcaps</button></div>
-     <div className="sellerList">{sellers.map((x,i)=><div className="seller" key={x[0]}><span>{i+1}</span><div><b>{x[0]}</b><small>{x[1]} sold</small></div><strong>{x[2]}</strong></div>)}</div>
-     <p className="prefillNote">Prefill uses annual sales rank and rotates endcap-appropriate products between front and back placements. You can replace individual items later.</p>
+     <div className="topSellersHead"><div><span className="eyebrow">PAST 2 YEARS + SEASON</span><h2>Top-selling {dept} items</h2></div><button onClick={()=>prefill("both")}>✦ Prefill all endcaps</button></div>
+     <div className="sellerList">{sellers.map((x,i)=><div className="seller" key={x[0]}><span>{i+1}</span><div><b>{x[0]}</b><small>{x[1]} sold · {x[4]}</small></div><strong>Est. retail {x[3]}</strong></div>)}</div>
+     <p className="prefillNote">Prefill ranks two years of fictional sales history and current seasonal relevance, then rotates endcap-appropriate items between front and back placements.</p>
      {dept==="Grocery"&&<div className="stackbaseRule"><span>▦</span><div><b>Action-alley stackbase rule</b><p>Bulky products such as bottled-water cases, charcoal, large pet food, and oversized paper goods are excluded from endcaps. Plan those as pallet stacks on stackbases in the action alley.</p></div></div>}
    </div>
  </section><CyclePlanner dept={dept} sellers={sellers}/></>
@@ -139,10 +157,8 @@ function EndcapSection({title,side,count,assignments,recommendations,sellers,ass
        <em>{isOpen?"▲":"▼"}</em>
      </button>
      {isOpen&&<div className="featureMenu">
-       <div className="menuLabel">✦ AI recommended</div>
-       {recommendations.map(x=><button className={value===x[0]?"selected":""} key={`concept-${x[0]}`} onClick={()=>choose(slot,x[0])}><span><b>{x[0]}</b><small>{x[1]}</small></span><em>{x[4]} fit</em></button>)}
-       <div className="menuLabel">Top sellers</div>
-       {sellers.map(x=><button className={value===x[0]?"selected":""} key={`seller-${x[0]}`} onClick={()=>choose(slot,x[0])}><span><b>{x[0]}</b><small>{x[1]}</small></span><em>{x[2]}</em></button>)}
+       <div className="menuLabel">✦ Two-year top sellers · seasonal fit</div>
+       {sellers.map(x=><button className={value===x[0]?"selected":""} key={`seller-${x[0]}`} onClick={()=>choose(slot,x[0])}><span><b>{x[0]}</b><small>{x[1]} · {x[4]}</small></span><em>{x[3]}</em></button>)}
        {value&&<button className="clearFeature" onClick={()=>choose(slot,"")}>Clear this endcap</button>}
      </div>}
    </div>
