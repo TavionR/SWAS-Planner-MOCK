@@ -1,0 +1,48 @@
+.cyclePlanner{background:white;border:1px solid #dce5e9;border-radius:12px;margin:0 0 25px;overflow:hidden}
+.cycleHead{display:flex;justify-content:space-between;align-items:flex-end;padding:20px 21px;border-bottom:1px solid #e5ebee}
+.cycleHead h2{font-size:18px;margin:4px 0}
+.cycleHead p{font-size:9px;color:#7c8998;margin:0}
+.periodTabs{display:flex;background:#eef2f4;border-radius:9px;padding:4px;gap:3px}
+.periodTabs button{min-width:78px;border:0;background:transparent;border-radius:7px;padding:7px 10px;color:#738192;text-align:left}
+.periodTabs button b,.periodTabs button span,.periodTabs button small{display:inline-block}
+.periodTabs button b{font:800 16px Manrope;margin-right:3px}
+.periodTabs button span{font-size:8px}
+.periodTabs button small{display:block;font-size:6px;text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
+.periodTabs button.active{background:#15384a;color:white;box-shadow:0 3px 9px #17384a25}
+.periodTabs button.active small{color:#61d8b8}
+.cycleBody{display:grid;grid-template-columns:1.15fr .85fr}
+.setForm{padding:20px;display:grid;grid-template-columns:1fr 1fr;gap:12px;border-right:1px solid #e5eaed}
+.formTitle{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;margin-bottom:2px}
+.formTitle>span{font-size:8px;letter-spacing:1px;color:#218b75;font-weight:800}
+.formTitle i{font-style:normal}
+.formTitle button,.orderHead button{border:0;background:#e9f6f2;color:#21866f;border-radius:7px;padding:7px 9px;font-size:8px;font-weight:700}
+.setForm label>span{display:block;font-size:8px;color:#6f7e8f;font-weight:700;margin:0 0 5px}
+.setForm input{width:100%;border:1px solid #d9e2e7;background:#fafcfd;border-radius:7px;padding:9px 10px;color:#213246;font-size:10px;outline:0}
+.setForm input:focus{border-color:#58c9aa;box-shadow:0 0 0 3px #55c7aa1c}
+.setForm label>small{display:block;color:#929da8;font-size:7px;margin:4px 0 0}
+.setForm .wide{grid-column:1/-1}
+.dateLogic{display:flex;gap:8px;background:#edf8f5;border-radius:8px;padding:10px}
+.dateLogic>span{color:#238e77;font-weight:800}
+.dateLogic p{font-size:8px;color:#647970;line-height:1.45;margin:0}
+.dateLogic b{color:#247963}
+.orderPanel{padding:20px;background:#fbfcfd}
+.orderHead{display:flex;justify-content:space-between;align-items:start;border-bottom:1px solid #e5eaed;padding-bottom:12px}
+.orderHead h3{font-size:15px;margin-top:4px}
+.orderRows{display:grid}
+.orderRow{display:grid;grid-template-columns:1fr 62px 52px;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid #e8ecef}
+.orderRow b,.orderRow small{display:block}
+.orderRow b{font-size:9px}
+.orderRow small{font-size:7px;color:#8996a4;margin-top:3px;line-height:1.3}
+.orderRow>span{font-size:8px;color:#637386}
+.orderRow>strong{font-size:9px;text-align:right}
+.orderTotal{display:flex;justify-content:space-between;background:#edf7f4;border-radius:7px;padding:10px;margin-top:12px;font-size:9px;color:#587269}
+.orderTotal b{color:#197a65}
+.submitOrder{width:100%;border:0;background:#16394a;color:white;border-radius:7px;padding:10px;margin-top:9px;font-size:9px;font-weight:700}
+.emptyOrder{text-align:center;padding:28px 18px 20px}
+.emptyOrder>span{width:36px;height:36px;border-radius:9px;background:#e9f5f2;color:#218c75;display:grid;place-items:center;margin:0 auto 9px}
+.emptyOrder b{font-size:10px}
+.emptyOrder p{font-size:8px;color:#8593a2;line-height:1.5;max-width:290px;margin:5px auto 12px}
+.emptyOrder button{border:0;background:#193a4b;color:white;border-radius:7px;padding:9px 12px;font-size:8px}
+.systemNote{font-size:7px;color:#919daa;line-height:1.4;margin:12px 0 0}
+@media(max-width:1000px){.cycleHead{display:block}.periodTabs{margin-top:14px;width:max-content}.cycleBody{grid-template-columns:1fr}.setForm{border-right:0;border-bottom:1px solid #e5eaed}}
+@media(max-width:600px){.periodTabs{width:100%}.periodTabs button{min-width:0;flex:1}.setForm{grid-template-columns:1fr}.setForm label,.setForm .wide{grid-column:1}.cycleHead,.setForm,.orderPanel{padding:15px}}

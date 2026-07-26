@@ -1,0 +1,46 @@
+.departmentWorkspace{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(280px,.7fr);gap:13px;margin-bottom:25px;align-items:start}
+.planBox,.topSellers{background:white;border:1px solid #dce5e9;border-radius:12px;overflow:hidden}
+.planBoxHead{width:100%;border:0;background:white;padding:19px 21px;display:flex;align-items:center;justify-content:space-between;text-align:left}
+.planBoxHead:hover{background:#fbfdfd}
+.planBoxHead h2,.topSellers h2{font-size:18px;margin-top:4px}
+.planBoxHead p{margin:4px 0 0;color:#7e8b9a;font-size:9px}
+.expand{width:30px;height:30px;border:1px solid #d7e4e0;border-radius:50%;display:grid;place-items:center;color:#208b74;background:#f4faf8;font-size:18px}
+.endcapSections{border-top:1px solid #e7ecef;padding:16px;display:grid;gap:14px;background:#f7f9fa}
+.endcapSection{background:white;border:1px solid #dfe6ea;border-radius:10px;padding:14px}
+.endcapSection.front{border-left:3px solid #4fc9a7}
+.endcapSection.back{border-left:3px solid #5d9fe3}
+.endcapTitle{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.endcapTitle>div{display:flex;align-items:center;gap:8px}
+.endcapTitle i{width:9px;height:9px;border-radius:50%;background:#4fc9a7}
+.back .endcapTitle i{background:#5d9fe3}
+.endcapTitle b,.endcapTitle small{display:block}
+.endcapTitle b{font-size:11px}
+.endcapTitle small{font-size:8px;color:#8592a0;margin-top:2px}
+.endcapTitle button{border:1px solid #d4e3df;background:#f3faf8;color:#278d77;border-radius:16px;padding:5px 9px;font-size:8px;font-weight:700}
+.endcapTitle strong{font:800 17px Manrope;margin-left:4px;min-width:24px;text-align:center}
+.endcapGrid{display:grid;grid-template-columns:repeat(4,minmax(105px,1fr));gap:8px}
+.endcapGrid>button{min-height:76px;border:1px dashed #ced9de;background:#fbfcfd;border-radius:8px;padding:9px;text-align:left;position:relative}
+.endcapGrid>button:hover{border-color:#58c9aa;background:#f4faf8}
+.endcapGrid>button>span{display:block;color:#7e8d9c;font-size:7px;font-weight:800;letter-spacing:.8px}
+.endcapGrid>button>b,.endcapGrid>button>small{display:block}
+.endcapGrid>button>b{font-size:9px;color:#344456;margin:8px 0 3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.endcapGrid>button>small{font-size:7px;color:#929daa}
+.endcapGrid>button.filled{border-style:solid;border-color:#b9ddd3;background:#f2faf7}
+.endcapGrid>button.filled>b{color:#197c68}
+.endcapGrid>button.addEndcap{display:grid;place-content:center;text-align:center;background:#f0f5f6;border-color:#bfd2d7}
+.addEndcap span{font-size:18px!important;color:#218c75!important}
+.addEndcap b{margin:1px 0!important}
+.topSellers{padding:19px}
+.topSellersHead{display:flex;justify-content:space-between;align-items:start;border-bottom:1px solid #e7ecef;padding-bottom:13px}
+.topSellersHead button{border:0;background:#19394a;color:white;border-radius:7px;padding:8px 10px;font-size:8px;font-weight:700}
+.sellerList{display:grid}
+.seller{display:grid;grid-template-columns:24px 1fr auto;align-items:center;gap:7px;padding:10px 0;border-bottom:1px solid #edf0f2}
+.seller>span{width:21px;height:21px;border-radius:6px;background:#e9f5f2;color:#218c75;display:grid;place-items:center;font-size:8px;font-weight:800}
+.seller b,.seller small{display:block}
+.seller b{font-size:9px}
+.seller small{font-size:7px;color:#8a97a5;margin-top:2px}
+.seller strong{font-size:9px}
+.prefillNote{background:#edf8f5;color:#617871;border-radius:7px;padding:9px;font-size:8px;line-height:1.45;margin:12px 0 0}
+.stackbaseRule{display:flex;gap:9px;background:#fff6e5;border:1px solid #f0d59d;border-radius:8px;padding:10px;margin-top:10px}.stackbaseRule>span{width:24px;height:24px;flex:none;border-radius:6px;background:#f4c869;color:#6f4b0c;display:grid;place-items:center}.stackbaseRule b{font-size:9px;color:#765116}.stackbaseRule p{font-size:8px;color:#816e4b;line-height:1.45;margin:3px 0 0}
+@media(max-width:1150px){.departmentWorkspace{grid-template-columns:1fr}.endcapGrid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:760px){.endcapGrid{grid-template-columns:repeat(2,1fr)}.topSellersHead{display:block}.topSellersHead button{margin-top:10px}}
