@@ -125,22 +125,26 @@ function DepartmentView({dept,count,adjust,assignments,prefill,assignEndcap}){
 }
 
 function EndcapSection({title,side,count,assignments,recommendations,sellers,assignEndcap,add,prefill,description}){
+ const [openSlot,setOpenSlot]=useState(null);
+ const choose=(slot,value)=>{assignEndcap(slot,value);setOpenSlot(null)};
  return <div className={`endcapSection ${side}`}><div className="endcapTitle"><div><i /><span><b>{title}</b><small>{description}</small></span></div><div><button onClick={prefill}>Prefill</button><strong>{count}</strong></div></div><div className="endcapGrid">{Array.from({length:count},(_,i)=>{
    const slot=`${side}-${i}`;
    const value=assignments[slot]||"";
-   return <div className={`endcapSlot ${value?"filled":""}`} key={slot}>
-     <span>{side==="front"?"F":"B"}{i+1}</span>
-     <b>{value||"Open endcap"}</b>
-     <small>{value?"Feature selected":"AI suggestions ready"}</small>
-     <select aria-label={`Choose feature for ${side} endcap ${i+1}`} value={value} onChange={e=>assignEndcap(slot,e.target.value)}>
-       <option value="">Choose an AI feature...</option>
-       <optgroup label="AI recommended concepts">
-         {recommendations.map(x=><option key={`concept-${x[0]}`} value={x[0]}>{x[0]} · {x[4]} fit</option>)}
-       </optgroup>
-       <optgroup label="Top-selling items">
-         {sellers.map(x=><option key={`seller-${x[0]}`} value={x[0]}>{x[0]} · {x[1]}</option>)}
-       </optgroup>
-     </select>
+   const isOpen=openSlot===slot;
+   return <div className={`endcapSlot ${value?"filled":""} ${isOpen?"menuOpen":""}`} key={slot}>
+     <button className="slotTrigger" aria-expanded={isOpen} onClick={()=>setOpenSlot(isOpen?null:slot)}>
+       <span>{side==="front"?"F":"B"}{i+1}</span>
+       <b>{value||"Open endcap"}</b>
+       <small>{value?"✓ Feature saved":"Click to choose an AI feature"}</small>
+       <em>{isOpen?"▲":"▼"}</em>
+     </button>
+     {isOpen&&<div className="featureMenu">
+       <div className="menuLabel">✦ AI recommended</div>
+       {recommendations.map(x=><button className={value===x[0]?"selected":""} key={`concept-${x[0]}`} onClick={()=>choose(slot,x[0])}><span><b>{x[0]}</b><small>{x[1]}</small></span><em>{x[4]} fit</em></button>)}
+       <div className="menuLabel">Top sellers</div>
+       {sellers.map(x=><button className={value===x[0]?"selected":""} key={`seller-${x[0]}`} onClick={()=>choose(slot,x[0])}><span><b>{x[0]}</b><small>{x[1]}</small></span><em>{x[2]}</em></button>)}
+       {value&&<button className="clearFeature" onClick={()=>choose(slot,"")}>Clear this endcap</button>}
+     </div>}
    </div>
  })}<button className="addEndcap" onClick={add}><span>+</span><b>Add endcap</b><small>Expand this section</small></button></div></div>
 }

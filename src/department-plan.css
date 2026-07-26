@@ -19,16 +19,23 @@
 .endcapTitle button{border:1px solid #d4e3df;background:#f3faf8;color:#278d77;border-radius:16px;padding:5px 9px;font-size:8px;font-weight:700}
 .endcapTitle strong{font:800 17px Manrope;margin-left:4px;min-width:24px;text-align:center}
 .endcapGrid{display:grid;grid-template-columns:repeat(4,minmax(105px,1fr));gap:8px}
-.endcapSlot{min-height:108px;border:1px dashed #ced9de;background:#fbfcfd;border-radius:8px;padding:9px;text-align:left;position:relative}
+.endcapSlot{min-height:96px;border:1px dashed #ced9de;background:#fbfcfd;border-radius:8px;text-align:left;position:relative}
 .endcapSlot:hover{border-color:#58c9aa;background:#f4faf8}
-.endcapSlot>span{display:block;color:#7e8d9c;font-size:7px;font-weight:800;letter-spacing:.8px}
-.endcapSlot>b,.endcapSlot>small{display:block}
-.endcapSlot>b{font-size:9px;color:#344456;margin:8px 0 3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.endcapSlot>small{font-size:7px;color:#929daa}
 .endcapSlot.filled{border-style:solid;border-color:#b9ddd3;background:#f2faf7}
-.endcapSlot.filled>b{color:#197c68}
-.endcapSlot select{width:100%;margin-top:9px;border:1px solid #d5e0e4;border-radius:6px;background:#fff;color:#344456;padding:6px 7px;font:700 8px Manrope,Arial,sans-serif;cursor:pointer}
-.endcapSlot select:focus{outline:2px solid rgba(47,177,145,.22);border-color:#43b996}
+.endcapSlot.menuOpen{z-index:20;border-style:solid;border-color:#43b996;box-shadow:0 0 0 3px rgba(67,185,150,.12)}
+.slotTrigger{width:100%;min-height:94px;border:0;background:transparent;padding:10px;text-align:left;position:relative;cursor:pointer}
+.slotTrigger>span{display:block;color:#7e8d9c;font-size:7px;font-weight:800;letter-spacing:.8px}
+.slotTrigger>b,.slotTrigger>small{display:block;padding-right:14px}
+.slotTrigger>b{font-size:9px;color:#344456;margin:9px 0 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.slotTrigger>small{font-size:7px;color:#929daa;line-height:1.35}
+.filled .slotTrigger>b,.filled .slotTrigger>small{color:#197c68}
+.slotTrigger>em{position:absolute;right:10px;top:10px;color:#59806f;font-style:normal;font-size:7px}
+.featureMenu{position:absolute;left:-1px;right:-1px;top:calc(100% + 5px);background:#fff;border:1px solid #cbdad5;border-radius:9px;padding:6px;box-shadow:0 14px 32px rgba(14,35,46,.18);max-height:310px;overflow:auto}
+.featureMenu .menuLabel{padding:7px 7px 5px;color:#218c75;font-size:7px;font-weight:800;letter-spacing:.7px;text-transform:uppercase}
+.featureMenu>button{width:100%;border:0;border-radius:6px;background:#fff;padding:7px;display:flex;align-items:center;justify-content:space-between;gap:7px;text-align:left;cursor:pointer}
+.featureMenu>button:hover,.featureMenu>button.selected{background:#edf8f5}
+.featureMenu button span{min-width:0}.featureMenu button b,.featureMenu button small{display:block}.featureMenu button b{font-size:8px;color:#263b46}.featureMenu button small{font-size:6px;color:#87949e;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.featureMenu button em{font-style:normal;font-size:7px;font-weight:800;color:#218c75;white-space:nowrap}
+.featureMenu>button.clearFeature{justify-content:center;color:#a14e4e;border-top:1px solid #edf0f1;border-radius:0;margin-top:4px;font-size:7px;font-weight:700}
 .endcapGrid>button.addEndcap{display:grid;place-content:center;text-align:center;background:#f0f5f6;border-color:#bfd2d7}
 .addEndcap span{font-size:18px!important;color:#218c75!important}
 .addEndcap b{margin:1px 0!important}
