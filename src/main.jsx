@@ -88,6 +88,19 @@ function getEventSellers(dept,event,base){
   return [...cross,...normalized.filter(item=>item[4].toLowerCase().includes(event.split(" ")[0].toLowerCase())),...normalized].filter((item,index,list)=>list.findIndex(candidate=>candidate[0]===item[0])===index).slice(0,8);
 }
 
+const CATALOG_ITEMS = {
+  "Grocery":[["Glad Sandwich Bags",4.48,41],["Great Value Aluminum Foil",5.98,38],["Hefty Party Cups",6.98,43],["Kraft Macaroni 5 Pack",5.48,32],["Skippy Peanut Butter",4.98,35],["Welch's Fruit Snacks",7.98,39],["Pringles Variety Pack",9.98,36],["Great Value Granola Bars",4.48,44],["Hershey Snack Size Assortment",12.98,34],["Folgers Coffee Pods",14.98,31],["Clorox Disinfecting Wipes",6.48,37],["Great Value Freezer Bags",5.28,42]],
+  "Home":[["Mainstays Storage Cube",12.98,43],["Better Homes Wax Warmer",17.98,46],["Mainstays Blackout Curtain",14.98,41],["Rubbermaid Food Container Set",19.98,38],["Command Picture Strips",9.98,44],["Mainstays Closet Hangers",4.98,49],["Bissell Spot Cleaner Formula",11.98,35],["Mainstays Folding Table",39.98,32],["Ozark Trail Camp Chair",14.98,37],["Scotch Packing Tape 4 Pack",12.48,42],["Mainstays Shoe Organizer",9.98,45],["Pyrex Glass Storage Set",24.98,36]],
+  "Seasonal":[["Plastic Pumpkin Pail",1.98,51],["Way to Celebrate Gift Bags",3.98,48],["Holiday Time Ornament Set",9.98,45],["Pen+Gear Composition Books",1.24,52],["Five Star Spiral Notebook",4.97,43],["Crayola Colored Pencils",3.97,47],["Ozark Trail Beach Towel",9.98,41],["Mainstays Citronella Torch",7.98,44],["Valentine Exchange Cards",2.98,55],["Easter Plastic Eggs 48 Pack",3.48,53],["Graduation Party Banner",5.98,49],["Backpack Value Set",18.98,38]],
+  "Automotive":[["Rain-X Wiper Fluid",4.98,39],["Mobil 1 Oil 5 Quart",27.98,28],["Fram Oil Filter",9.98,37],["Armor All Cleaning Wipes",7.98,44],["Slime Tire Inflator",24.98,35],["Little Trees Air Freshener",3.98,52],["Auto Drive Floor Mats",19.98,41],["EverStart Booster Cables",16.98,36],["Meguiar's Interior Detailer",11.98,43],["BlueDEF Diesel Fluid",13.98,31],["Auto Drive Sunshade",12.98,46],["Super Tech Shop Towels",8.98,40]],
+  "Apparel":[["Hanes Men's T-Shirts 6 Pack",19.98,37],["Time and Tru Leggings",12.98,48],["Athletic Works Performance Socks",9.98,44],["George Men's Belt",12.98,51],["No Boundaries Backpack",16.98,46],["Wonder Nation School Uniform Polo",8.98,43],["Time and Tru Knit Cardigan",18.98,45],["Athletic Works Hoodie",21.98,41],["No Boundaries Beanie",7.98,54],["George Dress Socks",9.98,49],["Wonder Nation Rain Jacket",17.98,42],["Time and Tru Tote Bag",14.98,50]],
+  "Electronics":[["Onn. USB Wall Charger",9.98,42],["Onn. Bluetooth Mouse",12.98,39],["Onn. Wireless Keyboard",19.98,37],["Onn. HDMI Cable 6 Foot",8.98,45],["Onn. AA Batteries 24 Pack",13.98,35],["Onn. Surge Protector",16.98,41],["JLab Go Air Earbuds",24.98,33],["Onn. Phone Tripod",14.98,48],["Onn. Laptop Sleeve",12.98,46],["Onn. Screen Cleaning Kit",6.98,52],["Onn. Car Charging Kit",11.98,44],["Onn. LED Light Strip",18.98,43]],
+};
+const STORE_CATALOG=Object.entries(CATALOG_ITEMS).flatMap(([department,items],departmentIndex)=>items.map(([name,retail,margin],index)=>{
+  const cost=Number((retail*(1-margin/100)).toFixed(2));
+  return {name,department,retail,cost,margin,upc:`078742${String(departmentIndex+1).padStart(2,"0")}${String(index+1).padStart(4,"0")}`,itemNumber:`${departmentIndex+1}${String(42800+index*137).padStart(5,"0")}`};
+}));
+
 const STORES = [
   { id:"2487", name:"Lakeview", factor:1, score:86, margin:37.2 },
   { id:"1842", name:"Northgate", factor:.91, score:82, margin:35.9 },
@@ -566,6 +579,12 @@ function DepartmentView({dept,count,adjust,assignments,prefill,assignEndcap,stor
    setUserChosenSlots(old=>({...old,[slot]:Boolean(value)}));
    setStatuses(old=>({...old,[slot]:value?"Pending":"Open"}));
  };
+ const addCatalogItem=item=>{
+   const slot=allFeatureSlots.find(location=>!corporateSlots[location]&&!assignments[location]);
+   if(!slot)return null;
+   assignWithStatus(slot,item.name);
+   return `${slot.startsWith("front")?"F":slot.startsWith("back")?"B":"SB"}${Number(slot.split("-")[1])+1}`;
+ };
  const moveCorporate=(from,to)=>setCorporateSlots(old=>{
    if(from===to)return old;
    const next={...old,[to]:old[from]};
@@ -603,9 +622,22 @@ function DepartmentView({dept,count,adjust,assignments,prefill,assignEndcap,stor
      <p className="prefillNote">Prefilled or manually selected features begin as Pending until the department plan is complete and its merchandise order is approved.</p>
      <div className="rollbackHead"><div><span className="eyebrow">ACTIVE ROLLBACKS</span><h2>Value-priced features</h2></div><button onClick={()=>prefillWithStatus("rollbacks")}>↓ Prefill rollbacks</button></div>
      <div className="rollbackList">{rollbackItems.map((x,i)=><div className="rollbackItem" key={x[0]}><span>{i+1}</span><div><b>{x[0]}</b><small>Was {x[1]} · Rollback {x[2]}</small></div><strong>{x[3]}</strong></div>)}</div>
+     <CatalogSearch dept={dept} assignments={assignments} onAdd={addCatalogItem}/>
      {dept==="Grocery"&&<div className="stackbaseRule"><span>◇</span><div><b>Action-alley stackbase rule</b><p>Bulky products such as bottled-water cases, charcoal, large pet food, and oversized paper goods are excluded from endcaps.</p></div></div>}
    </div>
  </section><FeaturePerformance dept={dept} sellers={eventSellers} assignments={assignments}/><OrderingIntelligence dept={dept} sellers={eventSellers} assignments={assignments} allEndcapsPlanned={allEndcapsPlanned} plannedCount={plannedCount} totalEndcaps={endcapSlots.length} onWorkflowStage={advanceStatuses}/><MonthlyPerformance scope={dept} scale={storeScale}/><CyclePlanner dept={dept} sellers={eventSellers} eventPlans={eventPlans}/></>
+}
+
+function CatalogSearch({dept,assignments,onAdd}){
+ const [query,setQuery]=useState("");
+ const [added,setAdded]=useState({});
+ const normalized=query.trim().toLowerCase();
+ const results=STORE_CATALOG.filter(item=>!normalized?item.department===dept:[item.name,item.upc,item.itemNumber,item.department].some(value=>String(value).toLowerCase().includes(normalized))).sort((a,b)=>(a.department===dept?-1:1)-(b.department===dept?-1:1)).slice(0,8);
+ const add=item=>{
+   const location=onAdd(item);
+   setAdded(old=>({...old,[item.itemNumber]:location||"full"}));
+ };
+ return <section className="catalogSearch"><div className="catalogHead"><div><span className="eyebrow">SEARCH STORE CATALOG</span><h2>Add another item to the plan</h2><p>Search 72 fictional store items by product name, UPC, or item number.</p></div><span>{Object.values(assignments).filter(Boolean).length} locations filled</span></div><label className="catalogInput"><span>⌕</span><input aria-label="Search item catalog" placeholder="Search name, UPC, or item number" value={query} onChange={event=>setQuery(event.target.value)}/>{query&&<button onClick={()=>setQuery("")}>Clear</button>}</label><div className="catalogResults">{results.map(item=><div className={item.department!==dept?"crossCatalog":""} key={item.itemNumber}><div><b>{item.name}</b><small>{item.department} · UPC {item.upc} · Item {item.itemNumber}</small></div><span><small>Cost</small><b>${item.cost.toFixed(2)}</b></span><span><small>Retail</small><b>${item.retail.toFixed(2)}</b></span><span><small>Margin</small><b>{item.margin}%</b></span><button disabled={added[item.itemNumber]==="full"} onClick={()=>add(item)}>{added[item.itemNumber]==="full"?"Plan full":added[item.itemNumber]?`Added to ${added[item.itemNumber]} ✓`:"+ Add to plan"}</button></div>)}</div>{normalized&&!results.length&&<div className="noCatalogResults">No item matched that name, UPC, or item number.</div>}</section>
 }
 
 function EventPlanningBox({dept,eventPlans,setEventPlans,activeWindow,setActiveWindow}){
