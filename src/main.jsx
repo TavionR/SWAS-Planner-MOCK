@@ -60,6 +60,16 @@ const DEPARTMENT_LETTERS = {
   "Electronics":"E",
 };
 
+const HO_FEATURES=Object.fromEntries(Object.keys(DEPARTMENT_LETTERS).map(name=>[
+  name,
+  {"front-0":{feature:`${name} H.O. seasonal feature`,program:"Home Office SWAS"}},
+]));
+const plannedEndcapCount=(name,departmentAssignments={})=>new Set([
+  ...Object.keys(HO_FEATURES[name]||{}),
+  ...Object.entries(departmentAssignments).filter(([slot,value])=>!slot.startsWith("stackbase-")&&value).map(([slot])=>slot),
+]).size;
+const firstPlannedFeature=(name,departmentAssignments={})=>Object.values(HO_FEATURES[name]||{})[0]?.feature||Object.entries(departmentAssignments).find(([slot,value])=>!slot.startsWith("stackbase-")&&value)?.[1]||"No feature planned";
+
 const EVENT_OPTIONS = ["Back to School","Labor Day Weekend","Football Season","Halloween","Holiday Entertaining","Winter Readiness","Spring Refresh","Summer Kickoff"];
 const AI_EVENT_RECOMMENDATIONS = {30:"Back to School",60:"Labor Day Weekend",90:"Halloween"};
 const EVENT_MERCHANDISE = {
@@ -189,8 +199,8 @@ function App(){
   const isStoreOverview=dept==="Store Overview";
   const scopedEndcaps=isStoreOverview?(totals.front+totals.back)*storeCount:counts[dept].front+counts[dept].back;
   const scopedActiveEndcaps=isStoreOverview
-    ? Object.values(assignments).reduce((sum,departmentAssignments)=>sum+Object.entries(departmentAssignments||{}).filter(([slot,value])=>!slot.startsWith("stackbase-")&&value).length,0)*storeCount
-    : Object.entries(assignments[dept]||{}).filter(([slot,value])=>!slot.startsWith("stackbase-")&&value).length;
+    ? Object.keys(counts).reduce((sum,name)=>sum+plannedEndcapCount(name,assignments[name]),0)*storeCount
+    : plannedEndcapCount(dept,assignments[dept]);
   const scopedStackbases=isStoreOverview?totals.stackbases*storeCount:counts[dept].stackbases;
   const scopedActiveStackbases=isStoreOverview
     ? Object.values(assignments).reduce((sum,departmentAssignments)=>sum+Object.entries(departmentAssignments||{}).filter(([slot,value])=>slot.startsWith("stackbase-")&&value).length,0)*storeCount
@@ -348,9 +358,9 @@ function StoreFeaturePlan({counts,assignments,storeCount,setDept}){
  const rows=Object.keys(counts).map(name=>{
    const capacity=(counts[name].front+counts[name].back)*storeCount;
    const departmentAssignments=assignments[name]||{};
-   const planned=Object.entries(departmentAssignments).filter(([slot,value])=>!slot.startsWith("stackbase-")&&value).length*storeCount;
+   const planned=plannedEndcapCount(name,departmentAssignments)*storeCount;
    const open=Math.max(0,capacity-planned);
-   const next=Object.entries(departmentAssignments).find(([slot,value])=>!slot.startsWith("stackbase-")&&value)?.[1]||"No feature planned";
+   const next=firstPlannedFeature(name,departmentAssignments);
    const readiness=capacity?Math.round(planned/capacity*100):0;
    return {name,capacity,open,planned,next,date:planned?dates[name]:"—",readiness};
  });
@@ -415,14 +425,14 @@ function PerformanceView({stores,assignments,counts}){
  const storeCount=stores.length||1;
  const storeScale=stores.reduce((sum,store)=>sum+store.factor,0)||1;
  const capacity=Object.values(counts).reduce((sum,item)=>sum+item.front+item.back,0)*storeCount;
- const planned=Object.values(assignments).reduce((sum,items)=>sum+Object.entries(items||{}).filter(([slot,value])=>!slot.startsWith("stackbase-")&&value).length,0)*storeCount;
+ const planned=Object.keys(counts).reduce((sum,name)=>sum+plannedEndcapCount(name,assignments[name]),0)*storeCount;
  const averageScore=capacity?Math.round(planned/capacity*100):0;
  const totalSales=Math.round(188420*storeScale*(averageScore/100));
  const averageMargin=planned?(stores.reduce((sum,store)=>sum+store.margin,0)/storeCount).toFixed(1):"0.0";
  const marginOpportunity=Math.round(28600*storeScale*(averageScore/100));
  const departments=Object.keys(counts).map(name=>{
    const departmentCapacity=(counts[name].front+counts[name].back)*storeCount;
-   const departmentPlanned=Object.entries(assignments[name]||{}).filter(([slot,value])=>!slot.startsWith("stackbase-")&&value).length*storeCount;
+   const departmentPlanned=plannedEndcapCount(name,assignments[name])*storeCount;
    const score=departmentCapacity?Math.round(departmentPlanned/departmentCapacity*100):0;
    return [name,score,score,Math.round(DEPARTMENTS[name].sales*storeScale*(score/100))];
  }).sort((a,b)=>b[1]-a[1]);
@@ -495,11 +505,11 @@ function StoreView({setDept,storeCount,storeScale,assignments,counts}){
  const rows=Object.keys(counts).map(name=>{
    const capacity=(counts[name].front+counts[name].back)*storeCount;
    const entries=Object.entries(assignments[name]||{}).filter(([slot,value])=>!slot.startsWith("stackbase-")&&value);
-   const planned=entries.length*storeCount;
+   const planned=plannedEndcapCount(name,assignments[name])*storeCount;
    const score=capacity?Math.round(planned/capacity*100):0;
-   return [name,entries[0]?.[1]||"No feature planned",score,Math.round(DEPARTMENTS[name].sales*storeScale*(score/100)),score?`+${score}%`:"0%"];
+   return [name,firstPlannedFeature(name,assignments[name]),score,Math.round(DEPARTMENTS[name].sales*storeScale*(score/100)),score?`+${score}%`:"0%"];
  });
- const activeFront=Object.values(assignments).reduce((sum,items)=>sum+Object.entries(items||{}).filter(([slot,value])=>slot.startsWith("front-")&&value).length,0)*storeCount;
+ const activeFront=(Object.keys(counts).length+Object.values(assignments).reduce((sum,items)=>sum+Object.entries(items||{}).filter(([slot,value])=>slot.startsWith("front-")&&slot!=="front-0"&&value).length,0))*storeCount;
  const activeBack=Object.values(assignments).reduce((sum,items)=>sum+Object.entries(items||{}).filter(([slot,value])=>slot.startsWith("back-")&&value).length,0)*storeCount;
  const activeTotal=activeFront+activeBack;
  return <section className="storeGrid"><div className="panel performance"><div className="panelHead"><div><span className="eyebrow">WHAT'S THERE NOW</span><h2>{storeCount>1?`${storeCount}-store department performance`:"Department endcap performance"}</h2></div><button>View all {activeTotal} →</button></div><div className="table"><div className="tr th"><span>Department</span><span>Top display</span><span>Score</span><span>4-week sales</span><span>Trend</span></div>{rows.map(r=><button className="tr" key={r[0]} onClick={()=>setDept(r[0])}><span><i>{DEPARTMENTS[r[0]].icon}</i>{r[0]}</span><span>{r[1]}</span><span><b className={`score s${Math.floor(r[2]/10)}`}>{r[2]}</b></span><span>{fmt(r[3])}</span><span className="up">{r[4]}</span></button>)}</div></div>
@@ -563,7 +573,7 @@ function DepartmentView({dept,count,adjust,assignments,prefill,assignEndcap,stor
  const [open,setOpen]=useState(true);
  const [statuses,setStatuses]=useDemoSavedState(`swas-statuses-${dept}-v2`,{});
  const [userChosenSlots,setUserChosenSlots]=useDemoSavedState(`swas-user-chosen-${dept}-v1`,{});
- const [corporateSlots,setCorporateSlots]=useDemoSavedState(`swas-ho-slots-${dept}-v2`,{});
+ const [corporateSlots,setCorporateSlots]=useDemoSavedState(`swas-ho-slots-${dept}-v3`,HO_FEATURES[dept]);
  const [eventPlans,setEventPlans]=useDemoSavedState(`swas-events-${dept}-v1`,AI_EVENT_RECOMMENDATIONS);
  const [activeEventWindow,setActiveEventWindow]=useState(30);
  const sellers=[...(TOP_SELLERS[dept]||[]),...(TOP_SELLER_ADDITIONS[dept]||[])];
