@@ -470,8 +470,8 @@ function DepartmentView({dept,count,adjust,assignments,prefill,assignEndcap,stor
  const [open,setOpen]=useState(true);
  const [statuses,setStatuses]=useDemoSavedState(`swas-statuses-${dept}-v2`,{});
  const [userChosenSlots,setUserChosenSlots]=useDemoSavedState(`swas-user-chosen-${dept}-v1`,{});
- const [corporateSlots,setCorporateSlots]=useDemoSavedState(`swas-corporate-slots-${dept}-v1`,{
-   "front-0":{feature:`${dept} corporate seasonal feature`,program:"Corporate SWAS"}
+ const [corporateSlots,setCorporateSlots]=useDemoSavedState(`swas-ho-slots-${dept}-v1`,{
+   "front-0":{feature:`${dept} H.O. seasonal feature`,program:"Home Office SWAS"}
  });
  const sellers=TOP_SELLERS[dept]||[];
  const recommendations=CONCEPTS[dept]||[];
@@ -484,7 +484,7 @@ function DepartmentView({dept,count,adjust,assignments,prefill,assignEndcap,stor
  const markAssignedPending=side=>setStatuses(old=>{
    const next={...old};
    endcapSlots.filter(slot=>side==="both"||slot.startsWith(`${side}-`)).forEach(slot=>{
-     if(corporateSlots[slot])next[slot]="Corporate planned";
+     if(corporateSlots[slot])next[slot]="H.O. planned";
      else next[slot]="Pending";
    });
    return next;
@@ -513,7 +513,7 @@ function DepartmentView({dept,count,adjust,assignments,prefill,assignEndcap,stor
  const advanceStatuses=stage=>setStatuses(old=>{
    const next={...old};
    endcapSlots.forEach(slot=>{
-     if(corporateSlots[slot])next[slot]="Corporate planned";
+     if(corporateSlots[slot])next[slot]="H.O. planned";
      else if(assignments[slot])next[slot]=stage;
    });
    return next;
@@ -548,15 +548,15 @@ function EndcapSection({title,side,count,assignments,sellers,rollbackItems,assig
    const value=corporate?.feature||assignments[slot]||"";
    const isRollback=rollbackItems.some(item=>item[0]===value);
    const colorClass=corporate?"corporateSlot":isRollback?"rollbackSlot":userChosenSlots[slot]?"userChosenSlot":value?"topSellerSlot":"";
-   const status=corporate?"Corporate planned":(statuses[slot]||(value?"Pending":"Open"));
+   const status=corporate?"H.O. planned":(statuses[slot]||(value?"Pending":"Open"));
    const isOpen=openSlot===slot;
    return <div className={`endcapSlot ${value?"filled":""} ${isOpen?"menuOpen":""} ${colorClass}`} key={slot}>
      <button className="slotTrigger" aria-expanded={isOpen} onClick={()=>{if(!corporate)setOpenSlot(isOpen?null:slot)}}>
        <span>{locationLabel(slot)}</span><b>{value||`Open ${side==="stackbase"?"stackbase":"endcap"}`}</b>
-       <small>{corporate?"Corporate-directed · location can be moved":value?"Feature selected · order pending":`Click to choose ${side==="stackbase"?"merchandise":"an AI feature"}`}</small>
+       <small>{corporate?"Home Office-directed · location can be moved":value?"Feature selected · order pending":`Click to choose ${side==="stackbase"?"merchandise":"an AI feature"}`}</small>
        {!corporate&&<em>{isOpen?"▲":"▼"}</em>}
      </button>
-     {corporate?<div className="corporateControl"><span>Corporate planned</span><label>Move to <select value={slot} onChange={event=>moveCorporate(slot,event.target.value)}>{availableSlots.map(location=><option key={location} value={location}>{locationLabel(location)}</option>)}</select></label></div>:<div className={`slotStatus status-${status.toLowerCase().replaceAll(" ","-")}`}><label>Plan status</label><select value={status} onChange={event=>setStatus(slot,event.target.value)}>{["Open","Pending","Planned","In transit","Freight received","Ready to set","Active","Markdown scheduled","Ending soon","Completed"].map(option=><option key={option}>{option}</option>)}</select></div>}
+     {corporate?<div className="corporateControl"><span>H.O. planned</span><label>Move to <select value={slot} onChange={event=>moveCorporate(slot,event.target.value)}>{availableSlots.map(location=><option key={location} value={location}>{locationLabel(location)}</option>)}</select></label></div>:<div className={`slotStatus status-${status.toLowerCase().replaceAll(" ","-")}`}><label>Plan status</label><select value={status} onChange={event=>setStatus(slot,event.target.value)}>{["Open","Pending","Planned","In transit","Freight received","Ready to set","Active","Markdown scheduled","Ending soon","Completed"].map(option=><option key={option}>{option}</option>)}</select></div>}
      {isOpen&&!corporate&&<div className="featureMenu"><div className="menuLabel">✦ Two-year top sellers · seasonal fit</div>
        {sellers.map(x=><button className={value===x[0]?"selected":""} key={`seller-${x[0]}`} onClick={()=>choose(slot,x[0])}><span><b>{x[0]}</b><small>{x[1]} · {x[4]}</small></span><em>{x[3]}</em></button>)}
        {rollbackItems.length>0&&<><div className="menuLabel rollbackLabel">↓ Active rollbacks</div>{rollbackItems.map(x=><button className={value===x[0]?"selected":""} key={`rollback-${x[0]}`} onClick={()=>choose(slot,x[0])}><span><b>{x[0]}</b><small>Was {x[1]} · Rollback {x[2]}</small></span><em>{x[3]}</em></button>)}</>}
