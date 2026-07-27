@@ -390,6 +390,7 @@ function MonthlyPerformance({scope,scale=1}){
 }
 
 function StoreFeaturePlan({counts,assignments,storeCount,setDept}){
+ const [showAll,setShowAll]=useState(false);
  const dates={Grocery:"Jul 28",Home:"Aug 11",Seasonal:"Aug 4",Automotive:"Jul 31",Electronics:"Sep 3",Frozen:"Aug 8",Dairy:"Aug 9",Meats:"Aug 10"};
  const rows=Object.keys(counts).map(name=>{
    const capacity=(counts[name].front+counts[name].back+counts[name].bunkers)*storeCount;
@@ -403,10 +404,12 @@ function StoreFeaturePlan({counts,assignments,storeCount,setDept}){
  const totalCapacity=rows.reduce((sum,row)=>sum+row.capacity,0);
  const totalPlanned=rows.reduce((sum,row)=>sum+row.planned,0);
  const totalOpen=rows.reduce((sum,row)=>sum+row.open,0);
+ const visibleRows=showAll?rows:rows.slice(0,5);
  return <section className="storeFeaturePlan">
    <div className="featurePlanHead"><div><span className="eyebrow">TOTAL STORE FEATURE PLANNING</span><h2>Endcap plan coverage by department</h2><p>See what is assigned, where gaps remain, and which feature transitions are coming next.</p></div><div className="featurePlanTotals"><span><b>{totalPlanned}/{totalCapacity}</b><small>locations planned</small></span><span className={totalOpen?"attention":""}><b>{totalOpen}</b><small>open decisions</small></span><span><b>{Math.round(totalPlanned/totalCapacity*100)}%</b><small>plan coverage</small></span></div></div>
+   <div className="departmentTableToggle"><button onClick={()=>setShowAll(value=>!value)}>{showAll?"Show top 5 ↑":`View all ${rows.length} →`}</button></div>
    <div className="featurePlanColumns"><span>Department</span><span>Plan coverage</span><span>Next feature</span><span>Next set</span><span>Readiness</span><span></span></div>
-   <div className="featurePlanRows">{rows.map(row=><button key={row.name} onClick={()=>setDept(row.name)}><span className="featureDept"><i>{DEPARTMENTS[row.name].icon}</i><b>{row.name}</b><small>{row.capacity} feature locations</small></span><span className="coverageCell"><span><i style={{width:`${row.planned/row.capacity*100}%`}}></i></span><small>{row.planned} planned · {row.open} open</small></span><span className="nextFeature"><b>{row.next}</b><small>AI-aligned seasonal set</small></span><span className="setDate"><b>{row.date}</b><small>{row.date==="Next cycle"?"Planning window":"2026"}</small></span><span className={`readiness ${row.readiness<80?"risk":row.readiness===100?"ready":""}`}><b>{row.readiness}%</b><small>{row.readiness===100?"Ready":row.readiness<80?"Needs action":"On track"}</small></span><span className="rowArrow">→</span></button>)}</div>
+   <div className="featurePlanRows">{visibleRows.map(row=><button key={row.name} onClick={()=>setDept(row.name)}><span className="featureDept"><i>{DEPARTMENTS[row.name].icon}</i><b>{row.name}</b><small>{row.capacity} feature locations</small></span><span className="coverageCell"><span><i style={{width:`${row.planned/row.capacity*100}%`}}></i></span><small>{row.planned} planned · {row.open} open</small></span><span className="nextFeature"><b>{row.next}</b><small>AI-aligned seasonal set</small></span><span className="setDate"><b>{row.date}</b><small>{row.date==="Next cycle"?"Planning window":"2026"}</small></span><span className={`readiness ${row.readiness<80?"risk":row.readiness===100?"ready":""}`}><b>{row.readiness}%</b><small>{row.readiness===100?"Ready":row.readiness<80?"Needs action":"On track"}</small></span><span className="rowArrow">→</span></button>)}</div>
    <div className="planningWindows"><div><span>30 DAYS</span><b>{rows.filter(row=>["Jul 28","Jul 31","Aug 4","Aug 11"].includes(row.date)).length} sets</b><small>Execution and order confirmation</small></div><div><span>60 DAYS</span><b>{rows.filter(row=>row.planned>0).length} departments</b><small>Quantity and arrival planning</small></div><div><span>90 DAYS</span><b>{totalOpen} decisions</b><small>Seasonal demand preparation</small></div><p><b>AI planning focus:</b> Begin with front endcaps, then build stackbase and back-endcap coverage around the selected event.</p></div>
  </section>
 }
@@ -538,6 +541,7 @@ function CalendarEventEditor({event,save,remove,close}){
 }
 
 function StoreView({setDept,storeCount,storeScale,assignments,counts}){
+ const [showAll,setShowAll]=useState(false);
  const rows=Object.keys(counts).map(name=>{
    const capacity=(counts[name].front+counts[name].back+counts[name].bunkers)*storeCount;
    const entries=Object.entries(assignments[name]||{}).filter(([slot,value])=>!slot.startsWith("stackbase-")&&value);
@@ -549,7 +553,8 @@ function StoreView({setDept,storeCount,storeScale,assignments,counts}){
  const activeBack=Object.values(assignments).reduce((sum,items)=>sum+Object.entries(items||{}).filter(([slot,value])=>slot.startsWith("back-")&&value).length,0)*storeCount;
  const activeBunkers=(Object.values(HO_FEATURES).filter(items=>items["bunker-0"]).length+Object.values(assignments).reduce((sum,items)=>sum+Object.entries(items||{}).filter(([slot,value])=>slot.startsWith("bunker-")&&slot!=="bunker-0"&&value).length,0))*storeCount;
  const activeTotal=activeFront+activeBack+activeBunkers;
- return <section className="storeGrid"><div className="panel performance"><div className="panelHead"><div><span className="eyebrow">WHAT'S THERE NOW</span><h2>{storeCount>1?`${storeCount}-store department performance`:"Department endcap performance"}</h2></div><button>View all {activeTotal} →</button></div><div className="table"><div className="tr th"><span>Department</span><span>Top display</span><span>Score</span><span>4-week sales</span><span>Trend</span></div>{rows.map(r=><button className="tr" key={r[0]} onClick={()=>setDept(r[0])}><span><i>{DEPARTMENTS[r[0]].icon}</i>{r[0]}</span><span>{r[1]}</span><span><b className={`score s${Math.floor(r[2]/10)}`}>{r[2]}</b></span><span>{fmt(r[3])}</span><span className="up">{r[4]}</span></button>)}</div></div>
+ const visibleRows=showAll?rows:rows.slice(0,5);
+ return <section className="storeGrid"><div className="panel performance"><div className="panelHead"><div><span className="eyebrow">WHAT'S THERE NOW</span><h2>{storeCount>1?`${storeCount}-store department performance`:"Department endcap performance"}</h2></div><button onClick={()=>setShowAll(value=>!value)}>{showAll?"Show top 5 ↑":`View all ${rows.length} →`}</button></div><div className="table"><div className="tr th"><span>Department</span><span>Top display</span><span>Score</span><span>4-week sales</span><span>Trend</span></div>{visibleRows.map(r=><button className="tr" key={r[0]} onClick={()=>setDept(r[0])}><span><i>{DEPARTMENTS[r[0]].icon}</i>{r[0]}</span><span>{r[1]}</span><span><b className={`score s${Math.floor(r[2]/10)}`}>{r[2]}</b></span><span>{fmt(r[3])}</span><span className="up">{r[4]}</span></button>)}</div></div>
  <div className="panel placement"><div className="panelHead"><div><span className="eyebrow">SPACE MIX</span><h2>Active placement mix</h2></div></div><div className="donut"><div><strong>{activeTotal}</strong><small>active features</small></div></div><div className="placeRow"><span><i className="front"/>Front endcaps</span><b>{activeFront}</b><em>{activeFront?fmt(3480):"$0"} planned avg.</em></div><div className="placeRow"><span><i className="back"/>Back endcaps</span><b>{activeBack}</b><em>{activeBack?fmt(2740):"$0"} planned avg.</em></div><div className="placeRow"><span><i className="bunker"/>Bunker sections</span><b>{activeBunkers}</b><em>{activeBunkers?fmt(3180):"$0"} planned avg.</em></div><div className="insight">{activeTotal?<><b>{activeTotal}</b> placements are currently included in this session.</>:"Add a feature to begin measuring placement performance."}</div></div></section>
 }
 
