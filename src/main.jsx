@@ -6,6 +6,7 @@ import "./cycle-planner.css";
 import "./nav-dropdown.css";
 import "./store-lookup.css";
 import "./performance-view.css";
+import "./calendar-view.css";
 
 const DEPARTMENTS = {
   "Store Overview": { icon:"⌂", front: 34, back: 30, sales: 188420, margin: 37.2, score: 86 },
@@ -168,9 +169,9 @@ function App(){
       <div className="profile"><span>TR</span><div><b>Tavion Robinson</b><small>Store leadership</small></div></div>
     </aside>
     <main>
-      <header><div><span className="eyebrow">{storeLabel.toUpperCase()}</span><h1>{view==="Performance"?"Performance insights":dept==="Store Overview"?(multiStore?"Combined store endcap performance":"Total store endcap performance"):`${dept} endcap plan`}</h1><p>{view==="Performance"?`Track scores, sales, margin, and opportunities across ${multiStore?`${storeCount} selected stores`:"the selected store"}.`:dept==="Store Overview"?(multiStore?`One combined dashboard for ${storeCount} selected stores.`:"See what is live, what is working, and where the next margin opportunity is."):"Set your endcap capacity and build a department-specific seasonal plan."}</p></div><div className="headerActions"><select value={dept} onChange={e=>setDept(e.target.value)}>{Object.keys(DEPARTMENTS).map(x=><option key={x}>{x}</option>)}</select><button onClick={()=>window.print()}>Export plan ↗</button></div></header>
+      <header><div><span className="eyebrow">{storeLabel.toUpperCase()}</span><h1>{view==="Performance"?"Performance insights":view==="Calendar"?"SWAS planning calendar":dept==="Store Overview"?(multiStore?"Combined store endcap performance":"Total store endcap performance"):`${dept} endcap plan`}</h1><p>{view==="Performance"?`Track scores, sales, margin, and opportunities across ${multiStore?`${storeCount} selected stores`:"the selected store"}.`:view==="Calendar"?`Coordinate set dates, end dates, markdowns, and feature arrivals across ${multiStore?`${storeCount} selected stores`:"the selected store"}.`:dept==="Store Overview"?(multiStore?`One combined dashboard for ${storeCount} selected stores.`:"See what is live, what is working, and where the next margin opportunity is."):"Set your endcap capacity and build a department-specific seasonal plan."}</p></div><div className="headerActions"><select value={dept} onChange={e=>setDept(e.target.value)}>{Object.keys(DEPARTMENTS).map(x=><option key={x}>{x}</option>)}</select><button onClick={()=>window.print()}>Export plan ↗</button></div></header>
 
-      {view==="Performance"?<PerformanceView stores={activeStores}/>:<>
+      {view==="Performance"?<PerformanceView stores={activeStores}/>:view==="Calendar"?<CalendarView stores={activeStores}/>:<>
       <section className="statusBar"><span className="live">● {isStoreOverview?(multiStore?`LIVE ${storeCount}-STORE VIEW`:"LIVE TOTAL STORE VIEW"):`LIVE ${dept.toUpperCase()} VIEW`}</span><div><b>{scopedEndcaps}</b><small>{isStoreOverview?"All store endcaps":"Department endcaps"}</small></div><div><b>{scopedActiveStackbases}/{scopedStackbases}</b><small>Active stackbases</small></div><div><b>{scopedOpen}</b><small>Open endcaps</small></div><div><b>{scopedUtilization}%</b><small>Endcap utilization</small></div><p>{isStoreOverview?(multiStore?`${storeCount} locations combined`:"All departments combined"):`${dept} department only`} · Fictional live data</p></section>
 
       <section className="metrics">
@@ -214,6 +215,42 @@ function PerformanceView({stores}){
    </section>
    <section className="performancePanel departmentRanking"><div className="performancePanelHead"><div><span className="eyebrow">DEPARTMENT RANKING</span><h2>Where performance is strongest</h2></div><small>Score · trend · combined sales</small></div><div className="departmentPerformanceGrid">{departments.map(item=><div key={item[0]}><span><i>{DEPARTMENTS[item[0]].icon}</i><b>{item[0]}</b></span><div className="scoreTrack"><i style={{width:`${item[1]}%`}}></i></div><strong>{item[1]}</strong><em>+{item[2]}%</em><b>{fmt(item[3]*stores.reduce((sum,store)=>sum+store.factor,0))}</b></div>)}</div></section>
    <section className="performanceAction"><span>✦</span><div><small>AI PERFORMANCE INSIGHT</small><h2>Focus the next review on Apparel and Automotive.</h2><p>These departments have the largest gap to the top-performing areas and the clearest near-term margin opportunity.</p></div><b>{fmt(marginOpportunity*.34)} opportunity</b></section>
+ </div>
+}
+
+function CalendarView({stores}){
+ const [windowDays,setWindowDays]=useState(30);
+ const events=[
+   {day:28,month:"Jul",department:"Grocery",name:"Summer Hydration",type:"Set",window:30,color:"green"},
+   {day:31,month:"Jul",department:"Automotive",name:"Road Trip Ready",type:"Set",window:30,color:"blue"},
+   {day:4,month:"Aug",department:"Seasonal",name:"Back to School",type:"Arrival",window:30,color:"violet"},
+   {day:11,month:"Aug",department:"Home",name:"Dorm Room Reset",type:"Set",window:30,color:"green"},
+   {day:16,month:"Aug",department:"Grocery",name:"Summer Hydration",type:"Markdown",window:30,color:"amber"},
+   {day:23,month:"Aug",department:"Grocery",name:"Summer Hydration",type:"End",window:30,color:"red"},
+   {day:24,month:"Aug",department:"Apparel",name:"Back to Campus",type:"Set",window:60,color:"green"},
+   {day:3,month:"Sep",department:"Electronics",name:"Dorm Tech",type:"Arrival",window:60,color:"violet"},
+   {day:13,month:"Sep",department:"Seasonal",name:"Back to School",type:"Markdown",window:60,color:"amber"},
+   {day:20,month:"Sep",department:"Seasonal",name:"Back to School",type:"End",window:60,color:"red"},
+   {day:21,month:"Sep",department:"Home",name:"Fall Organization",type:"Set",window:90,color:"green"},
+   {day:15,month:"Oct",department:"Automotive",name:"Winter Ready",type:"Arrival",window:90,color:"violet"},
+ ];
+ const visible=events.filter(event=>event.window<=windowDays);
+ const weeks=[
+   ["27","28","29","30","31","1","2"],
+   ["3","4","5","6","7","8","9"],
+   ["10","11","12","13","14","15","16"],
+   ["17","18","19","20","21","22","23"],
+   ["24","25","26","27","28","29","30"],
+ ];
+ const eventForDay=(day,index)=>events.find(event=>event.day===Number(day)&&((index===0&&Number(day)>=27)?event.month==="Jul":event.month==="Aug")&&event.window<=windowDays);
+ return <div className="calendarView">
+   <section className="calendarTopline"><div><span className="eyebrow">30 / 60 / 90 DAY VIEW</span><h2>Feature transition schedule</h2><p>{stores.length} selected store{stores.length===1?"":"s"} · Fictional planning data</p></div><div className="calendarTabs">{[30,60,90].map(days=><button key={days} className={windowDays===days?"active":""} onClick={()=>setWindowDays(days)}><b>{days}</b><small>days</small></button>)}</div></section>
+   <section className="calendarStats"><div><small>Upcoming sets</small><b>{visible.filter(x=>x.type==="Set").length}</b><span>Ready to execute</span></div><div><small>Arrivals</small><b>{visible.filter(x=>x.type==="Arrival").length}</b><span>Inventory checkpoints</span></div><div><small>Markdowns</small><b>{visible.filter(x=>x.type==="Markdown").length}</b><span>Recovery actions</span></div><div><small>Ending features</small><b>{visible.filter(x=>x.type==="End").length}</b><span>Transitions required</span></div></section>
+   <section className="calendarLayout">
+     <div className="monthCalendar"><div className="monthHead"><button>‹</button><div><span className="eyebrow">PLANNING MONTH</span><h2>July–August 2026</h2></div><button>›</button></div><div className="weekdayRow">{["SUN","MON","TUE","WED","THU","FRI","SAT"].map(day=><span key={day}>{day}</span>)}</div><div className="calendarGrid">{weeks.flatMap((week,row)=>week.map((day,column)=>{const event=eventForDay(day,row);return <div className={`${row===0&&Number(day)>=27?"previous":""} ${event?"hasEvent":""}`} key={`${row}-${column}`}><b>{day}</b>{event&&<span className={event.color}><small>{event.type}</small>{event.department}</span>}</div>}))}</div></div>
+     <div className="upcomingPanel"><div className="performancePanelHead"><div><span className="eyebrow">UPCOMING MILESTONES</span><h2>Next actions</h2></div><small>{windowDays}-day window</small></div><div className="milestoneList">{visible.slice(0,7).map((event,index)=><div key={`${event.month}-${event.day}-${event.name}`}><span className={`dateBadge ${event.color}`}><b>{event.day}</b><small>{event.month}</small></span><div><small>{event.department} · {event.type}</small><b>{event.name}</b></div><em>{index<2?"Due soon":"Planned"}</em></div>)}</div></div>
+   </section>
+   <section className="calendarSchedule"><div className="performancePanelHead"><div><span className="eyebrow">TRANSITION CONTROL</span><h2>Set, markdown, and end-date schedule</h2></div><button>+ Add milestone</button></div><div className="scheduleTable"><div className="scheduleRow scheduleHead"><span>Department</span><span>Feature</span><span>Milestone</span><span>Date</span><span>Status</span></div>{visible.map(event=><div className="scheduleRow" key={`row-${event.month}-${event.day}-${event.name}`}><span><i>{DEPARTMENTS[event.department].icon}</i>{event.department}</span><b>{event.name}</b><span>{event.type}</span><span>{event.month} {event.day}, 2026</span><em className={event.color}>{event.type==="Set"?"Ready":event.type==="Arrival"?"Confirmed":event.type==="Markdown"?"Scheduled":"Planned"}</em></div>)}</div></section>
  </div>
 }
 
