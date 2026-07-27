@@ -72,6 +72,7 @@ const firstPlannedFeature=(name,departmentAssignments={})=>Object.values(HO_FEAT
 
 const EVENT_OPTIONS = ["Back to School","Labor Day Weekend","Football Season","Halloween","Holiday Entertaining","Winter Readiness","Spring Refresh","Summer Kickoff"];
 const AI_EVENT_RECOMMENDATIONS = {30:"Back to School",60:"Labor Day Weekend",90:"Halloween"};
+const EMPTY_EVENT_PLANS = {30:"",60:"",90:""};
 const EVENT_MERCHANDISE = {
   "Back to School":[
     ["Ziploc Sandwich Bags","31,840 units","$159K","$4.98 ea","Back to School","Grocery",39,["Seasonal","Grocery"]],
@@ -105,8 +106,9 @@ const EVENT_MERCHANDISE = {
 
 function getEventSellers(dept,event,base){
   // The active event and eligible-department list are the cross-merch guardrails.
-  const cross=(EVENT_MERCHANDISE[event]||[]).filter(item=>item[7].includes(dept)).map(item=>[...item,dept]);
   const normalized=base.map((item,index)=>[...item,dept,Math.max(31,46-index*2)]);
+  if(!event)return normalized.slice(0,10);
+  const cross=(EVENT_MERCHANDISE[event]||[]).filter(item=>item[7].includes(dept)).map(item=>[...item,dept]);
   return [...cross,...normalized.filter(item=>item[4].toLowerCase().includes(event.split(" ")[0].toLowerCase())),...normalized].filter((item,index,list)=>list.findIndex(candidate=>candidate[0]===item[0])===index).slice(0,10);
 }
 
@@ -574,7 +576,7 @@ function DepartmentView({dept,count,adjust,assignments,prefill,assignEndcap,stor
  const [statuses,setStatuses]=useDemoSavedState(`swas-statuses-${dept}-v2`,{});
  const [userChosenSlots,setUserChosenSlots]=useDemoSavedState(`swas-user-chosen-${dept}-v1`,{});
  const [corporateSlots,setCorporateSlots]=useDemoSavedState(`swas-ho-slots-${dept}-v3`,HO_FEATURES[dept]);
- const [eventPlans,setEventPlans]=useDemoSavedState(`swas-events-${dept}-v1`,AI_EVENT_RECOMMENDATIONS);
+ const [eventPlans,setEventPlans]=useDemoSavedState(`swas-events-${dept}-v2`,EMPTY_EVENT_PLANS);
  const [activeEventWindow,setActiveEventWindow]=useState(30);
  const sellers=[...(TOP_SELLERS[dept]||[]),...(TOP_SELLER_ADDITIONS[dept]||[])];
  const eventSellers=getEventSellers(dept,eventPlans[activeEventWindow],sellers);
@@ -683,7 +685,7 @@ function DepartmentView({dept,count,adjust,assignments,prefill,assignEndcap,stor
      </div>}
    </div>
    <div className="topSellers">
-     <div className="topSellersHead"><div><h2>Top-performing items</h2></div><button onClick={()=>prefillWithStatus("both")}>✦ Prefill {eventPlans[activeEventWindow]} theme</button></div>
+     <div className="topSellersHead"><div><h2>Top-performing items</h2></div><button onClick={()=>prefillWithStatus("both")}>✦ {eventPlans[activeEventWindow]?`Prefill ${eventPlans[activeEventWindow]}`:"Prefill"}</button></div>
      <div className="sellerList">{eventSellers.map((x,i)=><div className={`seller ${x[5]!==dept?"crossMerch":""}`} key={x[0]}><span>{i+1}</span><div><b>{x[5]!==dept?"★ ":""}{x[0]}</b><small>{x[1]} sold · Est. retail {x[3]} · {x[6]}% margin{x[5]!==dept?` · Cross-merch from ${x[5]} for ${eventPlans[activeEventWindow]}`:""}</small></div><strong>{x[2]}</strong></div>)}</div>
      <p className="prefillNote">Prefilled or manually selected features begin as Pending until the department plan is complete and its merchandise order is approved.</p>
      <div className="rollbackHead"><div><span className="eyebrow">ACTIVE ROLLBACKS</span><h2>Value-priced features</h2></div><button onClick={()=>prefillWithStatus("rollbacks")}>↓ Prefill rollbacks</button></div>
@@ -708,7 +710,7 @@ function CatalogSearch({dept,assignments,onAdd}){
 
 function EventPlanningBox({dept,eventPlans,setEventPlans,activeWindow,setActiveWindow}){
  const event=eventPlans[activeWindow];
- return <section className="eventPlanningBox"><div className="eventPlanIntro"><span className="eyebrow">UPCOMING EVENTS + HOLIDAYS</span><h2>Plan themes around what customers will shop next</h2><p>AI combines two years of seasonal sales, estimated margin, and the timing of upcoming events.</p></div><div className="eventWindowTabs">{[30,60,90].map(days=><button className={activeWindow===days?"active":""} key={days} onClick={()=>setActiveWindow(days)}><b>{days}</b><span>days</span><small>{eventPlans[days]}</small></button>)}</div><div className="eventChoice"><label><span>{activeWindow}-day event</span><select value={event} onChange={e=>setEventPlans(old=>({...old,[activeWindow]:e.target.value}))}>{EVENT_OPTIONS.map(option=><option key={option}>{option}</option>)}</select></label><button onClick={()=>setEventPlans(old=>({...old,[activeWindow]:AI_EVENT_RECOMMENDATIONS[activeWindow]}))}>✦ Use AI recommendation</button><div><small>AI THEME FOR {dept.toUpperCase()}</small><b>{event}</b><span>Prioritize high-velocity items with strong seasonal fit and margin.</span></div></div></section>
+ return <section className="eventPlanningBox"><div className="eventPlanIntro"><span className="eyebrow">UPCOMING EVENTS + HOLIDAYS</span><h2>Plan themes around what customers will shop next</h2><p>AI combines two years of seasonal sales, estimated margin, and the timing of upcoming events.</p></div><div className="eventWindowTabs">{[30,60,90].map(days=><button className={activeWindow===days?"active":""} key={days} onClick={()=>setActiveWindow(days)}><b>{days}</b><span>days</span><small>{eventPlans[days]||"Choose event"}</small></button>)}</div><div className="eventChoice"><label><span>{activeWindow}-day event</span><select value={event} onChange={e=>setEventPlans(old=>({...old,[activeWindow]:e.target.value}))}><option value="">Choose event</option>{EVENT_OPTIONS.map(option=><option key={option}>{option}</option>)}</select></label><button onClick={()=>setEventPlans(old=>({...old,[activeWindow]:AI_EVENT_RECOMMENDATIONS[activeWindow]}))}>✦ Use AI recommendation</button><div><small>AI THEME FOR {dept.toUpperCase()}</small><b>{event||"No event selected"}</b><span>{event?"Prioritize high-velocity items with strong seasonal fit and margin.":"Choose an event or use the AI recommendation to build a themed assortment."}</span></div></div></section>
 }
 
 function EndcapSection({title,side,count,assignments,sellers,rollbackItems,assignEndcap,statuses,setStatus,add,prefill,description,corporateSlots,moveCorporate,availableSlots,userChosenSlots,moveFeature,featureSlots}){
