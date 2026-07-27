@@ -62,12 +62,15 @@ function App(){
   const opportunity=concepts.reduce((a,x)=>a+x[2]*x[3]/100,0);
   const isStoreOverview=dept==="Store Overview";
   const scopedEndcaps=isStoreOverview?totals.front+totals.back:counts[dept].front+counts[dept].back;
+  const scopedActiveEndcaps=isStoreOverview
+    ? Math.max(0,scopedEndcaps-6)
+    : Object.entries(assignments[dept]||{}).filter(([slot,value])=>!slot.startsWith("stackbase-")&&value).length;
   const scopedStackbases=isStoreOverview?totals.stackbases:counts[dept].stackbases;
   const scopedActiveStackbases=isStoreOverview
     ? Object.values(assignments).reduce((sum,department)=>sum+Object.entries(department).filter(([slot,value])=>slot.startsWith("stackbase-")&&value).length,0)
     : Object.entries(assignments[dept]||{}).filter(([slot,value])=>slot.startsWith("stackbase-")&&value).length;
-  const scopedOpen=Math.max(0,scopedEndcaps-scopedActive);
-  const scopedUtilization=scopedEndcaps?Math.round((scopedActive/scopedEndcaps)*100):0;
+  const scopedOpen=Math.max(0,scopedEndcaps-scopedActiveEndcaps);
+  const scopedUtilization=scopedEndcaps?Math.round((scopedActiveEndcaps/scopedEndcaps)*100):0;
   const adjust=(where,delta)=>{if(dept==="Store Overview")return;setCounts(old=>({...old,[dept]:{...old[dept],[where]:Math.max(0,old[dept][where]+delta)}}))};
   const toggle=(name,targetDept=dept)=>{
     const already=(selected[targetDept]||[]).includes(name);
