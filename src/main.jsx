@@ -4,6 +4,7 @@ import "./styles.css";
 import "./department-plan.css";
 import "./cycle-planner.css";
 import "./nav-dropdown.css";
+import "./store-lookup.css";
 
 const DEPARTMENTS = {
   "Store Overview": { icon:"⌂", front: 34, back: 30, sales: 188420, margin: 37.2, score: 86 },
@@ -33,6 +34,15 @@ const TOP_SELLERS = {
   "Electronics":[["Onn. USB-C Cable","36,820 units","$294K","$7.98 ea","Travel"],["Onn. Power Bank","23,520 units","$470K","$19.98 ea","Travel"],["JBL Wireless Earbuds","17,880 units","$716K","$39.98 ea","Back to school"],["Onn. Power Strip","16,240 units","$244K","$14.98 ea","Dorm"],["Xbox Gift Card","15,360 units","$384K","$25.00 ea","Gaming"],["Onn. Bluetooth Speaker","14,740 units","$295K","$19.98 ea","Summer"],["Onn. Wall Charger","13,920 units","$167K","$11.98 ea","Travel"],["LED Desk Lamp","12,860 units","$257K","$19.98 ea","Dorm"]],
 };
 
+const STORES = [
+  { id:"2487", name:"Lakeview", factor:1, score:86, margin:37.2 },
+  { id:"1842", name:"Northgate", factor:.91, score:82, margin:35.9 },
+  { id:"3165", name:"Riverside", factor:1.12, score:91, margin:38.4 },
+  { id:"4271", name:"Westfield", factor:.84, score:79, margin:34.8 },
+  { id:"5096", name:"Pinecrest", factor:1.05, score:88, margin:37.8 },
+  { id:"6214", name:"Meadowbrook", factor:.97, score:84, margin:36.6 },
+];
+
 const STACKBASE_ITEMS = {
   "Grocery":[["Great Value Water 40 Pack","31,480 units","$173K","$5.48 ea","Summer"],["Kingsford Charcoal Twin Pack","18,920 units","$378K","$19.98 ea","Grilling"],["Gatorade 24 Pack","17,640 units","$317K","$17.98 ea","Summer"],["Bounty Paper Towels 12 Pack","15,280 units","$428K","$27.98 ea","Stock-up"],["Purina Dog Chow 44 lb","12,940 units","$414K","$31.98 ea","Stock-up"],["Great Value Sports Drinks 24 Pack","11,860 units","$142K","$11.98 ea","Summer"]],
 };
@@ -55,21 +65,32 @@ function App(){
   const [selected,setSelected]=useState({});
   const [view,setView]=useState("Dashboard");
   const [departmentMenuOpen,setDepartmentMenuOpen]=useState(false);
+  const [storeMenuOpen,setStoreMenuOpen]=useState(false);
+  const [selectedStores,setSelectedStores]=useState(["2487"]);
+  const [draftStores,setDraftStores]=useState(["2487"]);
   const [assignments,setAssignments]=useState({});
 
+  const activeStores=STORES.filter(store=>selectedStores.includes(store.id));
+  const storeCount=activeStores.length||1;
+  const multiStore=storeCount>1;
+  const storeScale=activeStores.reduce((sum,store)=>sum+store.factor,0)||1;
+  const averageStoreScore=Math.round(activeStores.reduce((sum,store)=>sum+store.score,0)/storeCount);
+  const averageStoreMargin=activeStores.reduce((sum,store)=>sum+store.margin,0)/storeCount;
+  const storeLabel=multiStore?`${storeCount} stores selected`:`Store ${activeStores[0]?.id||"2487"} · ${activeStores[0]?.name||"Lakeview"}`;
   const totals=useMemo(()=>Object.values(counts).reduce((a,v)=>({front:a.front+v.front,back:a.back+v.back,stackbases:a.stackbases+v.stackbases}),{front:0,back:0,stackbases:0}),[counts]);
-  const current=dept==="Store Overview"?{...DEPARTMENTS[dept],...totals}:DEPARTMENTS[dept];
+  const baseCurrent=dept==="Store Overview"?{...DEPARTMENTS[dept],...totals}:DEPARTMENTS[dept];
+  const current={...baseCurrent,sales:Math.round(baseCurrent.sales*storeScale),score:Math.max(0,Math.min(100,baseCurrent.score+averageStoreScore-86)),margin:(baseCurrent.margin+averageStoreMargin-37.2).toFixed(1)};
   const concepts=CONCEPTS[dept]||Object.entries(CONCEPTS).flatMap(([d,arr])=>arr.slice(0,1).map(x=>[...x,d])).slice(0,4);
   const chosen=selected[dept]||[];
-  const opportunity=concepts.reduce((a,x)=>a+x[2]*x[3]/100,0);
+  const opportunity=concepts.reduce((a,x)=>a+x[2]*x[3]/100,0)*storeScale;
   const isStoreOverview=dept==="Store Overview";
-  const scopedEndcaps=isStoreOverview?totals.front+totals.back:counts[dept].front+counts[dept].back;
+  const scopedEndcaps=isStoreOverview?(totals.front+totals.back)*storeCount:counts[dept].front+counts[dept].back;
   const scopedActiveEndcaps=isStoreOverview
-    ? Math.max(0,scopedEndcaps-6)
+    ? Math.max(0,scopedEndcaps-(6*storeCount))
     : Object.entries(assignments[dept]||{}).filter(([slot,value])=>!slot.startsWith("stackbase-")&&value).length;
-  const scopedStackbases=isStoreOverview?totals.stackbases:counts[dept].stackbases;
+  const scopedStackbases=isStoreOverview?totals.stackbases*storeCount:counts[dept].stackbases;
   const scopedActiveStackbases=isStoreOverview
-    ? Object.values(assignments).reduce((sum,department)=>sum+Object.entries(department).filter(([slot,value])=>slot.startsWith("stackbase-")&&value).length,0)
+    ? Math.max(0,scopedStackbases-(3*storeCount))
     : Object.entries(assignments[dept]||{}).filter(([slot,value])=>slot.startsWith("stackbase-")&&value).length;
   const scopedOpen=Math.max(0,scopedEndcaps-scopedActiveEndcaps);
   const scopedUtilization=scopedEndcaps?Math.round((scopedActiveEndcaps/scopedEndcaps)*100):0;
@@ -116,10 +137,26 @@ function App(){
       [dept]:{...(old[dept]||{}),[slot]:value}
     }));
   };
+  const toggleDraftStore=id=>setDraftStores(current=>current.includes(id)?current.filter(storeId=>storeId!==id):[...current,id]);
+  const applyStores=()=>{
+    if(!draftStores.length)return;
+    setSelectedStores(draftStores);
+    setDept("Store Overview");
+    setView("Dashboard");
+    setStoreMenuOpen(false);
+  };
 
   return <div className="app">
     <aside>
       <div className="brand"><span>SW</span><div><b>SWAS Planning</b><small>ENDCAP INTELLIGENCE</small></div></div>
+      <div className="storeLookup">
+        <button className="storeLookupButton" aria-expanded={storeMenuOpen} onClick={()=>{setDraftStores(selectedStores);setStoreMenuOpen(open=>!open)}}><span>⌖</span><div><small>STORE LOOKUP</small><b>{multiStore?`${storeCount} stores combined`:`Store ${activeStores[0]?.id||"2487"}`}</b></div><em>{storeMenuOpen?"▴":"▾"}</em></button>
+        {storeMenuOpen&&<div className="storeMenu">
+          <div className="storeMenuHead"><b>Select stores</b><small>Compare locations in one view</small></div>
+          <div className="storeOptions">{STORES.map(store=><label key={store.id}><input type="checkbox" checked={draftStores.includes(store.id)} onChange={()=>toggleDraftStore(store.id)}/><span><b>Store {store.id}</b><small>{store.name}</small></span><em>{store.score}</em></label>)}</div>
+          <div className="storeMenuActions"><button onClick={()=>setDraftStores([])}>Clear</button><button className="applyStores" disabled={!draftStores.length} onClick={applyStores}>Apply ({draftStores.length})</button></div>
+        </div>}
+      </div>
       <nav>
         <button className={view==="Dashboard"?"active":""} onClick={()=>{setView("Dashboard");setDept("Store Overview")}}><i>⌂</i>Dashboard</button>
         <button className={view==="Department plan"?"active":""} aria-expanded={departmentMenuOpen} onClick={()=>{setView("Department plan");setDepartmentMenuOpen(open=>!open)}}><i>✦</i>Department plan <em className="navChevron">{departmentMenuOpen?"▴":"▾"}</em></button>
@@ -130,9 +167,9 @@ function App(){
       <div className="profile"><span>TR</span><div><b>Tavion Robinson</b><small>Store leadership</small></div></div>
     </aside>
     <main>
-      <header><div><span className="eyebrow">STORE 2487 · LAKEVIEW</span><h1>{dept==="Store Overview"?"Total store endcap performance":`${dept} endcap plan`}</h1><p>{dept==="Store Overview"?"See what is live, what is working, and where the next margin opportunity is.":"Set your endcap capacity and build a department-specific seasonal plan."}</p></div><div className="headerActions"><select value={dept} onChange={e=>setDept(e.target.value)}>{Object.keys(DEPARTMENTS).map(x=><option key={x}>{x}</option>)}</select><button onClick={()=>window.print()}>Export plan ↗</button></div></header>
+      <header><div><span className="eyebrow">{storeLabel.toUpperCase()}</span><h1>{dept==="Store Overview"?(multiStore?"Combined store endcap performance":"Total store endcap performance"):`${dept} endcap plan`}</h1><p>{dept==="Store Overview"?(multiStore?`One combined dashboard for ${storeCount} selected stores.`:"See what is live, what is working, and where the next margin opportunity is."):"Set your endcap capacity and build a department-specific seasonal plan."}</p></div><div className="headerActions"><select value={dept} onChange={e=>setDept(e.target.value)}>{Object.keys(DEPARTMENTS).map(x=><option key={x}>{x}</option>)}</select><button onClick={()=>window.print()}>Export plan ↗</button></div></header>
 
-      <section className="statusBar"><span className="live">● {isStoreOverview?"LIVE TOTAL STORE VIEW":`LIVE ${dept.toUpperCase()} VIEW`}</span><div><b>{scopedEndcaps}</b><small>{isStoreOverview?"All store endcaps":"Department endcaps"}</small></div><div><b>{scopedActiveStackbases}/{scopedStackbases}</b><small>Active stackbases</small></div><div><b>{scopedOpen}</b><small>Open endcaps</small></div><div><b>{scopedUtilization}%</b><small>Endcap utilization</small></div><p>{isStoreOverview?"All departments combined":`${dept} department only`} · Fictional live data</p></section>
+      <section className="statusBar"><span className="live">● {isStoreOverview?(multiStore?`LIVE ${storeCount}-STORE VIEW`:"LIVE TOTAL STORE VIEW"):`LIVE ${dept.toUpperCase()} VIEW`}</span><div><b>{scopedEndcaps}</b><small>{isStoreOverview?"All store endcaps":"Department endcaps"}</small></div><div><b>{scopedActiveStackbases}/{scopedStackbases}</b><small>Active stackbases</small></div><div><b>{scopedOpen}</b><small>Open endcaps</small></div><div><b>{scopedUtilization}%</b><small>Endcap utilization</small></div><p>{isStoreOverview?(multiStore?`${storeCount} locations combined`:"All departments combined"):`${dept} department only`} · Fictional live data</p></section>
 
       <section className="metrics">
         <Metric label="Endcap sales · 4 weeks" value={fmt(current.sales)} sub="+12.8% vs prior period" color="green"/>
@@ -141,7 +178,7 @@ function App(){
         <Metric label="Average gross margin" value={`${current.margin}%`} sub="+2.4 pts vs aisle average" color="amber"/>
       </section>
 
-      {dept==="Store Overview"?<StoreView setDept={setDept}/>:<DepartmentView key={dept} dept={dept} count={counts[dept]} adjust={adjust} assignments={assignments[dept]||{}} prefill={prefill} assignEndcap={assignEndcap}/>}
+      {dept==="Store Overview"?<StoreView setDept={setDept} storeCount={storeCount} storeScale={storeScale} scoreOffset={averageStoreScore-86}/>:<DepartmentView key={dept} dept={dept} count={counts[dept]} adjust={adjust} assignments={assignments[dept]||{}} prefill={prefill} assignEndcap={assignEndcap}/>}
 
       <div className="sectionHead"><div><span className="eyebrow">AI-RANKED OPPORTUNITIES</span><h2>{dept==="Store Overview"?"Recommended concepts across the store":`Recommended ${dept} endcap concepts`}</h2></div><span>Ranked by demand · margin · seasonality</span></div>
       <section className="concepts">{concepts.map((x,i)=>{const owner=dept==="Store Overview"?x[5]:dept;const isAdded=(selected[owner]||[]).includes(x[0]);return <Concept key={x[0]} item={x} rank={i+1} added={isAdded} toggle={()=>toggle(x[0],owner)} overview={dept==="Store Overview"}/>})}</section>
@@ -154,10 +191,10 @@ function App(){
 
 function Metric({label,value,sub,color}){return <div className={`metric ${color}`}><span>{label}</span><strong>{value}</strong><small>↗ {sub}</small></div>}
 
-function StoreView({setDept}){
- const rows=[["Seasonal","Backyard Ready",94,"$32.9K","+24%"],["Grocery","Summer Hydration",91,"$47.2K","+18%"],["Electronics","Travel Tech",88,"$25.8K","+13%"],["Home","Patio Refresh",84,"$36.1K","+9%"],["Automotive","Road Trip Ready",82,"$24.8K","+7%"],["Apparel","Summer Essentials",78,"$21.6K","+3%"]];
- return <section className="storeGrid"><div className="panel performance"><div className="panelHead"><div><span className="eyebrow">WHAT'S THERE NOW</span><h2>Department endcap performance</h2></div><button>View all 64 →</button></div><div className="table"><div className="tr th"><span>Department</span><span>Top display</span><span>Score</span><span>4-week sales</span><span>Trend</span></div>{rows.map(r=><button className="tr" key={r[0]} onClick={()=>setDept(r[0])}><span><i>{DEPARTMENTS[r[0]].icon}</i>{r[0]}</span><span>{r[1]}</span><span><b className={`score s${Math.floor(r[2]/10)}`}>{r[2]}</b></span><span>{r[3]}</span><span className="up">{r[4]}</span></button>)}</div></div>
- <div className="panel placement"><div className="panelHead"><div><span className="eyebrow">SPACE MIX</span><h2>Placement performance</h2></div></div><div className="donut"><div><strong>64</strong><small>endcaps</small></div></div><div className="placeRow"><span><i className="front"/>Front endcaps</span><b>34</b><em>$3,480 avg.</em></div><div className="placeRow"><span><i className="back"/>Back endcaps</span><b>30</b><em>$2,740 avg.</em></div><div className="insight">Front placements are generating <b>27% more sales</b> per endcap.</div></div></section>
+function StoreView({setDept,storeCount,storeScale,scoreOffset}){
+ const rows=[["Seasonal","Backyard Ready",94,32900,"+24%"],["Grocery","Summer Hydration",91,47200,"+18%"],["Electronics","Travel Tech",88,25800,"+13%"],["Home","Patio Refresh",84,36100,"+9%"],["Automotive","Road Trip Ready",82,24800,"+7%"],["Apparel","Summer Essentials",78,21600,"+3%"]];
+ return <section className="storeGrid"><div className="panel performance"><div className="panelHead"><div><span className="eyebrow">WHAT'S THERE NOW</span><h2>{storeCount>1?`${storeCount}-store department performance`:"Department endcap performance"}</h2></div><button>View all {64*storeCount} →</button></div><div className="table"><div className="tr th"><span>Department</span><span>Top display</span><span>Score</span><span>4-week sales</span><span>Trend</span></div>{rows.map(r=>{const score=Math.max(0,Math.min(100,r[2]+scoreOffset));return <button className="tr" key={r[0]} onClick={()=>setDept(r[0])}><span><i>{DEPARTMENTS[r[0]].icon}</i>{r[0]}</span><span>{r[1]}</span><span><b className={`score s${Math.floor(score/10)}`}>{score}</b></span><span>{fmt(r[3]*storeScale)}</span><span className="up">{r[4]}</span></button>})}</div></div>
+ <div className="panel placement"><div className="panelHead"><div><span className="eyebrow">SPACE MIX</span><h2>Placement performance</h2></div></div><div className="donut"><div><strong>{64*storeCount}</strong><small>endcaps</small></div></div><div className="placeRow"><span><i className="front"/>Front endcaps</span><b>{34*storeCount}</b><em>$3,480 avg.</em></div><div className="placeRow"><span><i className="back"/>Back endcaps</span><b>{30*storeCount}</b><em>$2,740 avg.</em></div><div className="insight">Front placements are generating <b>27% more sales</b> per endcap.</div></div></section>
 }
 
 function DepartmentView({dept,count,adjust,assignments,prefill,assignEndcap}){
