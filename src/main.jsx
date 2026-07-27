@@ -148,15 +148,18 @@ const fmt = n => new Intl.NumberFormat("en-US",{style:"currency",currency:"USD",
 
 function useDemoSavedState(key,initialValue){
   const getInitial=()=>typeof initialValue==="function"?initialValue():initialValue;
+  const saveLocally=["localhost","127.0.0.1","0.0.0.0"].includes(window.location.hostname)||window.location.protocol==="file:";
   const [value,setValue]=useState(()=>{
+    if(!saveLocally)return getInitial();
     try{
       const saved=window.localStorage.getItem(key);
       return saved===null?getInitial():JSON.parse(saved);
     }catch{return getInitial()}
   });
   useEffect(()=>{
+    if(!saveLocally)return;
     try{window.localStorage.setItem(key,JSON.stringify(value))}catch{}
-  },[key,value]);
+  },[key,value,saveLocally]);
   return [value,setValue];
 }
 
