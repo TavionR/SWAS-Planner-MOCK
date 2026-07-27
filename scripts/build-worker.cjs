@@ -31,6 +31,7 @@ const css = [
   "src/operational-upgrades.css",
   "src/calendar-edit.css",
   "src/advanced-insights.css",
+  "src/planning-workflow.css",
 ].map((file) => fs.readFileSync(path.join(root, file), "utf8")).join("\n");
 
 const html = `<!doctype html>
@@ -41,11 +42,11 @@ const html = `<!doctype html>
   <meta name="theme-color" content="#081522">
   <meta name="description" content="SWAS Planning — AI-assisted retail endcap planning demonstration.">
   <title>SWAS Planning Demo</title>
-  <link rel="stylesheet" href="/app.css?v=5">
+  <link rel="stylesheet" href="/app.css?v=6">
 </head>
 <body>
   <div id="root"></div>
-  <script type="module" src="/app.js?v=5"></script>
+  <script type="module" src="/app.js?v=6"></script>
 </body>
 </html>`;
 
