@@ -42,11 +42,11 @@ const html = `<!doctype html>
   <meta name="theme-color" content="#081522">
   <meta name="description" content="SWAS Planning — AI-assisted retail endcap planning demonstration.">
   <title>SWAS Planning Demo</title>
-  <link rel="stylesheet" href="/app.css?v=17">
+  <link rel="stylesheet" href="/app.css?v=18">
 </head>
 <body>
   <div id="root"></div>
-  <script type="module" src="/app.js?v=17"></script>
+  <script type="module" src="/app.js?v=18"></script>
 </body>
 </html>`;
 

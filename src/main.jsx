@@ -149,17 +149,16 @@ const fmt = n => new Intl.NumberFormat("en-US",{style:"currency",currency:"USD",
 function useDemoSavedState(key,initialValue){
   const getInitial=()=>typeof initialValue==="function"?initialValue():initialValue;
   const saveLocally=["localhost","127.0.0.1","0.0.0.0"].includes(window.location.hostname)||window.location.protocol==="file:";
+  const storage=saveLocally?window.localStorage:window.sessionStorage;
   const [value,setValue]=useState(()=>{
-    if(!saveLocally)return getInitial();
     try{
-      const saved=window.localStorage.getItem(key);
+      const saved=storage.getItem(key);
       return saved===null?getInitial():JSON.parse(saved);
     }catch{return getInitial()}
   });
   useEffect(()=>{
-    if(!saveLocally)return;
-    try{window.localStorage.setItem(key,JSON.stringify(value))}catch{}
-  },[key,value,saveLocally]);
+    try{storage.setItem(key,JSON.stringify(value))}catch{}
+  },[key,value,storage]);
   return [value,setValue];
 }
 
@@ -185,21 +184,22 @@ function App(){
   const storeLabel=multiStore?`${storeCount} stores selected`:`Store ${activeStores[0]?.id||"2487"} · ${activeStores[0]?.name||"Lakeview"}`;
   const totals=useMemo(()=>Object.values(counts).reduce((a,v)=>({front:a.front+v.front,back:a.back+v.back,stackbases:a.stackbases+v.stackbases}),{front:0,back:0,stackbases:0}),[counts]);
   const baseCurrent=dept==="Store Overview"?{...DEPARTMENTS[dept],...totals}:DEPARTMENTS[dept];
-  const current={...baseCurrent,sales:Math.round(baseCurrent.sales*storeScale),score:Math.max(0,Math.min(100,baseCurrent.score+averageStoreScore-86)),margin:(baseCurrent.margin+averageStoreMargin-37.2).toFixed(1)};
   const concepts=CONCEPTS[dept]||Object.entries(CONCEPTS).flatMap(([d,arr])=>arr.slice(0,1).map(x=>[...x,d])).slice(0,4);
   const chosen=selected[dept]||[];
-  const opportunity=concepts.reduce((a,x)=>a+x[2]*x[3]/100,0)*storeScale;
   const isStoreOverview=dept==="Store Overview";
   const scopedEndcaps=isStoreOverview?(totals.front+totals.back)*storeCount:counts[dept].front+counts[dept].back;
   const scopedActiveEndcaps=isStoreOverview
-    ? Math.max(0,scopedEndcaps-(6*storeCount))
+    ? Object.values(assignments).reduce((sum,departmentAssignments)=>sum+Object.entries(departmentAssignments||{}).filter(([slot,value])=>!slot.startsWith("stackbase-")&&value).length,0)*storeCount
     : Object.entries(assignments[dept]||{}).filter(([slot,value])=>!slot.startsWith("stackbase-")&&value).length;
   const scopedStackbases=isStoreOverview?totals.stackbases*storeCount:counts[dept].stackbases;
   const scopedActiveStackbases=isStoreOverview
-    ? Math.max(0,scopedStackbases-(3*storeCount))
+    ? Object.values(assignments).reduce((sum,departmentAssignments)=>sum+Object.entries(departmentAssignments||{}).filter(([slot,value])=>slot.startsWith("stackbase-")&&value).length,0)*storeCount
     : Object.entries(assignments[dept]||{}).filter(([slot,value])=>slot.startsWith("stackbase-")&&value).length;
   const scopedOpen=Math.max(0,scopedEndcaps-scopedActiveEndcaps);
   const scopedUtilization=scopedEndcaps?Math.round((scopedActiveEndcaps/scopedEndcaps)*100):0;
+  const fullOpportunity=concepts.reduce((a,x)=>a+x[2]*x[3]/100,0)*storeScale;
+  const opportunity=Math.round(fullOpportunity*(scopedUtilization/100));
+  const current={...baseCurrent,sales:Math.round(baseCurrent.sales*storeScale*(scopedUtilization/100)),score:scopedUtilization,margin:scopedActiveEndcaps?(baseCurrent.margin+averageStoreMargin-37.2).toFixed(1):"0.0"};
   const adjust=(where,delta)=>{if(dept==="Store Overview")return;setCounts(old=>({...old,[dept]:{...old[dept],[where]:Math.max(0,old[dept][where]+delta)}}))};
   const toggle=(name,targetDept=dept)=>{
     const already=(selected[targetDept]||[]).includes(name);
@@ -271,21 +271,21 @@ function App(){
       <div className="profile"><span>TR</span><div><b>Tavion Robinson</b><small>Store leadership</small></div></div>
     </aside>
     <main>
-      <header><div><span className="eyebrow">{storeLabel.toUpperCase()}</span><h1>{view==="Performance"?"Performance insights":view==="Calendar"?"SWAS planning calendar":dept==="Store Overview"?(multiStore?"Combined store endcap performance":"Total store endcap performance"):`${dept} endcap plan`}</h1><p>{view==="Performance"?`Track scores, sales, margin, and opportunities across ${multiStore?`${storeCount} selected stores`:"the selected store"}.`:view==="Calendar"?`Coordinate set dates, end dates, markdowns, and feature arrivals across ${multiStore?`${storeCount} selected stores`:"the selected store"}.`:dept==="Store Overview"?(multiStore?`One combined dashboard for ${storeCount} selected stores.`:"See what is live, what is working, and where the next margin opportunity is."):"Set your endcap capacity and build a department-specific seasonal plan."}</p></div><div className="headerActions"><span className="saveStatus">✓ Saved on this device</span><select aria-label="Choose department plan" value={dept} onChange={e=>{setDept(e.target.value);setView("Dashboard")}}>{Object.keys(DEPARTMENTS).map(x=><option key={x}>{x}</option>)}</select><button onClick={()=>window.print()}>Export plan ↗</button></div></header>
+      <header><div><span className="eyebrow">{storeLabel.toUpperCase()}</span><h1>{view==="Performance"?"Performance insights":view==="Calendar"?"SWAS planning calendar":dept==="Store Overview"?(multiStore?"Combined store endcap performance":"Total store endcap performance"):`${dept} endcap plan`}</h1><p>{view==="Performance"?`Track scores, sales, margin, and opportunities across ${multiStore?`${storeCount} selected stores`:"the selected store"}.`:view==="Calendar"?`Coordinate set dates, end dates, markdowns, and feature arrivals across ${multiStore?`${storeCount} selected stores`:"the selected store"}.`:dept==="Store Overview"?(multiStore?`One combined dashboard for ${storeCount} selected stores.`:"See what is live, what is working, and where the next margin opportunity is."):"Set your endcap capacity and build a department-specific seasonal plan."}</p></div><div className="headerActions"><span className="saveStatus">{["localhost","127.0.0.1","0.0.0.0"].includes(window.location.hostname)?"✓ Saved on this device":"◷ Temporary demo session"}</span><select aria-label="Choose department plan" value={dept} onChange={e=>{setDept(e.target.value);setView("Dashboard")}}>{Object.keys(DEPARTMENTS).map(x=><option key={x}>{x}</option>)}</select><button onClick={()=>window.print()}>Export plan ↗</button></div></header>
 
-      {view==="Performance"?<PerformanceView stores={activeStores}/>:view==="Calendar"?<CalendarView stores={activeStores}/>:<>
+      {view==="Performance"?<PerformanceView stores={activeStores} assignments={assignments} counts={counts}/>:view==="Calendar"?<CalendarView stores={activeStores}/>:<>
       <section className="statusBar"><span className="live">● {isStoreOverview?(multiStore?`LIVE ${storeCount}-STORE VIEW`:"LIVE TOTAL STORE VIEW"):`LIVE ${dept.toUpperCase()} VIEW`}</span><div><b>{isStoreOverview?`${scopedActiveEndcaps}/${scopedEndcaps}`:scopedEndcaps}</b><small>{isStoreOverview?"Active endcaps":"Department endcaps"}</small></div><div><b>{scopedActiveStackbases}/{scopedStackbases}</b><small>Active stackbases</small></div><div><b>{scopedOpen}</b><small>Inactive endcaps</small></div><div><b>{scopedUtilization}%</b><small>Endcap utilization</small></div><p>{isStoreOverview?(multiStore?`${storeCount} locations combined`:"All departments combined"):`${dept} department only`} · Fictional live data</p></section>
 
       <section className="metrics">
-        <Metric label="Endcap sales · 4 weeks" value={fmt(current.sales)} sub="+12.8% vs prior period" color="green"/>
-        <Metric label="Margin opportunity" value={fmt(opportunity)} sub="from recommended concepts" color="blue"/>
-        <Metric label="Performance score" value={`${current.score}/100`} sub={current.score>=90?"Top-performing area":"Healthy with upside"} color="violet"/>
-        <Metric label="Average gross margin" value={`${current.margin}%`} sub="+2.4 pts vs aisle average" color="amber"/>
+        <Metric label="Planned endcap sales · 4 weeks" value={fmt(current.sales)} sub={scopedActiveEndcaps?"based on assigned features":"add a feature to begin"} color="green"/>
+        <Metric label="Margin opportunity captured" value={fmt(opportunity)} sub={`${scopedUtilization}% of planning opportunity`} color="blue"/>
+        <Metric label="Planning score" value={`${current.score}/100`} sub={scopedActiveEndcaps?`${scopedActiveEndcaps} endcap${scopedActiveEndcaps===1?"":"s"} assigned`:"no endcaps assigned"} color="violet"/>
+        <Metric label="Planned gross margin" value={`${current.margin}%`} sub={scopedActiveEndcaps?"from assigned feature mix":"add a feature to begin"} color="amber"/>
       </section>
 
-      {dept==="Store Overview"?<><StoreView setDept={setDept} storeCount={storeCount} storeScale={storeScale} scoreOffset={averageStoreScore-86}/><RiskCenter setDept={setDept}/></>:<DepartmentView key={dept} dept={dept} count={counts[dept]} adjust={adjust} assignments={assignments[dept]||{}} prefill={prefill} assignEndcap={assignEndcap} storeScale={storeScale}/>}
+      {dept==="Store Overview"?<><StoreView setDept={setDept} storeCount={storeCount} storeScale={storeScale} assignments={assignments} counts={counts}/><RiskCenter setDept={setDept}/></>:<DepartmentView key={dept} dept={dept} count={counts[dept]} adjust={adjust} assignments={assignments[dept]||{}} prefill={prefill} assignEndcap={assignEndcap} storeScale={storeScale}/>}
 
-      {dept==="Store Overview"?<StoreFeaturePlan counts={counts} storeCount={storeCount} setDept={setDept}/>:<><div className="sectionHead"><div><span className="eyebrow">AI-RANKED OPPORTUNITIES</span><h2>Recommended {dept} endcap concepts</h2></div><span>Ranked by demand · margin · seasonality</span></div><section className="concepts">{concepts.map((x,i)=>{const isAdded=(selected[dept]||[]).includes(x[0]);return <Concept key={x[0]} item={x} rank={i+1} added={isAdded} toggle={()=>toggle(x[0],dept)} overview={false}/>})}</section></>}
+      {dept==="Store Overview"?<StoreFeaturePlan counts={counts} assignments={assignments} storeCount={storeCount} setDept={setDept}/>:<><div className="sectionHead"><div><span className="eyebrow">AI-RANKED OPPORTUNITIES</span><h2>Recommended {dept} endcap concepts</h2></div><span>Ranked by demand · margin · seasonality</span></div><section className="concepts">{concepts.map((x,i)=>{const isAdded=(selected[dept]||[]).includes(x[0]);return <Concept key={x[0]} item={x} rank={i+1} added={isAdded} toggle={()=>toggle(x[0],dept)} overview={false}/>})}</section></>}
 
       <section className="action"><span>✦</span><div><small>{dept==="Store Overview"?"AI LEADERSHIP GUIDE":"AI NEXT BEST ACTION"}</small><h2>{dept==="Store Overview"?"Review the departments falling behind before opening individual action plans.":`Reserve a front endcap for “${concepts[0][0]}.”`}</h2><p>{dept==="Store Overview"?"Use the guide to identify planning gaps, inventory risks, missed dates, and departments that need follow-up. Actions are accepted inside each department plan.":`The front placement is projected to deliver 18% more sales than a back endcap. Confirm inventory and set the display this week.`}</p></div><button onClick={()=>setActionPlanOpen(true)}>{dept==="Store Overview"?"Open help guide →":actionAccepted?"Plan accepted ✓":"Review action plan →"}</button></section>
       </>}
@@ -343,14 +343,16 @@ function MonthlyPerformance({scope,scale=1}){
  </section>
 }
 
-function StoreFeaturePlan({counts,storeCount,setDept}){
- const gaps={Grocery:2,Home:1,Seasonal:0,Automotive:2,Apparel:3,Electronics:1};
+function StoreFeaturePlan({counts,assignments,storeCount,setDept}){
  const dates={Grocery:"Jul 28",Home:"Aug 11",Seasonal:"Aug 4",Automotive:"Jul 31",Apparel:"Aug 24",Electronics:"Sep 3"};
- const readiness={Grocery:86,Home:92,Seasonal:100,Automotive:78,Apparel:67,Electronics:89};
  const rows=Object.keys(counts).map(name=>{
    const capacity=(counts[name].front+counts[name].back)*storeCount;
-   const open=gaps[name]*storeCount;
-   return {name,capacity,open,planned:capacity-open,next:CONCEPTS[name][0][0],date:dates[name],readiness:readiness[name]};
+   const departmentAssignments=assignments[name]||{};
+   const planned=Object.entries(departmentAssignments).filter(([slot,value])=>!slot.startsWith("stackbase-")&&value).length*storeCount;
+   const open=Math.max(0,capacity-planned);
+   const next=Object.entries(departmentAssignments).find(([slot,value])=>!slot.startsWith("stackbase-")&&value)?.[1]||"No feature planned";
+   const readiness=capacity?Math.round(planned/capacity*100):0;
+   return {name,capacity,open,planned,next,date:planned?dates[name]:"—",readiness};
  });
  const totalCapacity=rows.reduce((sum,row)=>sum+row.capacity,0);
  const totalPlanned=rows.reduce((sum,row)=>sum+row.planned,0);
@@ -359,7 +361,7 @@ function StoreFeaturePlan({counts,storeCount,setDept}){
    <div className="featurePlanHead"><div><span className="eyebrow">TOTAL STORE FEATURE PLANNING</span><h2>Endcap plan coverage by department</h2><p>See what is assigned, where gaps remain, and which feature transitions are coming next.</p></div><div className="featurePlanTotals"><span><b>{totalPlanned}/{totalCapacity}</b><small>locations planned</small></span><span className={totalOpen?"attention":""}><b>{totalOpen}</b><small>open decisions</small></span><span><b>{Math.round(totalPlanned/totalCapacity*100)}%</b><small>plan coverage</small></span></div></div>
    <div className="featurePlanColumns"><span>Department</span><span>Plan coverage</span><span>Next feature</span><span>Next set</span><span>Readiness</span><span></span></div>
    <div className="featurePlanRows">{rows.map(row=><button key={row.name} onClick={()=>setDept(row.name)}><span className="featureDept"><i>{DEPARTMENTS[row.name].icon}</i><b>{row.name}</b><small>{row.capacity} endcaps</small></span><span className="coverageCell"><span><i style={{width:`${row.planned/row.capacity*100}%`}}></i></span><small>{row.planned} planned · {row.open} open</small></span><span className="nextFeature"><b>{row.next}</b><small>AI-aligned seasonal set</small></span><span className="setDate"><b>{row.date}</b><small>2026</small></span><span className={`readiness ${row.readiness<80?"risk":row.readiness===100?"ready":""}`}><b>{row.readiness}%</b><small>{row.readiness===100?"Ready":row.readiness<80?"Needs action":"On track"}</small></span><span className="rowArrow">→</span></button>)}</div>
-   <div className="planningWindows"><div><span>30 DAYS</span><b>{rows.filter(row=>["Jul 28","Jul 31","Aug 4","Aug 11"].includes(row.date)).length} sets</b><small>Execution and order confirmation</small></div><div><span>60 DAYS</span><b>1 transition</b><small>Quantity and arrival planning</small></div><div><span>90 DAYS</span><b>1 forecast</b><small>Seasonal demand preparation</small></div><p><b>AI planning focus:</b> Assign Apparel’s three open locations and confirm Automotive inventory before July 31.</p></div>
+   <div className="planningWindows"><div><span>30 DAYS</span><b>{rows.filter(row=>["Jul 28","Jul 31","Aug 4","Aug 11"].includes(row.date)).length} sets</b><small>Execution and order confirmation</small></div><div><span>60 DAYS</span><b>{rows.filter(row=>row.planned>0).length} departments</b><small>Quantity and arrival planning</small></div><div><span>90 DAYS</span><b>{totalOpen} decisions</b><small>Seasonal demand preparation</small></div><p><b>AI planning focus:</b> Begin with front endcaps, then build stackbase and back-endcap coverage around the selected event.</p></div>
  </section>
 }
 
@@ -374,7 +376,7 @@ function RiskCenter({setDept}){
 }
 
 function LeadershipSummary({stores,totalSales,averageScore,averageMargin,marginOpportunity}){
- const execution=Math.min(96,82+stores.length*2);
+ const execution=averageScore;
  return <section className="leadershipSummary">
    <div className="insightHeader"><div><span className="eyebrow">LEADERSHIP SUMMARY</span><h2>One-page feature planning readout</h2><p>Fictional executive view of execution, opportunity, and the actions that need leadership attention.</p></div><button onClick={()=>window.print()}>Export summary ↗</button></div>
    <div className="leadershipGrid">
@@ -409,13 +411,21 @@ function MultiStoreOpportunities({stores}){
  </section>
 }
 
-function PerformanceView({stores}){
+function PerformanceView({stores,assignments,counts}){
  const storeCount=stores.length||1;
- const totalSales=stores.reduce((sum,store)=>sum+(188420*store.factor),0);
- const averageScore=Math.round(stores.reduce((sum,store)=>sum+store.score,0)/storeCount);
- const averageMargin=(stores.reduce((sum,store)=>sum+store.margin,0)/storeCount).toFixed(1);
- const marginOpportunity=stores.reduce((sum,store)=>sum+(28600*store.factor),0);
- const departments=[["Seasonal",94,24,32900],["Grocery",91,18,47200],["Electronics",88,13,25800],["Home",84,9,36100],["Automotive",82,7,24800],["Apparel",78,3,21600]];
+ const storeScale=stores.reduce((sum,store)=>sum+store.factor,0)||1;
+ const capacity=Object.values(counts).reduce((sum,item)=>sum+item.front+item.back,0)*storeCount;
+ const planned=Object.values(assignments).reduce((sum,items)=>sum+Object.entries(items||{}).filter(([slot,value])=>!slot.startsWith("stackbase-")&&value).length,0)*storeCount;
+ const averageScore=capacity?Math.round(planned/capacity*100):0;
+ const totalSales=Math.round(188420*storeScale*(averageScore/100));
+ const averageMargin=planned?(stores.reduce((sum,store)=>sum+store.margin,0)/storeCount).toFixed(1):"0.0";
+ const marginOpportunity=Math.round(28600*storeScale*(averageScore/100));
+ const departments=Object.keys(counts).map(name=>{
+   const departmentCapacity=(counts[name].front+counts[name].back)*storeCount;
+   const departmentPlanned=Object.entries(assignments[name]||{}).filter(([slot,value])=>!slot.startsWith("stackbase-")&&value).length*storeCount;
+   const score=departmentCapacity?Math.round(departmentPlanned/departmentCapacity*100):0;
+   return [name,score,score,Math.round(DEPARTMENTS[name].sales*storeScale*(score/100))];
+ }).sort((a,b)=>b[1]-a[1]);
  return <div className="performanceView">
    <section className="performanceSummary">
      <Metric label="Combined endcap sales" value={fmt(totalSales)} sub="+12.8% vs prior period" color="green"/>
@@ -427,11 +437,11 @@ function PerformanceView({stores}){
    <MonthlyPerformance scope="Total Store" scale={stores.reduce((sum,store)=>sum+store.factor,0)||1}/>
    {stores.length>1&&<MultiStoreOpportunities stores={stores}/>}
    <section className="performancePanels">
-     <div className="performancePanel"><div className="performancePanelHead"><div><span className="eyebrow">STORE COMPARISON</span><h2>{storeCount===1?"Selected store performance":"Selected-store ranking"}</h2></div><small>Fictional 4-week results</small></div><div className="storePerformanceRows">{stores.map((store,index)=><div className="storePerformanceRow" key={store.id}><span className="storeRank">{index+1}</span><div><b>Store {store.id}</b><small>{store.name}</small></div><span><small>Sales</small><b>{fmt(188420*store.factor)}</b></span><span><small>Margin</small><b>{store.margin}%</b></span><strong>{store.score}</strong></div>)}</div></div>
-     <div className="performancePanel"><div className="performancePanelHead"><div><span className="eyebrow">12-WEEK TREND</span><h2>Endcap score trend</h2></div><b className="trendUp">+8 pts</b></div><div className="trendChart">{[64,68,66,72,70,76,74,79,81,83,84,86].map((height,index)=><div key={index}><span style={{height:`${height}%`}}></span><small>{index%3===0?`W${index+1}`:""}</small></div>)}</div></div>
+     <div className="performancePanel"><div className="performancePanelHead"><div><span className="eyebrow">STORE COMPARISON</span><h2>{storeCount===1?"Selected store performance":"Selected-store ranking"}</h2></div><small>Current planning session</small></div><div className="storePerformanceRows">{stores.map((store,index)=><div className="storePerformanceRow" key={store.id}><span className="storeRank">{index+1}</span><div><b>Store {store.id}</b><small>{store.name}</small></div><span><small>Sales</small><b>{fmt(188420*store.factor*(averageScore/100))}</b></span><span><small>Margin</small><b>{planned?`${store.margin}%`:"0.0%"}</b></span><strong>{averageScore}</strong></div>)}</div></div>
+     <div className="performancePanel"><div className="performancePanelHead"><div><span className="eyebrow">SESSION PROGRESS</span><h2>Endcap planning score</h2></div><b className="trendUp">{averageScore} pts</b></div><div className="trendChart">{Array.from({length:12},(_,index)=>Math.round(averageScore*((index+1)/12))).map((height,index)=><div key={index}><span style={{height:`${Math.max(2,height)}%`}}></span><small>{index%3===0?`S${index+1}`:""}</small></div>)}</div></div>
    </section>
    <section className="performancePanel departmentRanking"><div className="performancePanelHead"><div><span className="eyebrow">DEPARTMENT RANKING</span><h2>Where performance is strongest</h2></div><small>Score · trend · combined sales</small></div><div className="departmentPerformanceGrid">{departments.map(item=><div key={item[0]}><span><i>{DEPARTMENTS[item[0]].icon}</i><b>{item[0]}</b></span><div className="scoreTrack"><i style={{width:`${item[1]}%`}}></i></div><strong>{item[1]}</strong><em>+{item[2]}%</em><b>{fmt(item[3]*stores.reduce((sum,store)=>sum+store.factor,0))}</b></div>)}</div></section>
-   <section className="performanceAction"><span>✦</span><div><small>AI PERFORMANCE INSIGHT</small><h2>Focus the next review on Apparel and Automotive.</h2><p>These departments have the largest gap to the top-performing areas and the clearest near-term margin opportunity.</p></div><b>{fmt(marginOpportunity*.34)} opportunity</b></section>
+   <section className="performanceAction"><span>✦</span><div><small>AI PERFORMANCE INSIGHT</small><h2>{planned?"Continue with the departments that have the most open endcaps.":"Start by assigning the first front-endcap feature."}</h2><p>{planned?"The score will continue to rise as open endcaps receive approved features.":"This session begins at zero and measures only the plan created by the visitor."}</p></div><b>{fmt(marginOpportunity*.34)} opportunity</b></section>
  </div>
 }
 
@@ -481,10 +491,19 @@ function CalendarEventEditor({event,save,remove,close}){
  return <div className="calendarEditorOverlay"><section className="calendarEditor" role="dialog" aria-modal="true"><div className="calendarEditorHead"><div><span className="eyebrow">EDITABLE CALENDAR</span><h2>{event.id==="new"?"Add milestone":"Edit milestone"}</h2></div><button onClick={close}>×</button></div><div className="calendarEditorForm"><label className="wide"><span>Feature name</span><input value={draft.name} onChange={e=>update("name",e.target.value)}/></label><label><span>Department</span><select value={draft.department} onChange={e=>update("department",e.target.value)}>{Object.keys(DEPARTMENTS).filter(name=>name!=="Store Overview").map(name=><option key={name}>{name}</option>)}</select></label><label><span>Milestone type</span><select value={draft.type} onChange={e=>update("type",e.target.value)}>{["Set","Arrival","Markdown","End"].map(type=><option key={type}>{type}</option>)}</select></label><label><span>Date</span><input type="date" value={draft.date} onChange={e=>update("date",e.target.value)}/></label><label><span>Planning window</span><select value={draft.window} onChange={e=>update("window",e.target.value)}>{[30,60,90].map(days=><option key={days} value={days}>{days} days</option>)}</select></label></div><div className="calendarEditorButtons"><button className="deleteEvent" onClick={remove}>{event.id==="new"?"Cancel":"Delete"}</button><span/><button onClick={close}>Close</button><button className="saveEvent" onClick={()=>save(draft)}>Save milestone</button></div></section></div>
 }
 
-function StoreView({setDept,storeCount,storeScale,scoreOffset}){
- const rows=[["Seasonal","Backyard Ready",94,32900,"+24%"],["Grocery","Summer Hydration",91,47200,"+18%"],["Electronics","Travel Tech",88,25800,"+13%"],["Home","Patio Refresh",84,36100,"+9%"],["Automotive","Road Trip Ready",82,24800,"+7%"],["Apparel","Summer Essentials",78,21600,"+3%"]];
- return <section className="storeGrid"><div className="panel performance"><div className="panelHead"><div><span className="eyebrow">WHAT'S THERE NOW</span><h2>{storeCount>1?`${storeCount}-store department performance`:"Department endcap performance"}</h2></div><button>View all {64*storeCount} →</button></div><div className="table"><div className="tr th"><span>Department</span><span>Top display</span><span>Score</span><span>4-week sales</span><span>Trend</span></div>{rows.map(r=>{const score=Math.max(0,Math.min(100,r[2]+scoreOffset));return <button className="tr" key={r[0]} onClick={()=>setDept(r[0])}><span><i>{DEPARTMENTS[r[0]].icon}</i>{r[0]}</span><span>{r[1]}</span><span><b className={`score s${Math.floor(score/10)}`}>{score}</b></span><span>{fmt(r[3]*storeScale)}</span><span className="up">{r[4]}</span></button>})}</div></div>
- <div className="panel placement"><div className="panelHead"><div><span className="eyebrow">SPACE MIX</span><h2>Placement performance</h2></div></div><div className="donut"><div><strong>{64*storeCount}</strong><small>endcaps</small></div></div><div className="placeRow"><span><i className="front"/>Front endcaps</span><b>{34*storeCount}</b><em>$3,480 avg.</em></div><div className="placeRow"><span><i className="back"/>Back endcaps</span><b>{30*storeCount}</b><em>$2,740 avg.</em></div><div className="insight">Front placements are generating <b>27% more sales</b> per endcap.</div></div></section>
+function StoreView({setDept,storeCount,storeScale,assignments,counts}){
+ const rows=Object.keys(counts).map(name=>{
+   const capacity=(counts[name].front+counts[name].back)*storeCount;
+   const entries=Object.entries(assignments[name]||{}).filter(([slot,value])=>!slot.startsWith("stackbase-")&&value);
+   const planned=entries.length*storeCount;
+   const score=capacity?Math.round(planned/capacity*100):0;
+   return [name,entries[0]?.[1]||"No feature planned",score,Math.round(DEPARTMENTS[name].sales*storeScale*(score/100)),score?`+${score}%`:"0%"];
+ });
+ const activeFront=Object.values(assignments).reduce((sum,items)=>sum+Object.entries(items||{}).filter(([slot,value])=>slot.startsWith("front-")&&value).length,0)*storeCount;
+ const activeBack=Object.values(assignments).reduce((sum,items)=>sum+Object.entries(items||{}).filter(([slot,value])=>slot.startsWith("back-")&&value).length,0)*storeCount;
+ const activeTotal=activeFront+activeBack;
+ return <section className="storeGrid"><div className="panel performance"><div className="panelHead"><div><span className="eyebrow">WHAT'S THERE NOW</span><h2>{storeCount>1?`${storeCount}-store department performance`:"Department endcap performance"}</h2></div><button>View all {activeTotal} →</button></div><div className="table"><div className="tr th"><span>Department</span><span>Top display</span><span>Score</span><span>4-week sales</span><span>Trend</span></div>{rows.map(r=><button className="tr" key={r[0]} onClick={()=>setDept(r[0])}><span><i>{DEPARTMENTS[r[0]].icon}</i>{r[0]}</span><span>{r[1]}</span><span><b className={`score s${Math.floor(r[2]/10)}`}>{r[2]}</b></span><span>{fmt(r[3])}</span><span className="up">{r[4]}</span></button>)}</div></div>
+ <div className="panel placement"><div className="panelHead"><div><span className="eyebrow">SPACE MIX</span><h2>Active placement mix</h2></div></div><div className="donut"><div><strong>{activeTotal}</strong><small>active endcaps</small></div></div><div className="placeRow"><span><i className="front"/>Front endcaps</span><b>{activeFront}</b><em>{activeFront?fmt(3480):"$0"} planned avg.</em></div><div className="placeRow"><span><i className="back"/>Back endcaps</span><b>{activeBack}</b><em>{activeBack?fmt(2740):"$0"} planned avg.</em></div><div className="insight">{activeTotal?<><b>{activeTotal}</b> placements are currently included in this session.</>:"Add a feature to begin measuring placement performance."}</div></div></section>
 }
 
 function LegacyDepartmentView({dept,count,adjust,assignments,prefill,assignEndcap,storeScale}){
@@ -544,9 +563,7 @@ function DepartmentView({dept,count,adjust,assignments,prefill,assignEndcap,stor
  const [open,setOpen]=useState(true);
  const [statuses,setStatuses]=useDemoSavedState(`swas-statuses-${dept}-v2`,{});
  const [userChosenSlots,setUserChosenSlots]=useDemoSavedState(`swas-user-chosen-${dept}-v1`,{});
- const [corporateSlots,setCorporateSlots]=useDemoSavedState(`swas-ho-slots-${dept}-v1`,{
-   "front-0":{feature:`${dept} H.O. seasonal feature`,program:"Home Office SWAS"}
- });
+ const [corporateSlots,setCorporateSlots]=useDemoSavedState(`swas-ho-slots-${dept}-v2`,{});
  const [eventPlans,setEventPlans]=useDemoSavedState(`swas-events-${dept}-v1`,AI_EVENT_RECOMMENDATIONS);
  const [activeEventWindow,setActiveEventWindow]=useState(30);
  const sellers=[...(TOP_SELLERS[dept]||[]),...(TOP_SELLER_ADDITIONS[dept]||[])];
