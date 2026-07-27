@@ -565,7 +565,22 @@ function DepartmentView({dept,count,adjust,assignments,prefill,assignEndcap,stor
    return next;
  });
  const prefillWithStatus=where=>{
-   if(["front","back","both"].includes(where)){
+   if(where==="rollbacks"){
+     const prioritySlots=[
+       ...Array.from({length:count.front},(_,i)=>`front-${i}`).filter(slot=>!corporateSlots[slot]),
+       ...Array.from({length:count.stackbases},(_,i)=>`stackbase-${i}`),
+       ...Array.from({length:count.back},(_,i)=>`back-${i}`).filter(slot=>!corporateSlots[slot]),
+     ];
+     rollbackItems.forEach((item,index)=>{
+       const slot=prioritySlots[index];
+       if(slot)assignEndcap(slot,item[0]);
+     });
+     setStatuses(old=>{
+       const next={...old};
+       prioritySlots.slice(0,rollbackItems.length).forEach(slot=>{next[slot]="Pending"});
+       return next;
+     });
+   }else if(["front","back","both"].includes(where)){
      const event=eventPlans[activeEventWindow];
      const terms={
        "Back to School":["back to school","dorm","school"],
@@ -589,11 +604,11 @@ function DepartmentView({dept,count,adjust,assignments,prefill,assignEndcap,stor
    }else prefill(where);
    setUserChosenSlots(old=>{
      const next={...old};
-     const sides=where==="both"||where==="rollbacks"?["front","back"]:[where==="stackbases"?"stackbase":where];
+     const sides=where==="both"?["front","back"]:where==="rollbacks"?["front","stackbase","back"]:[where==="stackbases"?"stackbase":where];
      Object.keys(next).forEach(slot=>{if(sides.some(side=>slot.startsWith(`${side}-`)))delete next[slot]});
      return next;
    });
-   markAssignedPending(where==="rollbacks"?"both":where);
+   if(where!=="rollbacks")markAssignedPending(where);
  };
  const assignWithStatus=(slot,value)=>{
    assignEndcap(slot,value);
@@ -634,7 +649,7 @@ function DepartmentView({dept,count,adjust,assignments,prefill,assignEndcap,stor
      {open&&<div className="endcapSections">
        <EndcapSection title="Front endcaps" side="front" count={count.front} assignments={assignments} sellers={eventSellers} rollbackItems={rollbackItems} assignEndcap={assignWithStatus} statuses={statuses} setStatus={(slot,status)=>setStatuses(old=>({...old,[slot]:status}))} add={()=>adjust("front",1)} prefill={()=>prefillWithStatus("front")} description="Highest visibility and customer traffic" corporateSlots={corporateSlots} moveCorporate={moveCorporate} availableSlots={endcapSlots} userChosenSlots={userChosenSlots} moveFeature={moveFeature} featureSlots={allFeatureSlots.filter(slot=>!corporateSlots[slot])}/>
        <EndcapSection title="Back endcaps" side="back" count={count.back} assignments={assignments} sellers={eventSellers} rollbackItems={rollbackItems} assignEndcap={assignWithStatus} statuses={statuses} setStatus={(slot,status)=>setStatuses(old=>({...old,[slot]:status}))} add={()=>adjust("back",1)} prefill={()=>prefillWithStatus("back")} description="Destination traffic and aisle transitions" corporateSlots={corporateSlots} moveCorporate={moveCorporate} availableSlots={endcapSlots} userChosenSlots={userChosenSlots} moveFeature={moveFeature} featureSlots={allFeatureSlots.filter(slot=>!corporateSlots[slot])}/>
-       <EndcapSection title="Action-alley stackbases" side="stackbase" count={count.stackbases} assignments={assignments} sellers={stackbaseItems} rollbackItems={[]} assignEndcap={assignWithStatus} statuses={statuses} setStatus={(slot,status)=>setStatuses(old=>({...old,[slot]:status}))} add={()=>adjust("stackbases",1)} prefill={()=>prefillWithStatus("stackbases")} description="Palletized and bulky seasonal merchandise" corporateSlots={{}} moveCorporate={()=>{}} availableSlots={[]} userChosenSlots={userChosenSlots} moveFeature={moveFeature} featureSlots={allFeatureSlots.filter(slot=>!corporateSlots[slot])}/>
+       <EndcapSection title="Action-alley stackbases" side="stackbase" count={count.stackbases} assignments={assignments} sellers={stackbaseItems} rollbackItems={rollbackItems} assignEndcap={assignWithStatus} statuses={statuses} setStatus={(slot,status)=>setStatuses(old=>({...old,[slot]:status}))} add={()=>adjust("stackbases",1)} prefill={()=>prefillWithStatus("stackbases")} description="Palletized and bulky seasonal merchandise" corporateSlots={{}} moveCorporate={()=>{}} availableSlots={[]} userChosenSlots={userChosenSlots} moveFeature={moveFeature} featureSlots={allFeatureSlots.filter(slot=>!corporateSlots[slot])}/>
      </div>}
    </div>
    <div className="topSellers">
@@ -674,7 +689,7 @@ function EndcapSection({title,side,count,assignments,sellers,rollbackItems,assig
    const slot=`${side}-${i}`;
    const corporate=corporateSlots[slot];
    const value=corporate?.feature||assignments[slot]||"";
-   const isRollback=Object.values(ROLLBACK_ITEMS).flat().some(item=>item[0]===value);
+   const isRollback=[...Object.values(ROLLBACK_ITEMS).flat(),...Object.values(ROLLBACK_ADDITIONS).flat()].some(item=>item[0]===value);
    const colorClass=corporate?"corporateSlot":isRollback?"rollbackSlot":userChosenSlots[slot]?"userChosenSlot":value?"topSellerSlot":"";
    const status=corporate?"H.O. planned":(statuses[slot]||(value?"Pending":"Open"));
    const isOpen=openSlot===slot;
