@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import "./styles.css";
 import "./department-plan.css";
 import "./cycle-planner.css";
+import "./nav-dropdown.css";
 
 const DEPARTMENTS = {
   "Store Overview": { icon:"⌂", front: 34, back: 30, sales: 188420, margin: 37.2, score: 86 },
@@ -53,6 +54,7 @@ function App(){
   const [placement,setPlacement]=useState("Front endcap");
   const [selected,setSelected]=useState({});
   const [view,setView]=useState("Dashboard");
+  const [departmentMenuOpen,setDepartmentMenuOpen]=useState(false);
   const [assignments,setAssignments]=useState({});
 
   const totals=useMemo(()=>Object.values(counts).reduce((a,v)=>({front:a.front+v.front,back:a.back+v.back,stackbases:a.stackbases+v.stackbases}),{front:0,back:0,stackbases:0}),[counts]);
@@ -118,8 +120,13 @@ function App(){
   return <div className="app">
     <aside>
       <div className="brand"><span>SW</span><div><b>SWAS Planning</b><small>ENDCAP INTELLIGENCE</small></div></div>
-      <nav>{["Dashboard","Department plan","Performance","Calendar"].map((x,i)=><button key={x} className={view===x?"active":""} onClick={()=>setView(x)}><i>{["⌂","✦","↗","□"][i]}</i>{x}</button>)}</nav>
-      <div className="deptNav"><small>DEPARTMENTS</small>{Object.entries(DEPARTMENTS).map(([name,d])=><button key={name} className={dept===name?"selected":""} onClick={()=>setDept(name)}><span>{d.icon}</span>{name}<em>{name==="Store Overview"?totals.front+totals.back:counts[name].front+counts[name].back}</em></button>)}</div>
+      <nav>
+        <button className={view==="Dashboard"?"active":""} onClick={()=>{setView("Dashboard");setDept("Store Overview")}}><i>⌂</i>Dashboard</button>
+        <button className={view==="Department plan"?"active":""} aria-expanded={departmentMenuOpen} onClick={()=>{setView("Department plan");setDepartmentMenuOpen(open=>!open)}}><i>✦</i>Department plan <em className="navChevron">{departmentMenuOpen?"▴":"▾"}</em></button>
+        {departmentMenuOpen&&<div className="deptNav departmentDropdown">{Object.entries(DEPARTMENTS).filter(([name])=>name!=="Store Overview").map(([name,d])=><button key={name} className={dept===name?"selected":""} onClick={()=>{setDept(name);setView("Department plan")}}><span>{d.icon}</span>{name}<em>{counts[name].front+counts[name].back}</em></button>)}</div>}
+        <button className={view==="Performance"?"active":""} onClick={()=>setView("Performance")}><i>↗</i>Performance</button>
+        <button className={view==="Calendar"?"active":""} onClick={()=>setView("Calendar")}><i>□</i>Calendar</button>
+      </nav>
       <div className="profile"><span>TR</span><div><b>Tavion Robinson</b><small>Store leadership</small></div></div>
     </aside>
     <main>
