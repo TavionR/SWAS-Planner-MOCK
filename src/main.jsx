@@ -7,6 +7,7 @@ import "./store-lookup.css";
 import "./performance-view.css";
 import "./calendar-view.css";
 import "./store-feature-plan.css";
+import "./monthly-performance.css";
 
 const DEPARTMENTS = {
   "Store Overview": { icon:"⌂", front: 34, back: 30, sales: 188420, margin: 37.2, score: 86 },
@@ -178,7 +179,7 @@ function App(){
         <Metric label="Average gross margin" value={`${current.margin}%`} sub="+2.4 pts vs aisle average" color="amber"/>
       </section>
 
-      {dept==="Store Overview"?<StoreView setDept={setDept} storeCount={storeCount} storeScale={storeScale} scoreOffset={averageStoreScore-86}/>:<DepartmentView key={dept} dept={dept} count={counts[dept]} adjust={adjust} assignments={assignments[dept]||{}} prefill={prefill} assignEndcap={assignEndcap}/>}
+      {dept==="Store Overview"?<StoreView setDept={setDept} storeCount={storeCount} storeScale={storeScale} scoreOffset={averageStoreScore-86}/>:<DepartmentView key={dept} dept={dept} count={counts[dept]} adjust={adjust} assignments={assignments[dept]||{}} prefill={prefill} assignEndcap={assignEndcap} storeScale={storeScale}/>}
 
       {dept==="Store Overview"?<StoreFeaturePlan counts={counts} storeCount={storeCount} setDept={setDept}/>:<><div className="sectionHead"><div><span className="eyebrow">AI-RANKED OPPORTUNITIES</span><h2>Recommended {dept} endcap concepts</h2></div><span>Ranked by demand · margin · seasonality</span></div><section className="concepts">{concepts.map((x,i)=>{const isAdded=(selected[dept]||[]).includes(x[0]);return <Concept key={x[0]} item={x} rank={i+1} added={isAdded} toggle={()=>toggle(x[0],dept)} overview={false}/>})}</section></>}
 
@@ -190,6 +191,30 @@ function App(){
 }
 
 function Metric({label,value,sub,color}){return <div className={`metric ${color}`}><span>{label}</span><strong>{value}</strong><small>↗ {sub}</small></div>}
+
+function MonthlyPerformance({scope,scale=1}){
+ const [metric,setMetric]=useState("sales");
+ const [range,setRange]=useState(12);
+ const months=["Aug 25","Sep 25","Oct 25","Nov 25","Dec 25","Jan 26","Feb 26","Mar 26","Apr 26","May 26","Jun 26","Jul 26"];
+ const trend=[.78,.81,.84,.89,.96,.83,.80,.85,.91,.95,1.02,1.08];
+ const scoreShift=[-8,-7,-6,-4,-2,-5,-6,-4,-3,-2,0,2];
+ const marginShift=[-2.1,-1.8,-1.5,-.9,-.3,-1.2,-1.4,-.8,-.5,-.2,.3,.7];
+ const base=scope==="Total Store"?DEPARTMENTS["Store Overview"]:DEPARTMENTS[scope];
+ const data=months.map((month,index)=>({month,sales:Math.round(base.sales*trend[index]*scale),score:Math.max(0,Math.min(100,base.score+scoreShift[index])),margin:Number((base.margin+marginShift[index]).toFixed(1))}));
+ const visible=data.slice(-range);
+ const values=visible.map(item=>item[metric]);
+ const maximum=Math.max(...values);
+ const minimum=Math.min(...values);
+ const latest=values[values.length-1];
+ const first=values[0];
+ const change=metric==="sales"?Math.round((latest-first)/first*100):Number((latest-first).toFixed(1));
+ const format=value=>metric==="sales"?fmt(value):metric==="score"?`${Math.round(value)}/100`:`${Number(value).toFixed(1)}%`;
+ return <section className="monthlyPerformance">
+   <div className="monthlyPerformanceHead"><div><span className="eyebrow">MONTH-BY-MONTH HISTORY</span><h2>{scope} endcap performance</h2><p>Fictional results from the past year through the current month.</p></div><div className="historyFilters"><label><span>METRIC</span><select value={metric} onChange={event=>setMetric(event.target.value)}><option value="sales">Endcap sales</option><option value="score">Performance score</option><option value="margin">Gross margin</option></select></label><div><span>PERIOD</span><section>{[3,6,12].map(months=><button key={months} className={range===months?"active":""} onClick={()=>setRange(months)}>{months}M</button>)}</section></div></div></div>
+   <div className="historySummary"><span><small>Current month</small><b>{format(latest)}</b></span><span><small>{range}-month change</small><b className={change>=0?"positive":"negative"}>{change>=0?"+":""}{change}{metric==="sales"?"%":metric==="score"?" pts":" pts"}</b></span><span><small>Period average</small><b>{format(values.reduce((sum,value)=>sum+value,0)/values.length)}</b></span><p><b>AI read:</b> {change>=0?"Performance is building into the current month. Keep high-scoring features funded and protect upcoming set dates.":"Performance softened during this period. Review placement, inventory, and feature timing."}</p></div>
+   <div className="historyChart"><div className="chartScale"><span>{format(maximum)}</span><span>{format((maximum+minimum)/2)}</span><span>{format(minimum)}</span></div><div className="monthlyBars" style={{gridTemplateColumns:`repeat(${visible.length},1fr)`}}>{visible.map((item,index)=>{const value=item[metric];const height=minimum===maximum?70:25+((value-minimum)/(maximum-minimum))*70;return <div key={item.month} className="monthlyBar"><span className="barValue">{format(value)}</span><div><i style={{height:`${height}%`}} className={index===visible.length-1?"current":""}></i></div><small>{item.month}</small></div>})}</div></div>
+ </section>
+}
 
 function StoreFeaturePlan({counts,storeCount,setDept}){
  const gaps={Grocery:2,Home:1,Seasonal:0,Automotive:2,Apparel:3,Electronics:1};
@@ -225,6 +250,7 @@ function PerformanceView({stores}){
      <Metric label="Average gross margin" value={`${averageMargin}%`} sub="+2.4 pts vs aisle average" color="amber"/>
      <Metric label="Margin opportunity" value={fmt(marginOpportunity)} sub="AI-ranked opportunities" color="blue"/>
    </section>
+   <MonthlyPerformance scope="Total Store" scale={stores.reduce((sum,store)=>sum+store.factor,0)||1}/>
    <section className="performancePanels">
      <div className="performancePanel"><div className="performancePanelHead"><div><span className="eyebrow">STORE COMPARISON</span><h2>{storeCount===1?"Selected store performance":"Selected-store ranking"}</h2></div><small>Fictional 4-week results</small></div><div className="storePerformanceRows">{stores.map((store,index)=><div className="storePerformanceRow" key={store.id}><span className="storeRank">{index+1}</span><div><b>Store {store.id}</b><small>{store.name}</small></div><span><small>Sales</small><b>{fmt(188420*store.factor)}</b></span><span><small>Margin</small><b>{store.margin}%</b></span><strong>{store.score}</strong></div>)}</div></div>
      <div className="performancePanel"><div className="performancePanelHead"><div><span className="eyebrow">12-WEEK TREND</span><h2>Endcap score trend</h2></div><b className="trendUp">+8 pts</b></div><div className="trendChart">{[64,68,66,72,70,76,74,79,81,83,84,86].map((height,index)=><div key={index}><span style={{height:`${height}%`}}></span><small>{index%3===0?`W${index+1}`:""}</small></div>)}</div></div>
@@ -276,7 +302,7 @@ function StoreView({setDept,storeCount,storeScale,scoreOffset}){
  <div className="panel placement"><div className="panelHead"><div><span className="eyebrow">SPACE MIX</span><h2>Placement performance</h2></div></div><div className="donut"><div><strong>{64*storeCount}</strong><small>endcaps</small></div></div><div className="placeRow"><span><i className="front"/>Front endcaps</span><b>{34*storeCount}</b><em>$3,480 avg.</em></div><div className="placeRow"><span><i className="back"/>Back endcaps</span><b>{30*storeCount}</b><em>$2,740 avg.</em></div><div className="insight">Front placements are generating <b>27% more sales</b> per endcap.</div></div></section>
 }
 
-function DepartmentView({dept,count,adjust,assignments,prefill,assignEndcap}){
+function DepartmentView({dept,count,adjust,assignments,prefill,assignEndcap,storeScale}){
  const [open,setOpen]=useState(true);
  const sellers=TOP_SELLERS[dept]||[];
  const recommendations=CONCEPTS[dept]||[];
@@ -299,7 +325,7 @@ function DepartmentView({dept,count,adjust,assignments,prefill,assignEndcap}){
      <div className="rollbackList">{rollbackItems.map((x,i)=><div className="rollbackItem" key={x[0]}><span>{i+1}</span><div><b>{x[0]}</b><small>Was {x[1]} · Rollback {x[2]}</small></div><strong>{x[3]}</strong></div>)}</div>
      {dept==="Grocery"&&<div className="stackbaseRule"><span>▦</span><div><b>Action-alley stackbase rule</b><p>Bulky products such as bottled-water cases, charcoal, large pet food, and oversized paper goods are excluded from endcaps. Plan those as pallet stacks on stackbases in the action alley.</p></div></div>}
    </div>
- </section><CyclePlanner dept={dept} sellers={sellers}/></>
+ </section><MonthlyPerformance scope={dept} scale={storeScale}/><CyclePlanner dept={dept} sellers={sellers}/></>
 }
 
 function EndcapSection({title,side,count,assignments,recommendations,sellers,rollbackItems,assignEndcap,add,prefill,description}){
