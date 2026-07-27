@@ -5,6 +5,7 @@ import "./department-plan.css";
 import "./cycle-planner.css";
 import "./nav-dropdown.css";
 import "./store-lookup.css";
+import "./performance-view.css";
 
 const DEPARTMENTS = {
   "Store Overview": { icon:"⌂", front: 34, back: 30, sales: 188420, margin: 37.2, score: 86 },
@@ -167,8 +168,9 @@ function App(){
       <div className="profile"><span>TR</span><div><b>Tavion Robinson</b><small>Store leadership</small></div></div>
     </aside>
     <main>
-      <header><div><span className="eyebrow">{storeLabel.toUpperCase()}</span><h1>{dept==="Store Overview"?(multiStore?"Combined store endcap performance":"Total store endcap performance"):`${dept} endcap plan`}</h1><p>{dept==="Store Overview"?(multiStore?`One combined dashboard for ${storeCount} selected stores.`:"See what is live, what is working, and where the next margin opportunity is."):"Set your endcap capacity and build a department-specific seasonal plan."}</p></div><div className="headerActions"><select value={dept} onChange={e=>setDept(e.target.value)}>{Object.keys(DEPARTMENTS).map(x=><option key={x}>{x}</option>)}</select><button onClick={()=>window.print()}>Export plan ↗</button></div></header>
+      <header><div><span className="eyebrow">{storeLabel.toUpperCase()}</span><h1>{view==="Performance"?"Performance insights":dept==="Store Overview"?(multiStore?"Combined store endcap performance":"Total store endcap performance"):`${dept} endcap plan`}</h1><p>{view==="Performance"?`Track scores, sales, margin, and opportunities across ${multiStore?`${storeCount} selected stores`:"the selected store"}.`:dept==="Store Overview"?(multiStore?`One combined dashboard for ${storeCount} selected stores.`:"See what is live, what is working, and where the next margin opportunity is."):"Set your endcap capacity and build a department-specific seasonal plan."}</p></div><div className="headerActions"><select value={dept} onChange={e=>setDept(e.target.value)}>{Object.keys(DEPARTMENTS).map(x=><option key={x}>{x}</option>)}</select><button onClick={()=>window.print()}>Export plan ↗</button></div></header>
 
+      {view==="Performance"?<PerformanceView stores={activeStores}/>:<>
       <section className="statusBar"><span className="live">● {isStoreOverview?(multiStore?`LIVE ${storeCount}-STORE VIEW`:"LIVE TOTAL STORE VIEW"):`LIVE ${dept.toUpperCase()} VIEW`}</span><div><b>{scopedEndcaps}</b><small>{isStoreOverview?"All store endcaps":"Department endcaps"}</small></div><div><b>{scopedActiveStackbases}/{scopedStackbases}</b><small>Active stackbases</small></div><div><b>{scopedOpen}</b><small>Open endcaps</small></div><div><b>{scopedUtilization}%</b><small>Endcap utilization</small></div><p>{isStoreOverview?(multiStore?`${storeCount} locations combined`:"All departments combined"):`${dept} department only`} · Fictional live data</p></section>
 
       <section className="metrics">
@@ -184,12 +186,36 @@ function App(){
       <section className="concepts">{concepts.map((x,i)=>{const owner=dept==="Store Overview"?x[5]:dept;const isAdded=(selected[owner]||[]).includes(x[0]);return <Concept key={x[0]} item={x} rank={i+1} added={isAdded} toggle={()=>toggle(x[0],owner)} overview={dept==="Store Overview"}/>})}</section>
 
       <section className="action"><span>✦</span><div><small>AI NEXT BEST ACTION</small><h2>{dept==="Store Overview"?"Move two low-performing displays into higher-value concepts.":`Reserve a front endcap for “${concepts[0][0]}.”`}</h2><p>{dept==="Store Overview"?"Seasonal and Grocery have the strongest near-term demand. Replacing two displays scoring below 65 could add an estimated $8,600 in four-week sales.":`The front placement is projected to deliver 18% more sales than a back endcap. Confirm inventory and set the display this week.`}</p></div><button>Review action plan →</button></section>
+      </>}
       <footer><span>SWAS Planning · Concept prototype</span><span>Fictional store and performance data · July 2026</span></footer>
     </main>
   </div>
 }
 
 function Metric({label,value,sub,color}){return <div className={`metric ${color}`}><span>{label}</span><strong>{value}</strong><small>↗ {sub}</small></div>}
+
+function PerformanceView({stores}){
+ const storeCount=stores.length||1;
+ const totalSales=stores.reduce((sum,store)=>sum+(188420*store.factor),0);
+ const averageScore=Math.round(stores.reduce((sum,store)=>sum+store.score,0)/storeCount);
+ const averageMargin=(stores.reduce((sum,store)=>sum+store.margin,0)/storeCount).toFixed(1);
+ const marginOpportunity=stores.reduce((sum,store)=>sum+(28600*store.factor),0);
+ const departments=[["Seasonal",94,24,32900],["Grocery",91,18,47200],["Electronics",88,13,25800],["Home",84,9,36100],["Automotive",82,7,24800],["Apparel",78,3,21600]];
+ return <div className="performanceView">
+   <section className="performanceSummary">
+     <Metric label="Combined endcap sales" value={fmt(totalSales)} sub="+12.8% vs prior period" color="green"/>
+     <Metric label="Combined score" value={`${averageScore}/100`} sub={`${storeCount} store${storeCount===1?"":"s"} measured`} color="violet"/>
+     <Metric label="Average gross margin" value={`${averageMargin}%`} sub="+2.4 pts vs aisle average" color="amber"/>
+     <Metric label="Margin opportunity" value={fmt(marginOpportunity)} sub="AI-ranked opportunities" color="blue"/>
+   </section>
+   <section className="performancePanels">
+     <div className="performancePanel"><div className="performancePanelHead"><div><span className="eyebrow">STORE COMPARISON</span><h2>{storeCount===1?"Selected store performance":"Selected-store ranking"}</h2></div><small>Fictional 4-week results</small></div><div className="storePerformanceRows">{stores.map((store,index)=><div className="storePerformanceRow" key={store.id}><span className="storeRank">{index+1}</span><div><b>Store {store.id}</b><small>{store.name}</small></div><span><small>Sales</small><b>{fmt(188420*store.factor)}</b></span><span><small>Margin</small><b>{store.margin}%</b></span><strong>{store.score}</strong></div>)}</div></div>
+     <div className="performancePanel"><div className="performancePanelHead"><div><span className="eyebrow">12-WEEK TREND</span><h2>Endcap score trend</h2></div><b className="trendUp">+8 pts</b></div><div className="trendChart">{[64,68,66,72,70,76,74,79,81,83,84,86].map((height,index)=><div key={index}><span style={{height:`${height}%`}}></span><small>{index%3===0?`W${index+1}`:""}</small></div>)}</div></div>
+   </section>
+   <section className="performancePanel departmentRanking"><div className="performancePanelHead"><div><span className="eyebrow">DEPARTMENT RANKING</span><h2>Where performance is strongest</h2></div><small>Score · trend · combined sales</small></div><div className="departmentPerformanceGrid">{departments.map(item=><div key={item[0]}><span><i>{DEPARTMENTS[item[0]].icon}</i><b>{item[0]}</b></span><div className="scoreTrack"><i style={{width:`${item[1]}%`}}></i></div><strong>{item[1]}</strong><em>+{item[2]}%</em><b>{fmt(item[3]*stores.reduce((sum,store)=>sum+store.factor,0))}</b></div>)}</div></section>
+   <section className="performanceAction"><span>✦</span><div><small>AI PERFORMANCE INSIGHT</small><h2>Focus the next review on Apparel and Automotive.</h2><p>These departments have the largest gap to the top-performing areas and the clearest near-term margin opportunity.</p></div><b>{fmt(marginOpportunity*.34)} opportunity</b></section>
+ </div>
+}
 
 function StoreView({setDept,storeCount,storeScale,scoreOffset}){
  const rows=[["Seasonal","Backyard Ready",94,32900,"+24%"],["Grocery","Summer Hydration",91,47200,"+18%"],["Electronics","Travel Tech",88,25800,"+13%"],["Home","Patio Refresh",84,36100,"+9%"],["Automotive","Road Trip Ready",82,24800,"+7%"],["Apparel","Summer Essentials",78,21600,"+3%"]];
