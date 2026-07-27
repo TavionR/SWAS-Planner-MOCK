@@ -6,6 +6,7 @@ import "./cycle-planner.css";
 import "./store-lookup.css";
 import "./performance-view.css";
 import "./calendar-view.css";
+import "./store-feature-plan.css";
 
 const DEPARTMENTS = {
   "Store Overview": { icon:"⌂", front: 34, back: 30, sales: 188420, margin: 37.2, score: 86 },
@@ -179,10 +180,9 @@ function App(){
 
       {dept==="Store Overview"?<StoreView setDept={setDept} storeCount={storeCount} storeScale={storeScale} scoreOffset={averageStoreScore-86}/>:<DepartmentView key={dept} dept={dept} count={counts[dept]} adjust={adjust} assignments={assignments[dept]||{}} prefill={prefill} assignEndcap={assignEndcap}/>}
 
-      <div className="sectionHead"><div><span className="eyebrow">AI-RANKED OPPORTUNITIES</span><h2>{dept==="Store Overview"?"Recommended concepts across the store":`Recommended ${dept} endcap concepts`}</h2></div><span>Ranked by demand · margin · seasonality</span></div>
-      <section className="concepts">{concepts.map((x,i)=>{const owner=dept==="Store Overview"?x[5]:dept;const isAdded=(selected[owner]||[]).includes(x[0]);return <Concept key={x[0]} item={x} rank={i+1} added={isAdded} toggle={()=>toggle(x[0],owner)} overview={dept==="Store Overview"}/>})}</section>
+      {dept==="Store Overview"?<StoreFeaturePlan counts={counts} storeCount={storeCount} setDept={setDept}/>:<><div className="sectionHead"><div><span className="eyebrow">AI-RANKED OPPORTUNITIES</span><h2>Recommended {dept} endcap concepts</h2></div><span>Ranked by demand · margin · seasonality</span></div><section className="concepts">{concepts.map((x,i)=>{const isAdded=(selected[dept]||[]).includes(x[0]);return <Concept key={x[0]} item={x} rank={i+1} added={isAdded} toggle={()=>toggle(x[0],dept)} overview={false}/>})}</section></>}
 
-      <section className="action"><span>✦</span><div><small>AI NEXT BEST ACTION</small><h2>{dept==="Store Overview"?"Move two low-performing displays into higher-value concepts.":`Reserve a front endcap for “${concepts[0][0]}.”`}</h2><p>{dept==="Store Overview"?"Seasonal and Grocery have the strongest near-term demand. Replacing two displays scoring below 65 could add an estimated $8,600 in four-week sales.":`The front placement is projected to deliver 18% more sales than a back endcap. Confirm inventory and set the display this week.`}</p></div><button>Review action plan →</button></section>
+      <section className="action"><span>✦</span><div><small>AI NEXT BEST ACTION</small><h2>{dept==="Store Overview"?"Close the highest-priority gaps in the next 30-day feature plan.":`Reserve a front endcap for “${concepts[0][0]}.”`}</h2><p>{dept==="Store Overview"?"Grocery, Automotive, and Apparel have the nearest transitions with unassigned space. Confirm ownership, inventory, and set dates before the next feature arrivals.":`The front placement is projected to deliver 18% more sales than a back endcap. Confirm inventory and set the display this week.`}</p></div><button>Review action plan →</button></section>
       </>}
       <footer><span>SWAS Planning · Concept prototype</span><span>Fictional store and performance data · July 2026</span></footer>
     </main>
@@ -190,6 +190,26 @@ function App(){
 }
 
 function Metric({label,value,sub,color}){return <div className={`metric ${color}`}><span>{label}</span><strong>{value}</strong><small>↗ {sub}</small></div>}
+
+function StoreFeaturePlan({counts,storeCount,setDept}){
+ const gaps={Grocery:2,Home:1,Seasonal:0,Automotive:2,Apparel:3,Electronics:1};
+ const dates={Grocery:"Jul 28",Home:"Aug 11",Seasonal:"Aug 4",Automotive:"Jul 31",Apparel:"Aug 24",Electronics:"Sep 3"};
+ const readiness={Grocery:86,Home:92,Seasonal:100,Automotive:78,Apparel:67,Electronics:89};
+ const rows=Object.keys(counts).map(name=>{
+   const capacity=(counts[name].front+counts[name].back)*storeCount;
+   const open=gaps[name]*storeCount;
+   return {name,capacity,open,planned:capacity-open,next:CONCEPTS[name][0][0],date:dates[name],readiness:readiness[name]};
+ });
+ const totalCapacity=rows.reduce((sum,row)=>sum+row.capacity,0);
+ const totalPlanned=rows.reduce((sum,row)=>sum+row.planned,0);
+ const totalOpen=rows.reduce((sum,row)=>sum+row.open,0);
+ return <section className="storeFeaturePlan">
+   <div className="featurePlanHead"><div><span className="eyebrow">TOTAL STORE FEATURE PLANNING</span><h2>Endcap plan coverage by department</h2><p>See what is assigned, where gaps remain, and which feature transitions are coming next.</p></div><div className="featurePlanTotals"><span><b>{totalPlanned}/{totalCapacity}</b><small>locations planned</small></span><span className={totalOpen?"attention":""}><b>{totalOpen}</b><small>open decisions</small></span><span><b>{Math.round(totalPlanned/totalCapacity*100)}%</b><small>plan coverage</small></span></div></div>
+   <div className="featurePlanColumns"><span>Department</span><span>Plan coverage</span><span>Next feature</span><span>Next set</span><span>Readiness</span><span></span></div>
+   <div className="featurePlanRows">{rows.map(row=><button key={row.name} onClick={()=>setDept(row.name)}><span className="featureDept"><i>{DEPARTMENTS[row.name].icon}</i><b>{row.name}</b><small>{row.capacity} endcaps</small></span><span className="coverageCell"><span><i style={{width:`${row.planned/row.capacity*100}%`}}></i></span><small>{row.planned} planned · {row.open} open</small></span><span className="nextFeature"><b>{row.next}</b><small>AI-aligned seasonal set</small></span><span className="setDate"><b>{row.date}</b><small>2026</small></span><span className={`readiness ${row.readiness<80?"risk":row.readiness===100?"ready":""}`}><b>{row.readiness}%</b><small>{row.readiness===100?"Ready":row.readiness<80?"Needs action":"On track"}</small></span><span className="rowArrow">→</span></button>)}</div>
+   <div className="planningWindows"><div><span>30 DAYS</span><b>{rows.filter(row=>["Jul 28","Jul 31","Aug 4","Aug 11"].includes(row.date)).length} sets</b><small>Execution and order confirmation</small></div><div><span>60 DAYS</span><b>1 transition</b><small>Quantity and arrival planning</small></div><div><span>90 DAYS</span><b>1 forecast</b><small>Seasonal demand preparation</small></div><p><b>AI planning focus:</b> Assign Apparel’s three open locations and confirm Automotive inventory before July 31.</p></div>
+ </section>
+}
 
 function PerformanceView({stores}){
  const storeCount=stores.length||1;
