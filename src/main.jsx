@@ -65,10 +65,12 @@ const AI_EVENT_RECOMMENDATIONS = {30:"Back to School",60:"Labor Day Weekend",90:
 const EVENT_MERCHANDISE = {
   "Back to School":[
     ["Ziploc Sandwich Bags","31,840 units","$159K","$4.98 ea","Back to School","Grocery",39,["Seasonal","Grocery"]],
-    ["Five Star 1-Inch Binder","28,760 units","$172K","$5.98 ea","Back to School","Seasonal",42,["Seasonal","Home"]],
-    ["Ticonderoga Pencil 24 Pack","27,410 units","$137K","$4.98 ea","Back to School","Seasonal",45,["Seasonal","Grocery"]],
-    ["Crayola Marker 10 Pack","25,980 units","$103K","$3.97 ea","Back to School","Seasonal",43,["Seasonal","Home"]],
+    ["Five Star 1-Inch Binder","28,760 units","$172K","$5.98 ea","Back to School","Seasonal",42,["Seasonal"]],
+    ["Ticonderoga Pencil 24 Pack","27,410 units","$137K","$4.98 ea","Back to School","Seasonal",45,["Seasonal"]],
+    ["Crayola Marker 10 Pack","25,980 units","$103K","$3.97 ea","Back to School","Seasonal",43,["Seasonal"]],
     ["Rubbermaid TakeAlong Containers","21,640 units","$151K","$6.98 ea","Back to School","Home",37,["Seasonal","Grocery","Home"]],
+    ["Ozark Trail Insulated Lunch Bag","20,920 units","$209K","$9.98 ea","Back to School","Seasonal",44,["Seasonal","Home"]],
+    ["Mainstays Bento Lunch Container","20,140 units","$120K","$5.98 ea","Back to School","Home",41,["Seasonal","Home"]],
     ["Onn. USB-C Charging Cable","19,880 units","$159K","$7.98 ea","Back to School","Electronics",35,["Seasonal","Electronics"]],
   ],
   "Halloween":[
@@ -80,13 +82,13 @@ const EVENT_MERCHANDISE = {
     ["Black Plastic Tablecloth","16,840 units","$50K","$2.98 ea","Halloween","Grocery",49,["Seasonal","Grocery"]],
   ],
   "Labor Day Weekend":[
-    ["Kingsford Match Light Charcoal","24,680 units","$370K","$14.98 ea","Labor Day","Grocery",34,["Seasonal","Grocery"]],
-    ["Reynolds Wrap Heavy Duty Foil","23,420 units","$187K","$7.98 ea","Labor Day","Grocery",41,["Seasonal","Grocery","Home"]],
+    ["Kingsford Match Light Charcoal","24,680 units","$370K","$14.98 ea","Labor Day","Grocery",34,[]],
+    ["Reynolds Wrap Heavy Duty Foil","23,420 units","$187K","$7.98 ea","Labor Day","Grocery",41,["Seasonal","Grocery"]],
     ["Mainstays Disposable Tablecloth","19,640 units","$78K","$3.98 ea","Labor Day","Home",46,["Seasonal","Grocery","Home"]],
   ],
   "Football Season":[
     ["Doritos Party Size","34,880 units","$209K","$5.98 ea","Football","Grocery",38,["Seasonal","Grocery"]],
-    ["Great Value Foam Plates","28,430 units","$142K","$4.98 ea","Football","Grocery",44,["Seasonal","Grocery","Home"]],
+    ["Great Value Foam Plates","28,430 units","$142K","$4.98 ea","Football","Grocery",44,["Seasonal","Grocery"]],
     ["Onn. HDMI Cable","15,620 units","$187K","$11.98 ea","Football","Electronics",37,["Seasonal","Electronics"]],
   ],
 };
@@ -100,8 +102,8 @@ function getEventSellers(dept,event,base){
 
 const CATALOG_ITEMS = {
   "Grocery":[["Glad Sandwich Bags",4.48,41],["Great Value Aluminum Foil",5.98,38],["Hefty Party Cups",6.98,43],["Kraft Macaroni 5 Pack",5.48,32],["Skippy Peanut Butter",4.98,35],["Welch's Fruit Snacks",7.98,39],["Pringles Variety Pack",9.98,36],["Great Value Granola Bars",4.48,44],["Hershey Snack Size Assortment",12.98,34],["Folgers Coffee Pods",14.98,31],["Clorox Disinfecting Wipes",6.48,37],["Great Value Freezer Bags",5.28,42]],
-  "Home":[["Mainstays Storage Cube",12.98,43],["Better Homes Wax Warmer",17.98,46],["Mainstays Blackout Curtain",14.98,41],["Rubbermaid Food Container Set",19.98,38],["Command Picture Strips",9.98,44],["Mainstays Closet Hangers",4.98,49],["Bissell Spot Cleaner Formula",11.98,35],["Mainstays Folding Table",39.98,32],["Ozark Trail Camp Chair",14.98,37],["Scotch Packing Tape 4 Pack",12.48,42],["Mainstays Shoe Organizer",9.98,45],["Pyrex Glass Storage Set",24.98,36]],
-  "Seasonal":[["Plastic Pumpkin Pail",1.98,51],["Way to Celebrate Gift Bags",3.98,48],["Holiday Time Ornament Set",9.98,45],["Pen+Gear Composition Books",1.24,52],["Five Star Spiral Notebook",4.97,43],["Crayola Colored Pencils",3.97,47],["Ozark Trail Beach Towel",9.98,41],["Mainstays Citronella Torch",7.98,44],["Valentine Exchange Cards",2.98,55],["Easter Plastic Eggs 48 Pack",3.48,53],["Graduation Party Banner",5.98,49],["Backpack Value Set",18.98,38]],
+  "Home":[["Mainstays Storage Cube",12.98,43],["Better Homes Wax Warmer",17.98,46],["Mainstays Blackout Curtain",14.98,41],["Rubbermaid Food Container Set",19.98,38],["Command Picture Strips",9.98,44],["Mainstays Closet Hangers",4.98,49],["Bissell Spot Cleaner Formula",11.98,35],["Mainstays Folding Table",39.98,32],["Ozark Trail Camp Chair",14.98,37],["Scotch Packing Tape 4 Pack",12.48,42],["Mainstays Shoe Organizer",9.98,45],["Pyrex Glass Storage Set",24.98,36],["Mainstays Bento Lunch Container",5.98,41]],
+  "Seasonal":[["Plastic Pumpkin Pail",1.98,51],["Way to Celebrate Gift Bags",3.98,48],["Holiday Time Ornament Set",9.98,45],["Pen+Gear Composition Books",1.24,52],["Five Star Spiral Notebook",4.97,43],["Crayola Colored Pencils",3.97,47],["Ozark Trail Beach Towel",9.98,41],["Mainstays Citronella Torch",7.98,44],["Valentine Exchange Cards",2.98,55],["Easter Plastic Eggs 48 Pack",3.48,53],["Graduation Party Banner",5.98,49],["Backpack Value Set",18.98,38],["Ozark Trail Insulated Lunch Bag",9.98,44]],
   "Automotive":[["Rain-X Wiper Fluid",4.98,39],["Mobil 1 Oil 5 Quart",27.98,28],["Fram Oil Filter",9.98,37],["Armor All Cleaning Wipes",7.98,44],["Slime Tire Inflator",24.98,35],["Little Trees Air Freshener",3.98,52],["Auto Drive Floor Mats",19.98,41],["EverStart Booster Cables",16.98,36],["Meguiar's Interior Detailer",11.98,43],["BlueDEF Diesel Fluid",13.98,31],["Auto Drive Sunshade",12.98,46],["Super Tech Shop Towels",8.98,40]],
   "Apparel":[["Hanes Men's T-Shirts 6 Pack",19.98,37],["Time and Tru Leggings",12.98,48],["Athletic Works Performance Socks",9.98,44],["George Men's Belt",12.98,51],["No Boundaries Backpack",16.98,46],["Wonder Nation School Uniform Polo",8.98,43],["Time and Tru Knit Cardigan",18.98,45],["Athletic Works Hoodie",21.98,41],["No Boundaries Beanie",7.98,54],["George Dress Socks",9.98,49],["Wonder Nation Rain Jacket",17.98,42],["Time and Tru Tote Bag",14.98,50]],
   "Electronics":[["Onn. USB Wall Charger",9.98,42],["Onn. Bluetooth Mouse",12.98,39],["Onn. Wireless Keyboard",19.98,37],["Onn. HDMI Cable 6 Foot",8.98,45],["Onn. AA Batteries 24 Pack",13.98,35],["Onn. Surge Protector",16.98,41],["JLab Go Air Earbuds",24.98,33],["Onn. Phone Tripod",14.98,48],["Onn. Laptop Sleeve",12.98,46],["Onn. Screen Cleaning Kit",6.98,52],["Onn. Car Charging Kit",11.98,44],["Onn. LED Light Strip",18.98,43]],
