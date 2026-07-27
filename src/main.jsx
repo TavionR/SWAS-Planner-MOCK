@@ -20,7 +20,6 @@ const DEPARTMENTS = {
   "Home": { icon:"◇", front: 6, back: 5, sales: 36100, margin: 38.6, score: 84 },
   "Seasonal": { icon:"☀", front: 5, back: 4, sales: 32900, margin: 42.1, score: 94 },
   "Automotive": { icon:"◉", front: 4, back: 3, sales: 24800, margin: 39.4, score: 82 },
-  "Apparel": { icon:"△", front: 4, back: 5, sales: 21600, margin: 44.3, score: 78 },
   "Electronics": { icon:"□", front: 3, back: 4, sales: 25820, margin: 35.2, score: 88 },
 };
 
@@ -29,7 +28,6 @@ const CONCEPTS = {
   "Home":[["Dorm Room Reset","Storage · Lamps · Bedding",21700,36,94],["Patio Refresh","Cushions · Lanterns · Rugs",17300,42,91],["Easy Organization","Bins · Labels · Shelving",14100,39,87]],
   "Seasonal":[["Backyard Ready","Citronella · Solar lights · Fans",22900,43,97],["Pool Day","Towels · Toys · Sunscreen",18600,41,93],["Back to School","Backpacks · Bottles · Lunch kits",25300,38,91]],
   "Automotive":[["Road Trip Ready","Phone mount · Cooler · Charger",15200,38,95],["Clean Car Summer","Wash · Towels · Protectant",12100,44,90],["Emergency Ready","Jump pack · Gauge · First aid",13600,40,87]],
-  "Apparel":[["Summer Essentials","Sunglasses · Hats · Sandals",16400,47,92],["Back to Campus","Basics · Socks · Accessories",18900,45,89],["Active Weekend","Shorts · Tees · Bottles",14700,43,86]],
   "Electronics":[["Travel Tech","Power bank · Cable · Earbuds",20800,36,94],["Game Night","Controllers · Headsets · Cards",17600,34,89],["Dorm Tech","Lamp · Speaker · Power strip",19400,38,91]],
 };
 
@@ -38,7 +36,6 @@ const TOP_SELLERS = {
   "Home":[["Sterilite Storage Tote","29,840 units","$476K","$15.98 ea","Dorm"],["Mainstays Sheet Set","24,820 units","$422K","$16.98 ea","Back to school"],["Better Homes Patio Cushion","19,740 units","$394K","$19.98 ea","Summer"],["Mainstays Desk Lamp","18,620 units","$284K","$15.28 ea","Dorm"],["Rubbermaid Shelf Unit","15,680 units","$252K","$15.98 ea","Organization"],["Mainstays Laundry Hamper","14,930 units","$149K","$9.98 ea","Dorm"],["Command Hook Value Pack","13,880 units","$153K","$10.98 ea","Dorm"],["Mainstays Bath Towel Set","12,760 units","$191K","$14.98 ea","Back to school"]],
   "Seasonal":[["OFF! Deep Woods","42,680 units","$384K","$8.98 ea","Summer"],["Mainstays Solar Lights","35,640 units","$352K","$9.88 ea","Summer"],["Ozark Trail Pool Towel","28,320 units","$282K","$9.98 ea","Pool"],["Lasko Box Fan","23,460 units","$658K","$27.98 ea","Heat"],["Backpack Value Set","21,900 units","$416K","$18.98 ea","Back to school"],["Citronella Candle Trio","20,440 units","$245K","$11.98 ea","Summer"],["School Supply Bundle","19,810 units","$238K","$11.98 ea","Back to school"],["Ozark Trail Sunscreen","18,620 units","$149K","$7.98 ea","Summer"]],
   "Automotive":[["Super Tech Washer Fluid","49,620 units","$196K","$3.98 ea","Road trip"],["Armor All Protectant","33,880 units","$252K","$7.44 ea","Summer"],["EverStart Jump Pack","17,460 units","$698K","$39.98 ea","Emergency"],["Auto Drive Phone Mount","16,240 units","$292K","$17.98 ea","Road trip"],["Microfiber Towel Pack","15,720 units","$142K","$8.98 ea","Car care"],["Meguiar's Car Wash","14,860 units","$208K","$13.98 ea","Summer"],["Slime Tire Gauge","13,920 units","$97K","$6.98 ea","Road trip"],["Auto Drive USB Charger","12,740 units","$153K","$11.98 ea","Road trip"]],
-  "Apparel":[["No Boundaries Sunglasses","26,960 units","$216K","$7.98 ea","Summer"],["Athletic Works Tee","23,840 units","$238K","$9.98 ea","Summer"],["Time and Tru Sandals","21,520 units","$344K","$15.98 ea","Summer"],["Hanes Sock Pack","19,680 units","$274K","$13.98 ea","Back to school"],["George Baseball Cap","16,620 units","$166K","$9.98 ea","Summer"],["No Boundaries Crossbody","15,840 units","$253K","$15.98 ea","Back to school"],["Athletic Works Shorts","14,960 units","$179K","$11.98 ea","Summer"],["Time and Tru Basics","13,780 units","$193K","$13.98 ea","Back to school"]],
   "Electronics":[["Onn. USB-C Cable","36,820 units","$294K","$7.98 ea","Travel"],["Onn. Power Bank","23,520 units","$470K","$19.98 ea","Travel"],["JBL Wireless Earbuds","17,880 units","$716K","$39.98 ea","Back to school"],["Onn. Power Strip","16,240 units","$244K","$14.98 ea","Dorm"],["Xbox Gift Card","15,360 units","$384K","$25.00 ea","Gaming"],["Onn. Bluetooth Speaker","14,740 units","$295K","$19.98 ea","Summer"],["Onn. Wall Charger","13,920 units","$167K","$11.98 ea","Travel"],["LED Desk Lamp","12,860 units","$257K","$19.98 ea","Dorm"]],
 };
 
@@ -47,7 +44,6 @@ const TOP_SELLER_ADDITIONS = {
   "Home":[["Mainstays Storage Cube","12,280 units","$159K","$12.98 ea","Dorm"],["Command Picture Strips","11,940 units","$119K","$9.98 ea","Dorm"]],
   "Seasonal":[["Pen+Gear Composition Books","17,980 units","$22K","$1.24 ea","Back to school"],["Way to Celebrate Gift Bags","16,740 units","$67K","$3.98 ea","Holiday"]],
   "Automotive":[["Rain-X Wiper Fluid","11,980 units","$60K","$4.98 ea","Winter"],["Little Trees Air Freshener","11,420 units","$45K","$3.98 ea","Road trip"]],
-  "Apparel":[["Wonder Nation School Uniform Polo","12,940 units","$116K","$8.98 ea","Back to school"],["No Boundaries Backpack","11,860 units","$201K","$16.98 ea","Back to school"]],
   "Electronics":[["Onn. Bluetooth Mouse","11,920 units","$155K","$12.98 ea","Back to school"],["Onn. Surge Protector","11,240 units","$191K","$16.98 ea","Dorm"]],
 };
 
@@ -56,13 +52,40 @@ const DEPARTMENT_LETTERS = {
   "Home":"H",
   "Seasonal":"L",
   "Automotive":"I",
-  "Apparel":"C",
   "Electronics":"E",
 };
 
+const NEW_DEPARTMENT_DATA = {
+  "Lawn & Garden":{icon:"♣",letter:"K",front:4,back:4,stackbases:4,bunkers:0,sales:28700,margin:39.8,themes:["Spring Lawn Reset","Patio Garden","Outdoor Care"],items:[["Expert Gardener Potting Mix",8.98,"Spring"],["Scotts Grass Seed",24.98,"Spring"],["Roundup Weed Killer",19.98,"Spring"],["Expert Gardener Hose Nozzle",12.98,"Summer"],["Hyper Tough Garden Gloves",7.98,"Spring"],["Miracle-Gro Plant Food",11.98,"Spring"],["Mainstays Solar Path Light",4.98,"Summer"],["Fiskars Hand Pruner",13.98,"Spring"],["Expert Gardener Watering Can",9.98,"Spring"],["Citronella Patio Candle",8.98,"Summer"]]},
+  "Health & Beauty":{icon:"♥",letter:"D",front:4,back:4,stackbases:2,bunkers:0,sales:34400,margin:43.6,themes:["Daily Care Essentials","Healthy Skin","Family Oral Care"],items:[["Dove Body Wash",9.97,"Daily care"],["Pantene Shampoo",6.97,"Daily care"],["Degree Deodorant",5.97,"Daily care"],["Crest Toothpaste Twin Pack",7.97,"Daily care"],["CeraVe Daily Lotion",14.97,"Skin care"],["Gillette Razor Pack",12.97,"Daily care"],["Neutrogena Sunscreen",10.97,"Summer"],["Cetaphil Face Cleanser",11.97,"Skin care"],["Equate Cotton Rounds",3.97,"Daily care"],["Listerine Mouthwash",7.47,"Daily care"]]},
+  "Pharmacy":{icon:"✚",letter:"R",front:3,back:3,stackbases:1,bunkers:0,sales:30200,margin:36.8,themes:["Cold & Allergy Ready","First Aid Center","Travel Wellness"],items:[["Equate Ibuprofen",6.98,"Wellness"],["Equate Allergy Relief",8.98,"Allergy"],["DayQuil Cold & Flu",13.98,"Cold season"],["Band-Aid Variety Pack",7.98,"First aid"],["Tums Antacid",6.48,"Wellness"],["Equate First Aid Kit",14.98,"First aid"],["Halls Cough Drops",4.48,"Cold season"],["Vicks Digital Thermometer",9.98,"Cold season"],["Refresh Eye Drops",11.98,"Wellness"],["Purell Hand Sanitizer",4.98,"Cold season"]]},
+  "Toys":{icon:"★",letter:"T",front:4,back:4,stackbases:3,bunkers:0,sales:31800,margin:41.5,themes:["Birthday Favorites","Outdoor Play","Family Game Night"],items:[["Hot Wheels 5 Pack",6.47,"Birthday"],["LEGO Classic Box",24.97,"Holiday"],["Barbie Fashion Doll",12.97,"Birthday"],["Nerf Elite Blaster",19.97,"Holiday"],["Play-Doh 10 Pack",8.97,"Back to school"],["Squishmallows Plush",14.97,"Holiday"],["Monopoly Board Game",19.97,"Family night"],["Fubbles Bubble Jug",5.97,"Summer"],["Crayola Sidewalk Chalk",4.97,"Summer"],["Pokémon Trading Cards",5.47,"Holiday"]]},
+  "Stationery":{icon:"✎",letter:"M",front:4,back:4,stackbases:2,bunkers:0,sales:26900,margin:44.2,themes:["Back to School Core","Office Reset","Creative Classroom"],items:[["Pen+Gear Composition Book",1.24,"Back to school"],["Paper Mate InkJoy Pens",4.97,"Back to school"],["Ticonderoga Pencils",5.97,"Back to school"],["Five Star Binder",6.97,"Back to school"],["Crayola Markers",3.97,"Back to school"],["HP Copy Paper",6.98,"Office"],["Pen+Gear Pocket Folders",1.00,"Back to school"],["Elmer's Glue Sticks",4.47,"Back to school"],["Texas Instruments Calculator",12.97,"Back to school"],["Blue Sky Planner",9.97,"New year"]]},
+  "Pets":{icon:"●",letter:"P",front:4,back:4,stackbases:4,bunkers:0,sales:33700,margin:37.9,themes:["Pet Stock-Up","New Pet Basics","Seasonal Pet Care"],items:[["Purina Dog Chow",29.98,"Stock-up"],["Fresh Step Cat Litter",17.98,"Stock-up"],["Milk-Bone Dog Treats",9.98,"Daily care"],["K9 Advantix Flea Care",24.98,"Summer"],["Vibrant Life Dog Toy",6.98,"Daily care"],["Purina Cat Chow",18.98,"Stock-up"],["Vibrant Life Training Pads",14.98,"New pet"],["Hartz Pet Shampoo",5.98,"Summer"],["Vibrant Life Pet Bowl",4.98,"New pet"],["Earth Rated Waste Bags",8.98,"Daily care"]]},
+  "Paper":{icon:"▤",letter:"Q",front:4,back:4,stackbases:4,bunkers:0,sales:29100,margin:32.8,themes:["Household Stock-Up","Party Paper","Everyday Essentials"],items:[["Bounty Paper Towels",24.98,"Stock-up"],["Charmin Toilet Paper",24.98,"Stock-up"],["Great Value Paper Plates",7.18,"Cookout"],["Hefty Party Cups",6.98,"Party"],["Vanity Fair Napkins",5.98,"Party"],["Kleenex Facial Tissue",6.98,"Cold season"],["Dixie Bowls",5.98,"Party"],["Great Value Plastic Cutlery",4.98,"Cookout"],["Puffs Plus Lotion",7.98,"Cold season"],["Great Value Storage Bags",5.28,"Stock-up"]]},
+  "Chemicals":{icon:"◆",letter:"C",front:4,back:4,stackbases:4,bunkers:0,sales:32600,margin:34.6,themes:["Laundry Event","Whole Home Clean","Kitchen Clean-Up"],items:[["Tide Laundry Detergent",15.98,"Stock-up"],["Clorox Bleach",5.98,"Cleaning"],["Dawn Dish Soap",5.48,"Cleaning"],["Lysol All Purpose Cleaner",4.98,"Cleaning"],["Clorox Disinfecting Wipes",6.48,"Cold season"],["Downy Fabric Softener",9.98,"Laundry"],["Cascade Dishwasher Pods",14.98,"Stock-up"],["Windex Glass Cleaner",4.48,"Spring clean"],["Scotch-Brite Sponges",5.98,"Cleaning"],["Febreze Air Freshener",5.48,"Spring clean"]]},
+  "Infants":{icon:"◇",letter:"B",front:4,back:4,stackbases:3,bunkers:0,sales:34800,margin:35.7,themes:["Baby Stock-Up","Feeding Time","Bath & Care"],items:[["Pampers Diapers",27.98,"Stock-up"],["Huggies Baby Wipes",17.98,"Stock-up"],["Similac Formula",34.98,"Stock-up"],["Gerber Baby Food",1.48,"Feeding"],["Johnson's Baby Lotion",6.98,"Daily care"],["Aveeno Baby Wash",7.98,"Daily care"],["Dr. Brown's Bottles",14.98,"Feeding"],["Munchkin Sippy Cups",9.98,"Feeding"],["Desitin Rash Cream",8.98,"Daily care"],["Pull-Ups Training Pants",24.98,"Stock-up"]]},
+  "Fabrics & Crafts":{icon:"✂",letter:"F",front:4,back:4,stackbases:2,bunkers:0,sales:24100,margin:48.3,themes:["Craft Room Reset","Handmade Gifts","School Projects"],items:[["Mainstays Acrylic Yarn",3.97,"Crafting"],["Cricut Permanent Vinyl",8.97,"Crafting"],["Apple Barrel Acrylic Paint",1.47,"School project"],["Artist Canvas 2 Pack",7.97,"Crafting"],["AdTech Mini Glue Gun",8.97,"School project"],["Waverly Cotton Fabric",4.97,"Crafting"],["Singer Sewing Needles",3.97,"Crafting"],["Cousin DIY Bead Kit",9.97,"Holiday"],["Coats & Clark Thread",2.97,"Crafting"],["Sharpie Creative Markers",9.97,"School project"]]},
+  "Frozen":{icon:"❄",letter:"Z",front:2,back:0,stackbases:0,bunkers:4,sales:38200,margin:29.8,themes:["Easy Family Meals","Frozen Breakfast","Treat Night"],items:[["Great Value Frozen Pizza",6.98,"Family meal"],["Birds Eye Frozen Vegetables",3.48,"Family meal"],["Great Value Ice Cream",5.48,"Summer"],["Eggo Waffles",5.98,"Breakfast"],["Ore-Ida French Fries",4.98,"Family meal"],["Healthy Choice Entrée",4.48,"Family meal"],["Tyson Frozen Chicken",9.98,"Family meal"],["Great Value Frozen Fruit",8.98,"Breakfast"],["El Monterey Burritos",5.98,"Family meal"],["New York Garlic Bread",4.48,"Family meal"]]},
+  "Dairy":{icon:"◉",letter:"Y",front:0,back:0,stackbases:0,bunkers:4,sales:41500,margin:25.6,themes:["Breakfast Bunker","Cheese & Snacking","Baking Essentials"],items:[["Great Value Milk Gallon",3.48,"Everyday"],["Great Value Large Eggs",3.98,"Breakfast"],["Land O Lakes Butter",5.48,"Baking"],["Chobani Greek Yogurt",5.98,"Breakfast"],["Sargento Shredded Cheese",4.48,"Everyday"],["Coffee mate Creamer",5.98,"Breakfast"],["Pillsbury Biscuits",3.48,"Holiday"],["Daisy Sour Cream",2.98,"Everyday"],["Simply Orange Juice",4.98,"Breakfast"],["Great Value Cottage Cheese",3.48,"Everyday"]]},
+  "Meats":{icon:"▲",letter:"V",front:0,back:0,stackbases:0,bunkers:4,sales:46800,margin:23.9,themes:["Grill Bunker","Weeknight Protein","Breakfast Meats"],items:[["Fresh Ground Beef",5.48,"Grilling"],["Boneless Chicken Breast",3.98,"Everyday"],["Great Value Bacon",5.98,"Breakfast"],["Jimmy Dean Sausage",4.98,"Breakfast"],["Fresh Pork Chops",4.48,"Everyday"],["Smithfield Pork Ribs",12.98,"Grilling"],["Fresh Sirloin Steak",10.98,"Grilling"],["Butterball Ground Turkey",4.98,"Everyday"],["Ball Park Hot Dogs",4.48,"Grilling"],["Chuck Roast",14.98,"Holiday"]]},
+};
+
+const makeTopItems=items=>items.map(([name,price,tag],index)=>{
+  const units=Math.max(9200,28600-index*1850);
+  return [name,`${units.toLocaleString("en-US")} units`,`$${Math.round(units*price/1000)}K`,`$${price.toFixed(2)} ea`,tag];
+});
+Object.entries(NEW_DEPARTMENT_DATA).forEach(([name,data])=>{
+  DEPARTMENTS[name]={icon:data.icon,front:data.front,back:data.back,stackbases:data.stackbases,bunkers:data.bunkers,sales:data.sales,margin:data.margin,score:0};
+  DEPARTMENT_LETTERS[name]=data.letter;
+  CONCEPTS[name]=data.themes.map((theme,index)=>[theme,data.items.slice(index*3,index*3+3).map(item=>item[0]).join(" · "),Math.round(data.sales*(.62-index*.08)),Math.round(data.margin+index*2),96-index*4]);
+  TOP_SELLERS[name]=makeTopItems(data.items);
+  TOP_SELLER_ADDITIONS[name]=[];
+});
+
 const HO_FEATURES=Object.fromEntries(Object.keys(DEPARTMENT_LETTERS).map(name=>[
   name,
-  {"front-0":{feature:`${name} H.O. seasonal feature`,program:"Home Office SWAS"}},
+  {[DEPARTMENTS[name].front>0?"front-0":"bunker-0"]:{feature:`${name} H.O. seasonal feature`,program:"Home Office SWAS"}},
 ]));
 const plannedEndcapCount=(name,departmentAssignments={})=>new Set([
   ...Object.keys(HO_FEATURES[name]||{}),
@@ -76,9 +99,9 @@ const EMPTY_EVENT_PLANS = {30:"",60:"",90:""};
 const EVENT_MERCHANDISE = {
   "Back to School":[
     ["Ziploc Sandwich Bags","31,840 units","$159K","$4.98 ea","Back to School","Grocery",39,["Seasonal","Grocery"]],
-    ["Five Star 1-Inch Binder","28,760 units","$172K","$5.98 ea","Back to School","Seasonal",42,["Seasonal"]],
-    ["Ticonderoga Pencil 24 Pack","27,410 units","$137K","$4.98 ea","Back to School","Seasonal",45,["Seasonal"]],
-    ["Crayola Marker 10 Pack","25,980 units","$103K","$3.97 ea","Back to School","Seasonal",43,["Seasonal"]],
+    ["Five Star 1-Inch Binder","28,760 units","$172K","$5.98 ea","Back to School","Stationery",42,["Stationery","Seasonal"]],
+    ["Ticonderoga Pencil 24 Pack","27,410 units","$137K","$4.98 ea","Back to School","Stationery",45,["Stationery","Seasonal"]],
+    ["Crayola Marker 10 Pack","25,980 units","$103K","$3.97 ea","Back to School","Stationery",43,["Stationery","Seasonal"]],
     ["Rubbermaid TakeAlong Containers","21,640 units","$151K","$6.98 ea","Back to School","Home",37,["Seasonal","Grocery","Home"]],
     ["Ozark Trail Insulated Lunch Bag","20,920 units","$209K","$9.98 ea","Back to School","Seasonal",44,["Seasonal","Home"]],
     ["Mainstays Bento Lunch Container","20,140 units","$120K","$5.98 ea","Back to School","Home",41,["Seasonal","Home"]],
@@ -88,7 +111,7 @@ const EVENT_MERCHANDISE = {
     ["Plastic Pumpkin Pail","46,820 units","$93K","$1.98 ea","Halloween","Seasonal",51,["Seasonal"]],
     ["Fun Size Candy Variety Bag","39,760 units","$397K","$9.98 ea","Halloween","Grocery",38,["Seasonal","Grocery"]],
     ["LED Orange String Lights","22,480 units","$270K","$11.98 ea","Halloween","Home",44,["Seasonal","Home"]],
-    ["Halloween Face Paint Kit","18,930 units","$151K","$7.98 ea","Halloween","Apparel",47,["Seasonal","Apparel"]],
+    ["Halloween Face Paint Kit","18,930 units","$151K","$7.98 ea","Halloween","Health & Beauty",47,["Seasonal","Health & Beauty"]],
     ["Onn. AA Battery 12 Pack","17,620 units","$176K","$9.98 ea","Halloween","Electronics",36,["Seasonal","Electronics"]],
     ["Black Plastic Tablecloth","16,840 units","$50K","$2.98 ea","Halloween","Grocery",49,["Seasonal","Grocery"]],
   ],
@@ -117,9 +140,11 @@ const CATALOG_ITEMS = {
   "Home":[["Mainstays Storage Cube",12.98,43],["Better Homes Wax Warmer",17.98,46],["Mainstays Blackout Curtain",14.98,41],["Rubbermaid Food Container Set",19.98,38],["Command Picture Strips",9.98,44],["Mainstays Closet Hangers",4.98,49],["Bissell Spot Cleaner Formula",11.98,35],["Mainstays Folding Table",39.98,32],["Ozark Trail Camp Chair",14.98,37],["Scotch Packing Tape 4 Pack",12.48,42],["Mainstays Shoe Organizer",9.98,45],["Pyrex Glass Storage Set",24.98,36],["Mainstays Bento Lunch Container",5.98,41]],
   "Seasonal":[["Plastic Pumpkin Pail",1.98,51],["Way to Celebrate Gift Bags",3.98,48],["Holiday Time Ornament Set",9.98,45],["Pen+Gear Composition Books",1.24,52],["Five Star Spiral Notebook",4.97,43],["Crayola Colored Pencils",3.97,47],["Ozark Trail Beach Towel",9.98,41],["Mainstays Citronella Torch",7.98,44],["Valentine Exchange Cards",2.98,55],["Easter Plastic Eggs 48 Pack",3.48,53],["Graduation Party Banner",5.98,49],["Backpack Value Set",18.98,38],["Ozark Trail Insulated Lunch Bag",9.98,44]],
   "Automotive":[["Rain-X Wiper Fluid",4.98,39],["Mobil 1 Oil 5 Quart",27.98,28],["Fram Oil Filter",9.98,37],["Armor All Cleaning Wipes",7.98,44],["Slime Tire Inflator",24.98,35],["Little Trees Air Freshener",3.98,52],["Auto Drive Floor Mats",19.98,41],["EverStart Booster Cables",16.98,36],["Meguiar's Interior Detailer",11.98,43],["BlueDEF Diesel Fluid",13.98,31],["Auto Drive Sunshade",12.98,46],["Super Tech Shop Towels",8.98,40]],
-  "Apparel":[["Hanes Men's T-Shirts 6 Pack",19.98,37],["Time and Tru Leggings",12.98,48],["Athletic Works Performance Socks",9.98,44],["George Men's Belt",12.98,51],["No Boundaries Backpack",16.98,46],["Wonder Nation School Uniform Polo",8.98,43],["Time and Tru Knit Cardigan",18.98,45],["Athletic Works Hoodie",21.98,41],["No Boundaries Beanie",7.98,54],["George Dress Socks",9.98,49],["Wonder Nation Rain Jacket",17.98,42],["Time and Tru Tote Bag",14.98,50]],
   "Electronics":[["Onn. USB Wall Charger",9.98,42],["Onn. Bluetooth Mouse",12.98,39],["Onn. Wireless Keyboard",19.98,37],["Onn. HDMI Cable 6 Foot",8.98,45],["Onn. AA Batteries 24 Pack",13.98,35],["Onn. Surge Protector",16.98,41],["JLab Go Air Earbuds",24.98,33],["Onn. Phone Tripod",14.98,48],["Onn. Laptop Sleeve",12.98,46],["Onn. Screen Cleaning Kit",6.98,52],["Onn. Car Charging Kit",11.98,44],["Onn. LED Light Strip",18.98,43]],
 };
+Object.entries(NEW_DEPARTMENT_DATA).forEach(([name,data])=>{
+  CATALOG_ITEMS[name]=data.items.map(([item,retail],index)=>[item,retail,Math.max(24,Math.round(data.margin+(index%5)-2))]);
+});
 const STORE_CATALOG=Object.entries(CATALOG_ITEMS).flatMap(([department,items],departmentIndex)=>items.map(([name,retail,margin],index)=>{
   const cost=Number((retail*(1-margin/100)).toFixed(2));
   return {name,department,retail,cost,margin,upc:`078742${String(departmentIndex+1).padStart(2,"0")}${String(index+1).padStart(4,"0")}`,itemNumber:`${departmentIndex+1}${String(42800+index*137).padStart(5,"0")}`};
@@ -143,7 +168,6 @@ const ROLLBACK_ITEMS = {
   "Home":[["Mainstays Sheet Set","$16.98","$14.98","12% off"],["Sterilite Drawer Cart","$24.98","$22.98","8% off"],["Mainstays Bath Towel Set","$14.98","$13.48","10% off"],["Better Homes Table Lamp","$29.98","$26.98","10% off"]],
   "Seasonal":[["Mainstays Solar Lights","$9.88","$8.88","10% off"],["Ozark Trail Pool Towel","$9.98","$8.98","10% off"],["OFF! Deep Woods Twin Pack","$13.98","$12.48","11% off"],["Backpack Value Set","$18.98","$16.98","11% off"]],
   "Automotive":[["Armor All Protectant","$7.44","$6.88","8% off"],["Auto Drive Phone Mount","$17.98","$15.98","11% off"],["Meguiar's Car Wash","$13.98","$12.48","11% off"],["Auto Drive USB Charger","$11.98","$10.98","8% off"]],
-  "Apparel":[["Athletic Works Tee","$9.98","$8.98","10% off"],["Time and Tru Sandals","$15.98","$14.48","9% off"],["Hanes Sock Pack","$13.98","$12.48","11% off"],["No Boundaries Crossbody","$15.98","$14.98","6% off"]],
   "Electronics":[["Onn. Power Bank","$19.98","$17.98","10% off"],["Onn. Bluetooth Speaker","$19.98","$17.48","13% off"],["Onn. Power Strip","$14.98","$13.48","10% off"],["Onn. Wall Charger","$11.98","$10.98","8% off"]],
 };
 
@@ -152,9 +176,13 @@ const ROLLBACK_ADDITIONS = {
   "Home":[["Mainstays Storage Cube","$12.98","$11.48","12% off"]],
   "Seasonal":[["Way to Celebrate Gift Bags","$3.98","$3.48","13% off"]],
   "Automotive":[["Rain-X Wiper Fluid","$4.98","$4.48","10% off"]],
-  "Apparel":[["Wonder Nation School Uniform Polo","$8.98","$7.98","11% off"]],
   "Electronics":[["Onn. Bluetooth Mouse","$12.98","$11.48","12% off"]],
 };
+Object.entries(NEW_DEPARTMENT_DATA).forEach(([name,data])=>{
+  const rollbacks=data.items.slice(0,5).map(([item,retail])=>[item,`$${retail.toFixed(2)}`,`$${(retail*.9).toFixed(2)}`,"10% off"]);
+  ROLLBACK_ITEMS[name]=rollbacks.slice(0,4);
+  ROLLBACK_ADDITIONS[name]=rollbacks.slice(4);
+});
 
 const fmt = n => new Intl.NumberFormat("en-US",{style:"currency",currency:"USD",maximumFractionDigits:0}).format(n);
 
@@ -176,16 +204,16 @@ function useDemoSavedState(key,initialValue){
 
 function App(){
   const [dept,setDept]=useState("Store Overview");
-  const [counts,setCounts]=useDemoSavedState("swas-capacity-v1",()=>Object.fromEntries(Object.keys(DEPARTMENTS).filter(k=>k!=="Store Overview").map(k=>[k,{front:4,back:4,stackbases:4}])));
+  const [counts,setCounts]=useDemoSavedState("swas-capacity-v2",()=>Object.fromEntries(Object.entries(DEPARTMENTS).filter(([name])=>name!=="Store Overview").map(([name,data])=>[name,{front:data.front,back:data.back,stackbases:data.stackbases??4,bunkers:data.bunkers??0}])));
   const [placement,setPlacement]=useState("Front endcap");
-  const [selected,setSelected]=useDemoSavedState("swas-concepts-v1",{});
+  const [selected,setSelected]=useDemoSavedState("swas-concepts-v2",{});
   const [view,setView]=useState("Dashboard");
   const [actionPlanOpen,setActionPlanOpen]=useState(false);
   const [actionAccepted,setActionAccepted]=useState(false);
   const [storeMenuOpen,setStoreMenuOpen]=useState(false);
   const [selectedStores,setSelectedStores]=useDemoSavedState("swas-stores-v1",["2487"]);
   const [draftStores,setDraftStores]=useState(["2487"]);
-  const [assignments,setAssignments]=useDemoSavedState("swas-assignments-v1",{});
+  const [assignments,setAssignments]=useDemoSavedState("swas-assignments-v2",{});
 
   const activeStores=STORES.filter(store=>selectedStores.includes(store.id));
   const storeCount=activeStores.length||1;
@@ -194,12 +222,12 @@ function App(){
   const averageStoreScore=Math.round(activeStores.reduce((sum,store)=>sum+store.score,0)/storeCount);
   const averageStoreMargin=activeStores.reduce((sum,store)=>sum+store.margin,0)/storeCount;
   const storeLabel=multiStore?`${storeCount} stores selected`:`Store ${activeStores[0]?.id||"2487"} · ${activeStores[0]?.name||"Lakeview"}`;
-  const totals=useMemo(()=>Object.values(counts).reduce((a,v)=>({front:a.front+v.front,back:a.back+v.back,stackbases:a.stackbases+v.stackbases}),{front:0,back:0,stackbases:0}),[counts]);
+  const totals=useMemo(()=>Object.values(counts).reduce((a,v)=>({front:a.front+v.front,back:a.back+v.back,stackbases:a.stackbases+v.stackbases,bunkers:a.bunkers+v.bunkers}),{front:0,back:0,stackbases:0,bunkers:0}),[counts]);
   const baseCurrent=dept==="Store Overview"?{...DEPARTMENTS[dept],...totals}:DEPARTMENTS[dept];
   const concepts=CONCEPTS[dept]||Object.entries(CONCEPTS).flatMap(([d,arr])=>arr.slice(0,1).map(x=>[...x,d])).slice(0,4);
   const chosen=selected[dept]||[];
   const isStoreOverview=dept==="Store Overview";
-  const scopedEndcaps=isStoreOverview?(totals.front+totals.back)*storeCount:counts[dept].front+counts[dept].back;
+  const scopedEndcaps=isStoreOverview?(totals.front+totals.back+totals.bunkers)*storeCount:counts[dept].front+counts[dept].back+counts[dept].bunkers;
   const scopedActiveEndcaps=isStoreOverview
     ? Object.keys(counts).reduce((sum,name)=>sum+plannedEndcapCount(name,assignments[name]),0)*storeCount
     : plannedEndcapCount(dept,assignments[dept]);
@@ -207,6 +235,10 @@ function App(){
   const scopedActiveStackbases=isStoreOverview
     ? Object.values(assignments).reduce((sum,departmentAssignments)=>sum+Object.entries(departmentAssignments||{}).filter(([slot,value])=>slot.startsWith("stackbase-")&&value).length,0)*storeCount
     : Object.entries(assignments[dept]||{}).filter(([slot,value])=>slot.startsWith("stackbase-")&&value).length;
+  const scopedBunkers=isStoreOverview?totals.bunkers*storeCount:counts[dept].bunkers;
+  const scopedActiveBunkers=isStoreOverview
+    ? Object.values(assignments).reduce((sum,departmentAssignments)=>sum+Object.entries(departmentAssignments||{}).filter(([slot,value])=>slot.startsWith("bunker-")&&value).length,0)*storeCount+Object.values(HO_FEATURES).filter(items=>items["bunker-0"]).length*storeCount
+    : Object.entries(assignments[dept]||{}).filter(([slot,value])=>slot.startsWith("bunker-")&&value).length+(HO_FEATURES[dept]?.["bunker-0"]?1:0);
   const scopedOpen=Math.max(0,scopedEndcaps-scopedActiveEndcaps);
   const scopedUtilization=scopedEndcaps?Math.round((scopedActiveEndcaps/scopedEndcaps)*100):0;
   const fullOpportunity=concepts.reduce((a,x)=>a+x[2]*x[3]/100,0)*storeScale;
@@ -223,11 +255,12 @@ function App(){
       const fillOpen=(side,total,offset)=>{
         for(let i=0;i<total;i++){
           const slot=`${side}-${i}`;
-          if(!next[slot])next[slot]=sellers[(i+offset)%sellers.length]?.[0]||"Open";
+          if(!next[slot]&&!HO_FEATURES[targetDept]?.[slot])next[slot]=sellers[(i+offset)%sellers.length]?.[0]||"Open";
         }
       };
       fillOpen("front",capacity.front,0);
       fillOpen("back",capacity.back,Math.ceil(sellers.length/2));
+      fillOpen("bunker",capacity.bunkers,0);
       return {...old,[targetDept]:next};
     });
   };
@@ -287,12 +320,12 @@ function App(){
       <header><div><span className="eyebrow">{storeLabel.toUpperCase()}</span><h1>{view==="Performance"?"Performance insights":view==="Calendar"?"SWAS planning calendar":dept==="Store Overview"?(multiStore?"Combined store endcap performance":"Total store endcap performance"):`${dept} endcap plan`}</h1><p>{view==="Performance"?`Track scores, sales, margin, and opportunities across ${multiStore?`${storeCount} selected stores`:"the selected store"}.`:view==="Calendar"?`Coordinate set dates, end dates, markdowns, and feature arrivals across ${multiStore?`${storeCount} selected stores`:"the selected store"}.`:dept==="Store Overview"?(multiStore?`One combined dashboard for ${storeCount} selected stores.`:"See what is live, what is working, and where the next margin opportunity is."):"Set your endcap capacity and build a department-specific seasonal plan."}</p></div><div className="headerActions"><span className="saveStatus">{["localhost","127.0.0.1","0.0.0.0"].includes(window.location.hostname)?"✓ Saved on this device":"◷ Temporary demo session"}</span><select aria-label="Choose department plan" value={dept} onChange={e=>{setDept(e.target.value);setView("Dashboard")}}>{Object.keys(DEPARTMENTS).map(x=><option key={x}>{x}</option>)}</select><button onClick={()=>window.print()}>Export plan ↗</button></div></header>
 
       {view==="Performance"?<PerformanceView stores={activeStores} assignments={assignments} counts={counts}/>:view==="Calendar"?<CalendarView stores={activeStores}/>:<>
-      <section className="statusBar"><span className="live">● {isStoreOverview?(multiStore?`LIVE ${storeCount}-STORE VIEW`:"LIVE TOTAL STORE VIEW"):`LIVE ${dept.toUpperCase()} VIEW`}</span><div><b>{isStoreOverview?`${scopedActiveEndcaps}/${scopedEndcaps}`:scopedEndcaps}</b><small>{isStoreOverview?"Active endcaps":"Department endcaps"}</small></div><div><b>{scopedActiveStackbases}/{scopedStackbases}</b><small>Active stackbases</small></div><div><b>{scopedOpen}</b><small>Inactive endcaps</small></div><div><b>{scopedUtilization}%</b><small>Endcap utilization</small></div><p>{isStoreOverview?(multiStore?`${storeCount} locations combined`:"All departments combined"):`${dept} department only`} · Fictional live data</p></section>
+      <section className="statusBar"><span className="live">● {isStoreOverview?(multiStore?`LIVE ${storeCount}-STORE VIEW`:"LIVE TOTAL STORE VIEW"):`LIVE ${dept.toUpperCase()} VIEW`}</span><div><b>{isStoreOverview?`${scopedActiveEndcaps}/${scopedEndcaps}`:scopedEndcaps}</b><small>{isStoreOverview?"Active feature locations":"Department feature locations"}</small></div><div><b>{scopedActiveStackbases}/{scopedStackbases}</b><small>Active stackbases</small></div><div><b>{scopedActiveBunkers}/{scopedBunkers}</b><small>Active bunker sections</small></div><div><b>{scopedOpen}</b><small>Open feature locations</small></div><div><b>{scopedUtilization}%</b><small>Plan utilization</small></div><p>{isStoreOverview?(multiStore?`${storeCount} locations combined`:"All departments combined"):`${dept} department only`} · Fictional live data</p></section>
 
       <section className="metrics">
         <Metric label="Planned endcap sales · 4 weeks" value={fmt(current.sales)} sub={scopedActiveEndcaps?"based on assigned features":"add a feature to begin"} color="green"/>
         <Metric label="Margin opportunity captured" value={fmt(opportunity)} sub={`${scopedUtilization}% of planning opportunity`} color="blue"/>
-        <Metric label="Planning score" value={`${current.score}/100`} sub={scopedActiveEndcaps?`${scopedActiveEndcaps} endcap${scopedActiveEndcaps===1?"":"s"} assigned`:"no endcaps assigned"} color="violet"/>
+        <Metric label="Planning score" value={`${current.score}/100`} sub={scopedActiveEndcaps?`${scopedActiveEndcaps} feature location${scopedActiveEndcaps===1?"":"s"} assigned`:"no feature locations assigned"} color="violet"/>
         <Metric label="Planned gross margin" value={`${current.margin}%`} sub={scopedActiveEndcaps?"from assigned feature mix":"add a feature to begin"} color="amber"/>
       </section>
 
@@ -325,7 +358,7 @@ function ActionPlan({dept,concept,accepted,close,accept}){
  ];
  return <div className="actionPlanOverlay" role="presentation" onMouseDown={event=>{if(event.target===event.currentTarget)close()}}><section className="actionPlanModal" role="dialog" aria-modal="true" aria-labelledby="action-plan-title">
    <div className="actionPlanTop"><span>✦</span><div><small>{overview?"AI LEADERSHIP HELP GUIDE":"AI-GENERATED ACTION PLAN"}</small><h2 id="action-plan-title">{overview?"How to review departments falling behind":`${dept} feature action plan`}</h2><p>{overview?"This overview provides review guidance only. Open the department page to create and accept its action plan.":`Move “${concept}” from recommendation to a confirmed endcap set.`}</p></div><button aria-label="Close action plan" onClick={close}>×</button></div>
-   <div className="actionPlanImpact"><div><small>{overview?"START WITH":"OWNER"}</small><b>{overview?"Apparel + Automotive":`${dept} team lead`}</b></div><div><small>{overview?"REVIEW WINDOW":"DUE DATE"}</small><b>{overview?"Next 7 days":"Within 7 days"}</b></div><div><small>{overview?"LOOK FOR":"ESTIMATED IMPACT"}</small><b>{overview?"Gaps, late inventory, missed dates":"+18% placement sales"}</b></div></div>
+   <div className="actionPlanImpact"><div><small>{overview?"START WITH":"OWNER"}</small><b>{overview?"Lawn & Garden + Automotive":`${dept} team lead`}</b></div><div><small>{overview?"REVIEW WINDOW":"DUE DATE"}</small><b>{overview?"Next 7 days":"Within 7 days"}</b></div><div><small>{overview?"LOOK FOR":"ESTIMATED IMPACT"}</small><b>{overview?"Gaps, late inventory, missed dates":"+18% placement sales"}</b></div></div>
    <div className="actionSteps"><div className="actionStepsHead"><b>Recommended steps</b><span>{steps.length} actions</span></div>{steps.map((step,index)=><div key={step[0]}><span>{index+1}</span><div><b>{step[0]}</b><p>{step[1]}</p></div><em>{index===0?"Start now":"Next"}</em></div>)}</div>
    <div className="actionPlanNote"><span>i</span><p><b>Decision support only.</b> Confirm inventory, staffing, and local operating requirements before execution.</p></div>
    <div className="actionPlanButtons"><button onClick={close}>{overview?"Close guide":"Close"}</button>{!overview&&<button className="acceptPlan" disabled={accepted} onClick={accept}>{accepted?"Plan accepted ✓":"Accept action plan"}</button>}</div>
@@ -357,15 +390,15 @@ function MonthlyPerformance({scope,scale=1}){
 }
 
 function StoreFeaturePlan({counts,assignments,storeCount,setDept}){
- const dates={Grocery:"Jul 28",Home:"Aug 11",Seasonal:"Aug 4",Automotive:"Jul 31",Apparel:"Aug 24",Electronics:"Sep 3"};
+ const dates={Grocery:"Jul 28",Home:"Aug 11",Seasonal:"Aug 4",Automotive:"Jul 31",Electronics:"Sep 3",Frozen:"Aug 8",Dairy:"Aug 9",Meats:"Aug 10"};
  const rows=Object.keys(counts).map(name=>{
-   const capacity=(counts[name].front+counts[name].back)*storeCount;
+   const capacity=(counts[name].front+counts[name].back+counts[name].bunkers)*storeCount;
    const departmentAssignments=assignments[name]||{};
    const planned=plannedEndcapCount(name,departmentAssignments)*storeCount;
    const open=Math.max(0,capacity-planned);
    const next=firstPlannedFeature(name,departmentAssignments);
    const readiness=capacity?Math.round(planned/capacity*100):0;
-   return {name,capacity,open,planned,next,date:planned?dates[name]:"—",readiness};
+   return {name,capacity,open,planned,next,date:planned?(dates[name]||"Next cycle"):"—",readiness};
  });
  const totalCapacity=rows.reduce((sum,row)=>sum+row.capacity,0);
  const totalPlanned=rows.reduce((sum,row)=>sum+row.planned,0);
@@ -373,14 +406,14 @@ function StoreFeaturePlan({counts,assignments,storeCount,setDept}){
  return <section className="storeFeaturePlan">
    <div className="featurePlanHead"><div><span className="eyebrow">TOTAL STORE FEATURE PLANNING</span><h2>Endcap plan coverage by department</h2><p>See what is assigned, where gaps remain, and which feature transitions are coming next.</p></div><div className="featurePlanTotals"><span><b>{totalPlanned}/{totalCapacity}</b><small>locations planned</small></span><span className={totalOpen?"attention":""}><b>{totalOpen}</b><small>open decisions</small></span><span><b>{Math.round(totalPlanned/totalCapacity*100)}%</b><small>plan coverage</small></span></div></div>
    <div className="featurePlanColumns"><span>Department</span><span>Plan coverage</span><span>Next feature</span><span>Next set</span><span>Readiness</span><span></span></div>
-   <div className="featurePlanRows">{rows.map(row=><button key={row.name} onClick={()=>setDept(row.name)}><span className="featureDept"><i>{DEPARTMENTS[row.name].icon}</i><b>{row.name}</b><small>{row.capacity} endcaps</small></span><span className="coverageCell"><span><i style={{width:`${row.planned/row.capacity*100}%`}}></i></span><small>{row.planned} planned · {row.open} open</small></span><span className="nextFeature"><b>{row.next}</b><small>AI-aligned seasonal set</small></span><span className="setDate"><b>{row.date}</b><small>2026</small></span><span className={`readiness ${row.readiness<80?"risk":row.readiness===100?"ready":""}`}><b>{row.readiness}%</b><small>{row.readiness===100?"Ready":row.readiness<80?"Needs action":"On track"}</small></span><span className="rowArrow">→</span></button>)}</div>
+   <div className="featurePlanRows">{rows.map(row=><button key={row.name} onClick={()=>setDept(row.name)}><span className="featureDept"><i>{DEPARTMENTS[row.name].icon}</i><b>{row.name}</b><small>{row.capacity} feature locations</small></span><span className="coverageCell"><span><i style={{width:`${row.planned/row.capacity*100}%`}}></i></span><small>{row.planned} planned · {row.open} open</small></span><span className="nextFeature"><b>{row.next}</b><small>AI-aligned seasonal set</small></span><span className="setDate"><b>{row.date}</b><small>{row.date==="Next cycle"?"Planning window":"2026"}</small></span><span className={`readiness ${row.readiness<80?"risk":row.readiness===100?"ready":""}`}><b>{row.readiness}%</b><small>{row.readiness===100?"Ready":row.readiness<80?"Needs action":"On track"}</small></span><span className="rowArrow">→</span></button>)}</div>
    <div className="planningWindows"><div><span>30 DAYS</span><b>{rows.filter(row=>["Jul 28","Jul 31","Aug 4","Aug 11"].includes(row.date)).length} sets</b><small>Execution and order confirmation</small></div><div><span>60 DAYS</span><b>{rows.filter(row=>row.planned>0).length} departments</b><small>Quantity and arrival planning</small></div><div><span>90 DAYS</span><b>{totalOpen} decisions</b><small>Seasonal demand preparation</small></div><p><b>AI planning focus:</b> Begin with front endcaps, then build stackbase and back-endcap coverage around the selected event.</p></div>
  </section>
 }
 
 function RiskCenter({setDept}){
  const risks=[
-   {level:"high",department:"Apparel",title:"3 endcaps still unassigned",detail:"The next feature window begins in 28 days.",action:"Assign locations"},
+   {level:"high",department:"Lawn & Garden",title:"3 feature locations still unassigned",detail:"The next feature window begins in 28 days.",action:"Assign locations"},
    {level:"high",department:"Automotive",title:"Arrival date is after planned set",detail:"Winter Ready inventory is projected two days late.",action:"Review timing"},
    {level:"medium",department:"Grocery",title:"Markdown date needs confirmation",detail:"Summer Hydration ends before the next inbound set.",action:"Confirm markdown"},
    {level:"medium",department:"Electronics",title:"Low weeks of supply",detail:"Power banks may fall below feature demand in 9 days.",action:"Review order"},
@@ -399,7 +432,7 @@ function LeadershipSummary({stores,totalSales,averageScore,averageMargin,marginO
      <div><small>Margin opportunity</small><b>{fmt(marginOpportunity)}</b><span>AI-ranked next actions</span></div>
    </div>
    <div className="executiveActions">
-     <div><i>1</i><span><b>Close Apparel planning gaps</b><small>Assign open locations before the next feature window.</small></span></div>
+     <div><i>1</i><span><b>Close Lawn & Garden planning gaps</b><small>Assign open locations before the next feature window.</small></span></div>
      <div><i>2</i><span><b>Protect Automotive timing</b><small>Resolve the inventory arrival risk before July 31.</small></span></div>
      <div><i>3</i><span><b>Scale Seasonal’s playbook</b><small>Reuse its placement and inventory depth in comparable stores.</small></span></div>
    </div>
@@ -427,14 +460,14 @@ function MultiStoreOpportunities({stores}){
 function PerformanceView({stores,assignments,counts}){
  const storeCount=stores.length||1;
  const storeScale=stores.reduce((sum,store)=>sum+store.factor,0)||1;
- const capacity=Object.values(counts).reduce((sum,item)=>sum+item.front+item.back,0)*storeCount;
+ const capacity=Object.values(counts).reduce((sum,item)=>sum+item.front+item.back+item.bunkers,0)*storeCount;
  const planned=Object.keys(counts).reduce((sum,name)=>sum+plannedEndcapCount(name,assignments[name]),0)*storeCount;
  const averageScore=capacity?Math.round(planned/capacity*100):0;
  const totalSales=Math.round(188420*storeScale*(averageScore/100));
  const averageMargin=planned?(stores.reduce((sum,store)=>sum+store.margin,0)/storeCount).toFixed(1):"0.0";
  const marginOpportunity=Math.round(28600*storeScale*(averageScore/100));
  const departments=Object.keys(counts).map(name=>{
-   const departmentCapacity=(counts[name].front+counts[name].back)*storeCount;
+   const departmentCapacity=(counts[name].front+counts[name].back+counts[name].bunkers)*storeCount;
    const departmentPlanned=plannedEndcapCount(name,assignments[name])*storeCount;
    const score=departmentCapacity?Math.round(departmentPlanned/departmentCapacity*100):0;
    return [name,score,score,Math.round(DEPARTMENTS[name].sales*storeScale*(score/100))];
@@ -454,7 +487,7 @@ function PerformanceView({stores,assignments,counts}){
      <div className="performancePanel"><div className="performancePanelHead"><div><span className="eyebrow">SESSION PROGRESS</span><h2>Endcap planning score</h2></div><b className="trendUp">{averageScore} pts</b></div><div className="trendChart">{Array.from({length:12},(_,index)=>Math.round(averageScore*((index+1)/12))).map((height,index)=><div key={index}><span style={{height:`${Math.max(2,height)}%`}}></span><small>{index%3===0?`S${index+1}`:""}</small></div>)}</div></div>
    </section>
    <section className="performancePanel departmentRanking"><div className="performancePanelHead"><div><span className="eyebrow">DEPARTMENT RANKING</span><h2>Where performance is strongest</h2></div><small>Score · trend · combined sales</small></div><div className="departmentPerformanceGrid">{departments.map(item=><div key={item[0]}><span><i>{DEPARTMENTS[item[0]].icon}</i><b>{item[0]}</b></span><div className="scoreTrack"><i style={{width:`${item[1]}%`}}></i></div><strong>{item[1]}</strong><em>+{item[2]}%</em><b>{fmt(item[3]*stores.reduce((sum,store)=>sum+store.factor,0))}</b></div>)}</div></section>
-   <section className="performanceAction"><span>✦</span><div><small>AI PERFORMANCE INSIGHT</small><h2>{planned?"Continue with the departments that have the most open endcaps.":"Start by assigning the first front-endcap feature."}</h2><p>{planned?"The score will continue to rise as open endcaps receive approved features.":"This session begins at zero and measures only the plan created by the visitor."}</p></div><b>{fmt(marginOpportunity*.34)} opportunity</b></section>
+   <section className="performanceAction"><span>✦</span><div><small>AI PERFORMANCE INSIGHT</small><h2>{planned?"Continue with the departments that have the most open feature locations.":"Start by assigning the first open feature location."}</h2><p>{planned?"The score will continue to rise as endcaps, stackbases, and bunkers receive approved features.":"This session measures the visitor plan plus required H.O. placements."}</p></div><b>{fmt(marginOpportunity*.34)} opportunity</b></section>
  </div>
 }
 
@@ -467,7 +500,7 @@ function CalendarView({stores}){
    {id:4,date:"2026-08-11",day:11,month:"Aug",department:"Home",name:"Dorm Room Reset",type:"Set",window:30,color:"green"},
    {id:5,date:"2026-08-16",day:16,month:"Aug",department:"Grocery",name:"Summer Hydration",type:"Markdown",window:30,color:"amber"},
    {id:6,date:"2026-08-23",day:23,month:"Aug",department:"Grocery",name:"Summer Hydration",type:"End",window:30,color:"red"},
-   {id:7,date:"2026-08-24",day:24,month:"Aug",department:"Apparel",name:"Back to Campus",type:"Set",window:60,color:"green"},
+   {id:7,date:"2026-08-24",day:24,month:"Aug",department:"Toys",name:"Holiday Preview",type:"Set",window:60,color:"green"},
    {id:8,date:"2026-09-03",day:3,month:"Sep",department:"Electronics",name:"Dorm Tech",type:"Arrival",window:60,color:"violet"},
    {id:9,date:"2026-09-13",day:13,month:"Sep",department:"Seasonal",name:"Back to School",type:"Markdown",window:60,color:"amber"},
    {id:10,date:"2026-09-20",day:20,month:"Sep",department:"Seasonal",name:"Back to School",type:"End",window:60,color:"red"},
@@ -506,17 +539,18 @@ function CalendarEventEditor({event,save,remove,close}){
 
 function StoreView({setDept,storeCount,storeScale,assignments,counts}){
  const rows=Object.keys(counts).map(name=>{
-   const capacity=(counts[name].front+counts[name].back)*storeCount;
+   const capacity=(counts[name].front+counts[name].back+counts[name].bunkers)*storeCount;
    const entries=Object.entries(assignments[name]||{}).filter(([slot,value])=>!slot.startsWith("stackbase-")&&value);
    const planned=plannedEndcapCount(name,assignments[name])*storeCount;
    const score=capacity?Math.round(planned/capacity*100):0;
    return [name,firstPlannedFeature(name,assignments[name]),score,Math.round(DEPARTMENTS[name].sales*storeScale*(score/100)),score?`+${score}%`:"0%"];
  });
- const activeFront=(Object.keys(counts).length+Object.values(assignments).reduce((sum,items)=>sum+Object.entries(items||{}).filter(([slot,value])=>slot.startsWith("front-")&&slot!=="front-0"&&value).length,0))*storeCount;
+ const activeFront=(Object.values(HO_FEATURES).filter(items=>items["front-0"]).length+Object.values(assignments).reduce((sum,items)=>sum+Object.entries(items||{}).filter(([slot,value])=>slot.startsWith("front-")&&slot!=="front-0"&&value).length,0))*storeCount;
  const activeBack=Object.values(assignments).reduce((sum,items)=>sum+Object.entries(items||{}).filter(([slot,value])=>slot.startsWith("back-")&&value).length,0)*storeCount;
- const activeTotal=activeFront+activeBack;
+ const activeBunkers=(Object.values(HO_FEATURES).filter(items=>items["bunker-0"]).length+Object.values(assignments).reduce((sum,items)=>sum+Object.entries(items||{}).filter(([slot,value])=>slot.startsWith("bunker-")&&slot!=="bunker-0"&&value).length,0))*storeCount;
+ const activeTotal=activeFront+activeBack+activeBunkers;
  return <section className="storeGrid"><div className="panel performance"><div className="panelHead"><div><span className="eyebrow">WHAT'S THERE NOW</span><h2>{storeCount>1?`${storeCount}-store department performance`:"Department endcap performance"}</h2></div><button>View all {activeTotal} →</button></div><div className="table"><div className="tr th"><span>Department</span><span>Top display</span><span>Score</span><span>4-week sales</span><span>Trend</span></div>{rows.map(r=><button className="tr" key={r[0]} onClick={()=>setDept(r[0])}><span><i>{DEPARTMENTS[r[0]].icon}</i>{r[0]}</span><span>{r[1]}</span><span><b className={`score s${Math.floor(r[2]/10)}`}>{r[2]}</b></span><span>{fmt(r[3])}</span><span className="up">{r[4]}</span></button>)}</div></div>
- <div className="panel placement"><div className="panelHead"><div><span className="eyebrow">SPACE MIX</span><h2>Active placement mix</h2></div></div><div className="donut"><div><strong>{activeTotal}</strong><small>active endcaps</small></div></div><div className="placeRow"><span><i className="front"/>Front endcaps</span><b>{activeFront}</b><em>{activeFront?fmt(3480):"$0"} planned avg.</em></div><div className="placeRow"><span><i className="back"/>Back endcaps</span><b>{activeBack}</b><em>{activeBack?fmt(2740):"$0"} planned avg.</em></div><div className="insight">{activeTotal?<><b>{activeTotal}</b> placements are currently included in this session.</>:"Add a feature to begin measuring placement performance."}</div></div></section>
+ <div className="panel placement"><div className="panelHead"><div><span className="eyebrow">SPACE MIX</span><h2>Active placement mix</h2></div></div><div className="donut"><div><strong>{activeTotal}</strong><small>active features</small></div></div><div className="placeRow"><span><i className="front"/>Front endcaps</span><b>{activeFront}</b><em>{activeFront?fmt(3480):"$0"} planned avg.</em></div><div className="placeRow"><span><i className="back"/>Back endcaps</span><b>{activeBack}</b><em>{activeBack?fmt(2740):"$0"} planned avg.</em></div><div className="placeRow"><span><i className="bunker"/>Bunker sections</span><b>{activeBunkers}</b><em>{activeBunkers?fmt(3180):"$0"} planned avg.</em></div><div className="insight">{activeTotal?<><b>{activeTotal}</b> placements are currently included in this session.</>:"Add a feature to begin measuring placement performance."}</div></div></section>
 }
 
 function LegacyDepartmentView({dept,count,adjust,assignments,prefill,assignEndcap,storeScale}){
@@ -585,7 +619,7 @@ function DepartmentView({dept,count,adjust,assignments,prefill,assignEndcap,stor
  const stackbaseItems=STACKBASE_ITEMS[dept]||sellers;
  const rollbackItems=[...(ROLLBACK_ITEMS[dept]||[]),...(ROLLBACK_ADDITIONS[dept]||[])];
  const departmentLetter=DEPARTMENT_LETTERS[dept]||dept.slice(0,1);
- const endcapSlots=[...Array.from({length:count.front},(_,i)=>`front-${i}`),...Array.from({length:count.back},(_,i)=>`back-${i}`)];
+ const endcapSlots=[...Array.from({length:count.front},(_,i)=>`front-${i}`),...Array.from({length:count.back},(_,i)=>`back-${i}`),...Array.from({length:count.bunkers},(_,i)=>`bunker-${i}`)];
  const allFeatureSlots=[...endcapSlots,...Array.from({length:count.stackbases},(_,i)=>`stackbase-${i}`)];
  const plannedCount=endcapSlots.filter(slot=>assignments[slot]||corporateSlots[slot]).length;
  const allEndcapsPlanned=plannedCount===endcapSlots.length;
@@ -595,6 +629,7 @@ function DepartmentView({dept,count,adjust,assignments,prefill,assignEndcap,stor
      const prioritySlots=[
        ...Array.from({length:count.front},(_,i)=>`front-${i}`),
        ...Array.from({length:count.stackbases},(_,i)=>`stackbase-${i}`),
+       ...Array.from({length:count.bunkers},(_,i)=>`bunker-${i}`),
        ...Array.from({length:count.back},(_,i)=>`back-${i}`),
      ].filter(slot=>!corporateSlots[slot]&&!assignments[slot]);
      rollbackItems.forEach((item,index)=>{
@@ -604,7 +639,7 @@ function DepartmentView({dept,count,adjust,assignments,prefill,assignEndcap,stor
          newlyPrefilled.push(slot);
        }
      });
-   }else if(["front","back","both","all"].includes(where)){
+   }else if(["front","back","bunker","both","all"].includes(where)){
      const event=eventPlans[activeEventWindow];
      const terms={
        "Back to School":["back to school","dorm","school"],
@@ -632,6 +667,7 @@ function DepartmentView({dept,count,adjust,assignments,prefill,assignEndcap,stor
      };
      if(where==="front"||where==="both"||where==="all")fillSide("front",count.front,0);
      if(where==="back"||where==="both"||where==="all")fillSide("back",count.back,Math.min(3,ranked.length-1));
+     if(where==="bunker"||where==="all")fillSide("bunker",count.bunkers,0);
      if(where==="all"){
        const stackItems=STACKBASE_ITEMS[dept]||ranked;
        let stackIndex=0;
@@ -669,7 +705,7 @@ function DepartmentView({dept,count,adjust,assignments,prefill,assignEndcap,stor
    const slot=allFeatureSlots.find(location=>!corporateSlots[location]&&!assignments[location]);
    if(!slot)return null;
    assignWithStatus(slot,item.name);
-   return `${slot.startsWith("front")?"F":slot.startsWith("back")?"B":"SB"}${Number(slot.split("-")[1])+1}`;
+   return `${slot.startsWith("front")?"F":slot.startsWith("back")?"B":slot.startsWith("bunker")?"BK":"SB"}${Number(slot.split("-")[1])+1}`;
  };
  const moveCorporate=(from,to)=>setCorporateSlots(old=>{
    if(from===to)return old;
@@ -695,11 +731,12 @@ function DepartmentView({dept,count,adjust,assignments,prefill,assignEndcap,stor
  });
  return <><EventPlanningBox dept={dept} eventPlans={eventPlans} setEventPlans={setEventPlans} activeWindow={activeEventWindow} setActiveWindow={setActiveEventWindow}/><section className="departmentWorkspace">
    <div className={`planBox ${open?"open":""}`}>
-     <button className="planBoxHead" onClick={()=>setOpen(!open)}><div><span className="eyebrow">DEPARTMENT SETUP</span><h2><i className="departmentLetter">{departmentLetter}</i>{dept} department plan</h2><p>{plannedCount}/{endcapSlots.length} endcaps assigned · Click to {open?"hide":"open"} the location map.</p></div><span className="expand">{open?"−":"+"}</span></button>
+     <button className="planBoxHead" onClick={()=>setOpen(!open)}><div><span className="eyebrow">DEPARTMENT SETUP</span><h2><i className="departmentLetter">{departmentLetter}</i>{dept} department plan</h2><p>{plannedCount}/{endcapSlots.length} feature locations assigned · Click to {open?"hide":"open"} the location map.</p></div><span className="expand">{open?"−":"+"}</span></button>
      {open&&<div className="endcapSections">
-       <EndcapSection title="Front endcaps" side="front" count={count.front} assignments={assignments} sellers={eventSellers} rollbackItems={rollbackItems} assignEndcap={assignWithStatus} statuses={statuses} setStatus={(slot,status)=>setStatuses(old=>({...old,[slot]:status}))} add={()=>adjust("front",1)} prefill={()=>prefillWithStatus("front")} description="Highest visibility and customer traffic" corporateSlots={corporateSlots} moveCorporate={moveCorporate} availableSlots={endcapSlots} userChosenSlots={userChosenSlots} moveFeature={moveFeature} featureSlots={allFeatureSlots.filter(slot=>!corporateSlots[slot])}/>
-       <EndcapSection title="Back endcaps" side="back" count={count.back} assignments={assignments} sellers={eventSellers} rollbackItems={rollbackItems} assignEndcap={assignWithStatus} statuses={statuses} setStatus={(slot,status)=>setStatuses(old=>({...old,[slot]:status}))} add={()=>adjust("back",1)} prefill={()=>prefillWithStatus("back")} description="Destination traffic and aisle transitions" corporateSlots={corporateSlots} moveCorporate={moveCorporate} availableSlots={endcapSlots} userChosenSlots={userChosenSlots} moveFeature={moveFeature} featureSlots={allFeatureSlots.filter(slot=>!corporateSlots[slot])}/>
-       <EndcapSection title="Action-alley stackbases" side="stackbase" count={count.stackbases} assignments={assignments} sellers={stackbaseItems} rollbackItems={rollbackItems} assignEndcap={assignWithStatus} statuses={statuses} setStatus={(slot,status)=>setStatuses(old=>({...old,[slot]:status}))} add={()=>adjust("stackbases",1)} prefill={()=>prefillWithStatus("stackbases")} description="Palletized and bulky seasonal merchandise" corporateSlots={{}} moveCorporate={()=>{}} availableSlots={[]} userChosenSlots={userChosenSlots} moveFeature={moveFeature} featureSlots={allFeatureSlots.filter(slot=>!corporateSlots[slot])}/>
+       {count.front>0&&<EndcapSection title="Front endcaps" side="front" count={count.front} assignments={assignments} sellers={eventSellers} rollbackItems={rollbackItems} assignEndcap={assignWithStatus} statuses={statuses} setStatus={(slot,status)=>setStatuses(old=>({...old,[slot]:status}))} add={()=>adjust("front",1)} prefill={()=>prefillWithStatus("front")} description="Highest visibility and customer traffic" corporateSlots={corporateSlots} moveCorporate={moveCorporate} availableSlots={endcapSlots} userChosenSlots={userChosenSlots} moveFeature={moveFeature} featureSlots={allFeatureSlots.filter(slot=>!corporateSlots[slot])}/>}
+       {count.back>0&&<EndcapSection title="Back endcaps" side="back" count={count.back} assignments={assignments} sellers={eventSellers} rollbackItems={rollbackItems} assignEndcap={assignWithStatus} statuses={statuses} setStatus={(slot,status)=>setStatuses(old=>({...old,[slot]:status}))} add={()=>adjust("back",1)} prefill={()=>prefillWithStatus("back")} description="Destination traffic and aisle transitions" corporateSlots={corporateSlots} moveCorporate={moveCorporate} availableSlots={endcapSlots} userChosenSlots={userChosenSlots} moveFeature={moveFeature} featureSlots={allFeatureSlots.filter(slot=>!corporateSlots[slot])}/>}
+       {count.stackbases>0&&<EndcapSection title="Action-alley stackbases" side="stackbase" count={count.stackbases} assignments={assignments} sellers={stackbaseItems} rollbackItems={rollbackItems} assignEndcap={assignWithStatus} statuses={statuses} setStatus={(slot,status)=>setStatuses(old=>({...old,[slot]:status}))} add={()=>adjust("stackbases",1)} prefill={()=>prefillWithStatus("stackbases")} description="Palletized and bulky seasonal merchandise" corporateSlots={{}} moveCorporate={()=>{}} availableSlots={[]} userChosenSlots={userChosenSlots} moveFeature={moveFeature} featureSlots={allFeatureSlots.filter(slot=>!corporateSlots[slot])}/>}
+       {count.bunkers>0&&<EndcapSection title="Bunker sections" side="bunker" count={count.bunkers} assignments={assignments} sellers={eventSellers} rollbackItems={rollbackItems} assignEndcap={assignWithStatus} statuses={statuses} setStatus={(slot,status)=>setStatuses(old=>({...old,[slot]:status}))} add={()=>adjust("bunkers",1)} prefill={()=>prefillWithStatus("bunker")} description="Refrigerated or frozen feature sections" corporateSlots={corporateSlots} moveCorporate={moveCorporate} availableSlots={endcapSlots} userChosenSlots={userChosenSlots} moveFeature={moveFeature} featureSlots={allFeatureSlots.filter(slot=>!corporateSlots[slot])}/>}
      </div>}
    </div>
    <div className="topSellers">
@@ -723,7 +760,7 @@ function CatalogSearch({dept,assignments,onAdd}){
    const location=onAdd(item);
    setAdded(old=>({...old,[item.itemNumber]:location||"full"}));
  };
- return <section className="catalogSearch"><div className="catalogHead"><div><span className="eyebrow">SEARCH STORE CATALOG</span><h2>Add another item to the plan</h2><p>Search 72 fictional store items by product name, UPC, or item number.</p></div><span>{Object.values(assignments).filter(Boolean).length} locations filled</span></div><label className="catalogInput"><span>⌕</span><input aria-label="Search item catalog" placeholder="Search name, UPC, or item number" value={query} onChange={event=>setQuery(event.target.value)}/>{query&&<button onClick={()=>setQuery("")}>Clear</button>}</label><div className="catalogResults">{results.map(item=><div className={item.department!==dept?"crossCatalog":""} key={item.itemNumber}><div><b>{item.name}</b><small>{item.department} · UPC {item.upc} · Item {item.itemNumber}</small></div><span><small>Cost</small><b>${item.cost.toFixed(2)}</b></span><span><small>Retail</small><b>${item.retail.toFixed(2)}</b></span><span><small>Margin</small><b>{item.margin}%</b></span><button disabled={added[item.itemNumber]==="full"} onClick={()=>add(item)}>{added[item.itemNumber]==="full"?"Plan full":added[item.itemNumber]?`Added to ${added[item.itemNumber]} ✓`:"+ Add to plan"}</button></div>)}</div>{normalized&&!results.length&&<div className="noCatalogResults">No item matched that name, UPC, or item number.</div>}</section>
+ return <section className="catalogSearch"><div className="catalogHead"><div><span className="eyebrow">SEARCH STORE CATALOG</span><h2>Add another item to the plan</h2><p>Search {STORE_CATALOG.length} fictional store items by product name, UPC, or item number.</p></div><span>{Object.values(assignments).filter(Boolean).length} locations filled</span></div><label className="catalogInput"><span>⌕</span><input aria-label="Search item catalog" placeholder="Search name, UPC, or item number" value={query} onChange={event=>setQuery(event.target.value)}/>{query&&<button onClick={()=>setQuery("")}>Clear</button>}</label><div className="catalogResults">{results.map(item=><div className={item.department!==dept?"crossCatalog":""} key={item.itemNumber}><div><b>{item.name}</b><small>{item.department} · UPC {item.upc} · Item {item.itemNumber}</small></div><span><small>Cost</small><b>${item.cost.toFixed(2)}</b></span><span><small>Retail</small><b>${item.retail.toFixed(2)}</b></span><span><small>Margin</small><b>{item.margin}%</b></span><button disabled={added[item.itemNumber]==="full"} onClick={()=>add(item)}>{added[item.itemNumber]==="full"?"Plan full":added[item.itemNumber]?`Added to ${added[item.itemNumber]} ✓`:"+ Add to plan"}</button></div>)}</div>{normalized&&!results.length&&<div className="noCatalogResults">No item matched that name, UPC, or item number.</div>}</section>
 }
 
 function EventPlanningBox({dept,eventPlans,setEventPlans,activeWindow,setActiveWindow}){
@@ -734,7 +771,7 @@ function EventPlanningBox({dept,eventPlans,setEventPlans,activeWindow,setActiveW
 function EndcapSection({title,side,count,assignments,sellers,rollbackItems,assignEndcap,statuses,setStatus,add,prefill,description,corporateSlots,moveCorporate,availableSlots,userChosenSlots,moveFeature,featureSlots}){
  const [openSlot,setOpenSlot]=useState(null);
  const choose=(slot,value)=>{assignEndcap(slot,value);setOpenSlot(null)};
- const locationLabel=slot=>`${slot.startsWith("front")?"F":slot.startsWith("back")?"B":"SB"}${Number(slot.split("-")[1])+1}`;
+ const locationLabel=slot=>`${slot.startsWith("front")?"F":slot.startsWith("back")?"B":slot.startsWith("bunker")?"BK":"SB"}${Number(slot.split("-")[1])+1}`;
  return <div className={`endcapSection ${side}`}><div className="endcapTitle"><div><i/><span><b>{title}</b><small>{description}</small></span></div><div><button onClick={prefill}>Prefill</button><strong>{count}</strong></div></div><div className="endcapGrid">{Array.from({length:count},(_,i)=>{
    const slot=`${side}-${i}`;
    const corporate=corporateSlots[slot];
@@ -745,8 +782,8 @@ function EndcapSection({title,side,count,assignments,sellers,rollbackItems,assig
    const isOpen=openSlot===slot;
    return <div className={`endcapSlot ${value?"filled":""} ${isOpen?"menuOpen":""} ${colorClass}`} key={slot}>
      <button className="slotTrigger" aria-expanded={isOpen} onClick={()=>{if(!corporate)setOpenSlot(isOpen?null:slot)}}>
-       <span>{locationLabel(slot)}</span><b>{value||`Open ${side==="stackbase"?"stackbase":"endcap"}`}</b>
-       <small>{corporate?"Home Office-directed · location can be moved":value?"Feature selected · order pending":`Click to choose ${side==="stackbase"?"merchandise":"an AI feature"}`}</small>
+       <span>{locationLabel(slot)}</span><b>{value||`Open ${side==="stackbase"?"stackbase":side==="bunker"?"bunker section":"endcap"}`}</b>
+       <small>{corporate?"Home Office-directed · location can be moved":value?"Feature selected · order pending":`Click to choose ${side==="stackbase"?"merchandise":side==="bunker"?"a bunker feature":"an AI feature"}`}</small>
        {!corporate&&<em>{isOpen?"▲":"▼"}</em>}
      </button>
      {corporate?<div className="corporateControl"><span>H.O. planned</span><label>Move to <select value={slot} onChange={event=>moveCorporate(slot,event.target.value)}>{availableSlots.map(location=><option key={location} value={location}>{locationLabel(location)}</option>)}</select></label></div>:<div className="featureControls"><div className={`slotStatus status-${status.toLowerCase().replaceAll(" ","-")}`}><label>Plan status</label><select value={status} onChange={event=>setStatus(slot,event.target.value)}>{["Open","Pending","Planned","In transit","Freight received","Ready to set","Active","Markdown scheduled","Ending soon","Completed"].map(option=><option key={option}>{option}</option>)}</select></div>{value&&<label className="moveFeature">Move to <select value={slot} onChange={event=>moveFeature(slot,event.target.value)}>{featureSlots.map(location=><option key={location} value={location}>{locationLabel(location)}</option>)}</select></label>}</div>}
@@ -790,8 +827,8 @@ function LegacyOrderingIntelligence({dept,sellers,assignments}){
 }
 
 function OrderingIntelligence({dept,sellers,assignments,allEndcapsPlanned,plannedCount,totalEndcaps,onWorkflowStage}){
- const deliveryDates={Grocery:"2026-08-04",Home:"2026-08-07",Seasonal:"2026-08-03",Automotive:"2026-08-06",Apparel:"2026-08-10",Electronics:"2026-08-05"};
- const [workflow,setWorkflow]=useDemoSavedState(`swas-order-workflow-${dept}-v1`,{stage:"draft",approver:"Store Manager",deliveryDate:deliveryDates[dept]});
+ const deliveryDates={Grocery:"2026-08-04",Home:"2026-08-07",Seasonal:"2026-08-03",Automotive:"2026-08-06",Electronics:"2026-08-05",Frozen:"2026-08-08",Dairy:"2026-08-09",Meats:"2026-08-10"};
+ const [workflow,setWorkflow]=useDemoSavedState(`swas-order-workflow-${dept}-v2`,{stage:"draft",approver:"Store Manager",deliveryDate:deliveryDates[dept]||"2026-08-12"});
  const planned=[...new Set([...Object.values(assignments).filter(Boolean),...sellers.slice(0,4).map(item=>item[0])])].slice(0,4);
  const rows=planned.map((item,index)=>{
    const weekly=[46,38,31,25][index],onHand=[68,42,26,51][index],inbound=[24,48,36,0][index],casePack=[12,12,6,8][index];
@@ -814,7 +851,7 @@ function OrderingIntelligence({dept,sellers,assignments,allEndcapsPlanned,planne
  const advance=(stage,status)=>{setWorkflow(old=>({...old,stage}));onWorkflowStage(status)};
  return <section className="orderingIntelligence">
    <div className="orderingHead"><div><span className="eyebrow">PLANNED FEATURE ORDERING</span><h2>{dept} order and delivery workflow</h2><p>Suggested quantities move through approval, delivery, freight receipt, and set readiness.</p></div><span className={`orderStage stage-${workflow.stage}`}><b>{stageInfo[workflow.stage][0]}</b><small>{stageInfo[workflow.stage][1]}</small></span></div>
-   <div className="planReadiness"><span><b>{plannedCount}/{totalEndcaps}</b><small>endcaps assigned</small></span><i><span style={{width:`${Math.round(plannedCount/totalEndcaps*100)}%`}}/></i><strong>{allEndcapsPlanned?"Plan coverage complete":"Complete every open endcap before approval"}</strong></div>
+   <div className="planReadiness"><span><b>{plannedCount}/{totalEndcaps}</b><small>feature locations assigned</small></span><i><span style={{width:`${Math.round(plannedCount/totalEndcaps*100)}%`}}/></i><strong>{allEndcapsPlanned?"Plan coverage complete":"Complete every open feature location before approval"}</strong></div>
    <div className="orderingColumns"><span>Planned item</span><span>On hand</span><span>Inbound</span><span>Weekly sales</span><span>Weeks supply</span><span>Suggested order</span><span>Case pack</span><span>Leftover</span></div>
    <div className="orderingRows">{rows.map((row,index)=><div key={row.item}><span><i>{index+1}</i><b>{row.item}</b><small>AI demand recommendation</small></span><b>{row.onHand}</b><b>{row.inbound}</b><b>{row.weekly}</b><em className={row.weeks<2?"risk":""}>{row.weeks}</em><strong>{row.order} units</strong><span>{row.casePack}</span><span>{row.leftover} units</span></div>)}</div>
    <div className="approvalWorkflow">
@@ -829,7 +866,7 @@ function OrderingIntelligence({dept,sellers,assignments,allEndcapsPlanned,planne
        {workflow.stage==="ready"&&<button className="completeWorkflow">Ready for set date ✓</button>}
      </div>
    </div>
-   <div className="orderingFooter"><p><b>Status logic:</b> A selected feature starts Pending. When all endcaps are assigned and the order is approved, it becomes Planned. Shipping and freight actions then update every department location together.</p><span>Prototype workflow · Fictional order data</span></div>
+   <div className="orderingFooter"><p><b>Status logic:</b> A selected feature starts Pending. When all feature locations are assigned and the order is approved, it becomes Planned. Shipping and freight actions then update every department location together.</p><span>Prototype workflow · Fictional order data</span></div>
  </section>
 }
 
