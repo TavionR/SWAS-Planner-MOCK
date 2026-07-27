@@ -8,6 +8,7 @@ import "./performance-view.css";
 import "./calendar-view.css";
 import "./store-feature-plan.css";
 import "./monthly-performance.css";
+import "./action-plan.css";
 
 const DEPARTMENTS = {
   "Store Overview": { icon:"⌂", front: 34, back: 30, sales: 188420, margin: 37.2, score: 86 },
@@ -67,6 +68,8 @@ function App(){
   const [placement,setPlacement]=useState("Front endcap");
   const [selected,setSelected]=useState({});
   const [view,setView]=useState("Dashboard");
+  const [actionPlanOpen,setActionPlanOpen]=useState(false);
+  const [actionAccepted,setActionAccepted]=useState(false);
   const [storeMenuOpen,setStoreMenuOpen]=useState(false);
   const [selectedStores,setSelectedStores]=useState(["2487"]);
   const [draftStores,setDraftStores]=useState(["2487"]);
@@ -183,14 +186,37 @@ function App(){
 
       {dept==="Store Overview"?<StoreFeaturePlan counts={counts} storeCount={storeCount} setDept={setDept}/>:<><div className="sectionHead"><div><span className="eyebrow">AI-RANKED OPPORTUNITIES</span><h2>Recommended {dept} endcap concepts</h2></div><span>Ranked by demand · margin · seasonality</span></div><section className="concepts">{concepts.map((x,i)=>{const isAdded=(selected[dept]||[]).includes(x[0]);return <Concept key={x[0]} item={x} rank={i+1} added={isAdded} toggle={()=>toggle(x[0],dept)} overview={false}/>})}</section></>}
 
-      <section className="action"><span>✦</span><div><small>AI NEXT BEST ACTION</small><h2>{dept==="Store Overview"?"Close the highest-priority gaps in the next 30-day feature plan.":`Reserve a front endcap for “${concepts[0][0]}.”`}</h2><p>{dept==="Store Overview"?"Grocery, Automotive, and Apparel have the nearest transitions with unassigned space. Confirm ownership, inventory, and set dates before the next feature arrivals.":`The front placement is projected to deliver 18% more sales than a back endcap. Confirm inventory and set the display this week.`}</p></div><button>Review action plan →</button></section>
+      <section className="action"><span>✦</span><div><small>AI NEXT BEST ACTION</small><h2>{dept==="Store Overview"?"Close the highest-priority gaps in the next 30-day feature plan.":`Reserve a front endcap for “${concepts[0][0]}.”`}</h2><p>{dept==="Store Overview"?"Grocery, Automotive, and Apparel have the nearest transitions with unassigned space. Confirm ownership, inventory, and set dates before the next feature arrivals.":`The front placement is projected to deliver 18% more sales than a back endcap. Confirm inventory and set the display this week.`}</p></div><button onClick={()=>setActionPlanOpen(true)}>{actionAccepted?"Plan accepted ✓":"Review action plan →"}</button></section>
       </>}
+      {actionPlanOpen&&<ActionPlan dept={dept} concept={concepts[0]?.[0]} accepted={actionAccepted} close={()=>setActionPlanOpen(false)} accept={()=>setActionAccepted(true)}/>}
       <footer><span>SWAS Planning · Concept prototype</span><span>Fictional store and performance data · July 2026</span></footer>
     </main>
   </div>
 }
 
 function Metric({label,value,sub,color}){return <div className={`metric ${color}`}><span>{label}</span><strong>{value}</strong><small>↗ {sub}</small></div>}
+
+function ActionPlan({dept,concept,accepted,close,accept}){
+ const overview=dept==="Store Overview";
+ const steps=overview?[
+   ["Assign open locations","Confirm owners for Apparel’s three gaps and the two Automotive gaps."],
+   ["Validate inventory","Review on-hand and inbound quantities before committing each feature."],
+   ["Lock transition dates","Confirm set, arrival, markdown, and end dates in the 30-day calendar."],
+   ["Review execution","Check completion and performance during the next leadership walk."],
+ ]:[
+   ["Reserve placement",`Assign “${concept}” to the next available front endcap.`],
+   ["Confirm the order","Validate forecasted units, case pack, and the planned arrival date."],
+   ["Schedule the transition","Set the display date and schedule the outgoing feature’s markdown."],
+   ["Measure results","Review sales, margin, and score after the first seven days."],
+ ];
+ return <div className="actionPlanOverlay" role="presentation" onMouseDown={event=>{if(event.target===event.currentTarget)close()}}><section className="actionPlanModal" role="dialog" aria-modal="true" aria-labelledby="action-plan-title">
+   <div className="actionPlanTop"><span>✦</span><div><small>AI-GENERATED ACTION PLAN</small><h2 id="action-plan-title">{overview?"30-day total store feature plan":`${dept} feature action plan`}</h2><p>{overview?"Turn the highest-priority open decisions into confirmed, executable features.":`Move “${concept}” from recommendation to a confirmed endcap set.`}</p></div><button aria-label="Close action plan" onClick={close}>×</button></div>
+   <div className="actionPlanImpact"><div><small>OWNER</small><b>{overview?"Store leadership + team leads":`${dept} team lead`}</b></div><div><small>DUE DATE</small><b>{overview?"July 31, 2026":"Within 7 days"}</b></div><div><small>ESTIMATED IMPACT</small><b>{overview?"9 planning gaps closed":"+18% placement sales"}</b></div></div>
+   <div className="actionSteps"><div className="actionStepsHead"><b>Recommended steps</b><span>{steps.length} actions</span></div>{steps.map((step,index)=><div key={step[0]}><span>{index+1}</span><div><b>{step[0]}</b><p>{step[1]}</p></div><em>{index===0?"Start now":"Next"}</em></div>)}</div>
+   <div className="actionPlanNote"><span>i</span><p><b>Decision support only.</b> Confirm inventory, staffing, and local operating requirements before execution.</p></div>
+   <div className="actionPlanButtons"><button onClick={close}>Close</button><button className="acceptPlan" disabled={accepted} onClick={accept}>{accepted?"Plan accepted ✓":"Accept action plan"}</button></div>
+ </section></div>
+}
 
 function MonthlyPerformance({scope,scale=1}){
  const [metric,setMetric]=useState("sales");
