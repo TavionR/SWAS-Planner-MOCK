@@ -22,6 +22,15 @@ const css = [
   "src/styles.css",
   "src/department-plan.css",
   "src/cycle-planner.css",
+  "src/store-lookup.css",
+  "src/performance-view.css",
+  "src/calendar-view.css",
+  "src/store-feature-plan.css",
+  "src/monthly-performance.css",
+  "src/action-plan.css",
+  "src/operational-upgrades.css",
+  "src/calendar-edit.css",
+  "src/advanced-insights.css",
 ].map((file) => fs.readFileSync(path.join(root, file), "utf8")).join("\n");
 
 const html = `<!doctype html>
@@ -32,11 +41,11 @@ const html = `<!doctype html>
   <meta name="theme-color" content="#081522">
   <meta name="description" content="SWAS Planning — AI-assisted retail endcap planning demonstration.">
   <title>SWAS Planning Demo</title>
-  <link rel="stylesheet" href="/app.css?v=4">
+  <link rel="stylesheet" href="/app.css?v=5">
 </head>
 <body>
   <div id="root"></div>
-  <script type="module" src="/app.js?v=4"></script>
+  <script type="module" src="/app.js?v=5"></script>
 </body>
 </html>`;
 

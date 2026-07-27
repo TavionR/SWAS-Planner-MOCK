@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
 import "./styles.css";
 import "./department-plan.css";
@@ -11,6 +11,7 @@ import "./monthly-performance.css";
 import "./action-plan.css";
 import "./operational-upgrades.css";
 import "./calendar-edit.css";
+import "./advanced-insights.css";
 
 const DEPARTMENTS = {
   "Store Overview": { icon:"⌂", front: 34, back: 30, sales: 188420, margin: 37.2, score: 86 },
@@ -64,18 +65,32 @@ const ROLLBACK_ITEMS = {
 
 const fmt = n => new Intl.NumberFormat("en-US",{style:"currency",currency:"USD",maximumFractionDigits:0}).format(n);
 
+function useDemoSavedState(key,initialValue){
+  const getInitial=()=>typeof initialValue==="function"?initialValue():initialValue;
+  const [value,setValue]=useState(()=>{
+    try{
+      const saved=window.localStorage.getItem(key);
+      return saved===null?getInitial():JSON.parse(saved);
+    }catch{return getInitial()}
+  });
+  useEffect(()=>{
+    try{window.localStorage.setItem(key,JSON.stringify(value))}catch{}
+  },[key,value]);
+  return [value,setValue];
+}
+
 function App(){
   const [dept,setDept]=useState("Store Overview");
-  const [counts,setCounts]=useState(Object.fromEntries(Object.keys(DEPARTMENTS).filter(k=>k!=="Store Overview").map(k=>[k,{front:4,back:4,stackbases:4}])));
+  const [counts,setCounts]=useDemoSavedState("swas-capacity-v1",()=>Object.fromEntries(Object.keys(DEPARTMENTS).filter(k=>k!=="Store Overview").map(k=>[k,{front:4,back:4,stackbases:4}])));
   const [placement,setPlacement]=useState("Front endcap");
-  const [selected,setSelected]=useState({});
+  const [selected,setSelected]=useDemoSavedState("swas-concepts-v1",{});
   const [view,setView]=useState("Dashboard");
   const [actionPlanOpen,setActionPlanOpen]=useState(false);
   const [actionAccepted,setActionAccepted]=useState(false);
   const [storeMenuOpen,setStoreMenuOpen]=useState(false);
-  const [selectedStores,setSelectedStores]=useState(["2487"]);
+  const [selectedStores,setSelectedStores]=useDemoSavedState("swas-stores-v1",["2487"]);
   const [draftStores,setDraftStores]=useState(["2487"]);
-  const [assignments,setAssignments]=useState({});
+  const [assignments,setAssignments]=useDemoSavedState("swas-assignments-v1",{});
 
   const activeStores=STORES.filter(store=>selectedStores.includes(store.id));
   const storeCount=activeStores.length||1;
@@ -172,7 +187,7 @@ function App(){
       <div className="profile"><span>TR</span><div><b>Tavion Robinson</b><small>Store leadership</small></div></div>
     </aside>
     <main>
-      <header><div><span className="eyebrow">{storeLabel.toUpperCase()}</span><h1>{view==="Performance"?"Performance insights":view==="Calendar"?"SWAS planning calendar":dept==="Store Overview"?(multiStore?"Combined store endcap performance":"Total store endcap performance"):`${dept} endcap plan`}</h1><p>{view==="Performance"?`Track scores, sales, margin, and opportunities across ${multiStore?`${storeCount} selected stores`:"the selected store"}.`:view==="Calendar"?`Coordinate set dates, end dates, markdowns, and feature arrivals across ${multiStore?`${storeCount} selected stores`:"the selected store"}.`:dept==="Store Overview"?(multiStore?`One combined dashboard for ${storeCount} selected stores.`:"See what is live, what is working, and where the next margin opportunity is."):"Set your endcap capacity and build a department-specific seasonal plan."}</p></div><div className="headerActions"><select aria-label="Choose department plan" value={dept} onChange={e=>{setDept(e.target.value);setView("Dashboard")}}>{Object.keys(DEPARTMENTS).map(x=><option key={x}>{x}</option>)}</select><button onClick={()=>window.print()}>Export plan ↗</button></div></header>
+      <header><div><span className="eyebrow">{storeLabel.toUpperCase()}</span><h1>{view==="Performance"?"Performance insights":view==="Calendar"?"SWAS planning calendar":dept==="Store Overview"?(multiStore?"Combined store endcap performance":"Total store endcap performance"):`${dept} endcap plan`}</h1><p>{view==="Performance"?`Track scores, sales, margin, and opportunities across ${multiStore?`${storeCount} selected stores`:"the selected store"}.`:view==="Calendar"?`Coordinate set dates, end dates, markdowns, and feature arrivals across ${multiStore?`${storeCount} selected stores`:"the selected store"}.`:dept==="Store Overview"?(multiStore?`One combined dashboard for ${storeCount} selected stores.`:"See what is live, what is working, and where the next margin opportunity is."):"Set your endcap capacity and build a department-specific seasonal plan."}</p></div><div className="headerActions"><span className="saveStatus">✓ Saved on this device</span><select aria-label="Choose department plan" value={dept} onChange={e=>{setDept(e.target.value);setView("Dashboard")}}>{Object.keys(DEPARTMENTS).map(x=><option key={x}>{x}</option>)}</select><button onClick={()=>window.print()}>Export plan ↗</button></div></header>
 
       {view==="Performance"?<PerformanceView stores={activeStores}/>:view==="Calendar"?<CalendarView stores={activeStores}/>:<>
       <section className="statusBar"><span className="live">● {isStoreOverview?(multiStore?`LIVE ${storeCount}-STORE VIEW`:"LIVE TOTAL STORE VIEW"):`LIVE ${dept.toUpperCase()} VIEW`}</span><div><b>{scopedEndcaps}</b><small>{isStoreOverview?"All store endcaps":"Department endcaps"}</small></div><div><b>{scopedActiveStackbases}/{scopedStackbases}</b><small>Active stackbases</small></div><div><b>{scopedOpen}</b><small>Open endcaps</small></div><div><b>{scopedUtilization}%</b><small>Endcap utilization</small></div><p>{isStoreOverview?(multiStore?`${storeCount} locations combined`:"All departments combined"):`${dept} department only`} · Fictional live data</p></section>
@@ -274,6 +289,42 @@ function RiskCenter({setDept}){
  return <section className="riskCenter"><div className="riskCenterHead"><div><span className="eyebrow">NOTIFICATIONS + RISK</span><h2>Feature planning attention center</h2><p>AI flags timing, inventory, and execution risks that could delay a set or reduce sales.</p></div><span className="riskCount"><b>{risks.length}</b><small>open alerts</small></span></div><div className="riskRows">{risks.map(risk=><button key={risk.title} onClick={()=>setDept(risk.department)}><span className={`riskLevel ${risk.level}`}>{risk.level==="high"?"!":"i"}</span><div><small>{risk.department} · {risk.level} priority</small><b>{risk.title}</b><p>{risk.detail}</p></div><em>{risk.action} →</em></button>)}</div></section>
 }
 
+function LeadershipSummary({stores,totalSales,averageScore,averageMargin,marginOpportunity}){
+ const execution=Math.min(96,82+stores.length*2);
+ return <section className="leadershipSummary">
+   <div className="insightHeader"><div><span className="eyebrow">LEADERSHIP SUMMARY</span><h2>One-page feature planning readout</h2><p>Fictional executive view of execution, opportunity, and the actions that need leadership attention.</p></div><button onClick={()=>window.print()}>Export summary ↗</button></div>
+   <div className="leadershipGrid">
+     <div><small>Feature sales</small><b>{fmt(totalSales)}</b><span>+12.8% vs prior period</span></div>
+     <div><small>Plan execution</small><b>{execution}%</b><span>{Math.max(2,9-stores.length)} gaps need follow-up</span></div>
+     <div><small>Combined health</small><b>{averageScore}/100</b><span>{averageMargin}% average margin</span></div>
+     <div><small>Margin opportunity</small><b>{fmt(marginOpportunity)}</b><span>AI-ranked next actions</span></div>
+   </div>
+   <div className="executiveActions">
+     <div><i>1</i><span><b>Close Apparel planning gaps</b><small>Assign open locations before the next feature window.</small></span></div>
+     <div><i>2</i><span><b>Protect Automotive timing</b><small>Resolve the inventory arrival risk before July 31.</small></span></div>
+     <div><i>3</i><span><b>Scale Seasonal’s playbook</b><small>Reuse its placement and inventory depth in comparable stores.</small></span></div>
+   </div>
+ </section>
+}
+
+function MultiStoreOpportunities({stores}){
+ const [copied,setCopied]=useState({});
+ const ideas=[
+   {feature:"Summer Hydration",best:stores.reduce((a,b)=>a.score>b.score?a:b),lift:18,action:"Copy front placement and four-week inventory depth"},
+   {feature:"Road Trip Ready",best:stores.reduce((a,b)=>a.margin>b.margin?a:b),lift:12,action:"Match attachment mix and arrival lead time"},
+   {feature:"Dorm Room Reset",best:stores.reduce((a,b)=>a.factor>b.factor?a:b),lift:9,action:"Reuse the winning four-item assortment"},
+ ];
+ return <section className="multiStoreOpportunities">
+   <div className="insightHeader"><div><span className="eyebrow">MULTI-STORE OPPORTUNITY</span><h2>Turn comparisons into repeatable actions</h2><p>Find the strongest setup among selected stores and copy the playbook to locations with the largest gap.</p></div><span>{stores.length} stores compared</span></div>
+   <div className="compareGrid">{ideas.map((idea,index)=><div className="compareCard" key={idea.feature}>
+     <div className="compareCardHead"><div><small>WINNING FEATURE</small><h3>{idea.feature}</h3></div><span>+{idea.lift}%</span></div>
+     <div className="compareStore"><span><small>Best example</small><b>Store {idea.best.id}</b></span><span><small>Score</small><b>{idea.best.score}</b></span></div>
+     <div className="compareRecommendation">{idea.action}. Start with Store {stores[(index+1)%stores.length].id}, which has the clearest performance gap.</div>
+     <button className={copied[idea.feature]?"copied":""} onClick={()=>setCopied(old=>({...old,[idea.feature]:true}))}>{copied[idea.feature]?"Added to comparison plan ✓":"Copy winning setup"}</button>
+   </div>)}</div>
+ </section>
+}
+
 function PerformanceView({stores}){
  const storeCount=stores.length||1;
  const totalSales=stores.reduce((sum,store)=>sum+(188420*store.factor),0);
@@ -288,7 +339,9 @@ function PerformanceView({stores}){
      <Metric label="Average gross margin" value={`${averageMargin}%`} sub="+2.4 pts vs aisle average" color="amber"/>
      <Metric label="Margin opportunity" value={fmt(marginOpportunity)} sub="AI-ranked opportunities" color="blue"/>
    </section>
+   <LeadershipSummary stores={stores} totalSales={totalSales} averageScore={averageScore} averageMargin={averageMargin} marginOpportunity={marginOpportunity}/>
    <MonthlyPerformance scope="Total Store" scale={stores.reduce((sum,store)=>sum+store.factor,0)||1}/>
+   {stores.length>1&&<MultiStoreOpportunities stores={stores}/>}
    <section className="performancePanels">
      <div className="performancePanel"><div className="performancePanelHead"><div><span className="eyebrow">STORE COMPARISON</span><h2>{storeCount===1?"Selected store performance":"Selected-store ranking"}</h2></div><small>Fictional 4-week results</small></div><div className="storePerformanceRows">{stores.map((store,index)=><div className="storePerformanceRow" key={store.id}><span className="storeRank">{index+1}</span><div><b>Store {store.id}</b><small>{store.name}</small></div><span><small>Sales</small><b>{fmt(188420*store.factor)}</b></span><span><small>Margin</small><b>{store.margin}%</b></span><strong>{store.score}</strong></div>)}</div></div>
      <div className="performancePanel"><div className="performancePanelHead"><div><span className="eyebrow">12-WEEK TREND</span><h2>Endcap score trend</h2></div><b className="trendUp">+8 pts</b></div><div className="trendChart">{[64,68,66,72,70,76,74,79,81,83,84,86].map((height,index)=><div key={index}><span style={{height:`${height}%`}}></span><small>{index%3===0?`W${index+1}`:""}</small></div>)}</div></div>
@@ -314,7 +367,7 @@ function CalendarView({stores}){
    {id:11,date:"2026-09-21",day:21,month:"Sep",department:"Home",name:"Fall Organization",type:"Set",window:90,color:"green"},
    {id:12,date:"2026-10-15",day:15,month:"Oct",department:"Automotive",name:"Winter Ready",type:"Arrival",window:90,color:"violet"},
  ];
- const [events,setEvents]=useState(initialEvents);
+ const [events,setEvents]=useDemoSavedState("swas-calendar-events-v1",initialEvents);
  const [editingEvent,setEditingEvent]=useState(null);
  const saveEvent=draft=>{const date=new Date(`${draft.date}T12:00:00`);const month=date.toLocaleString("en-US",{month:"short"});const color={Set:"green",Arrival:"violet",Markdown:"amber",End:"red"}[draft.type]||"blue";const saved={...draft,id:draft.id==="new"?Date.now():draft.id,day:date.getDate(),month,color,window:Number(draft.window)};setEvents(old=>draft.id==="new"?[...old,saved]:old.map(event=>event.id===draft.id?saved:event));setEditingEvent(null)};
  const visible=events.filter(event=>event.window<=windowDays);
@@ -352,7 +405,7 @@ function StoreView({setDept,storeCount,storeScale,scoreOffset}){
 
 function DepartmentView({dept,count,adjust,assignments,prefill,assignEndcap,storeScale}){
  const [open,setOpen]=useState(true);
- const [statuses,setStatuses]=useState({});
+ const [statuses,setStatuses]=useDemoSavedState(`swas-statuses-${dept}-v1`,{});
  const sellers=TOP_SELLERS[dept]||[];
  const recommendations=CONCEPTS[dept]||[];
  const stackbaseItems=STACKBASE_ITEMS[dept]||sellers;
@@ -374,7 +427,7 @@ function DepartmentView({dept,count,adjust,assignments,prefill,assignEndcap,stor
      <div className="rollbackList">{rollbackItems.map((x,i)=><div className="rollbackItem" key={x[0]}><span>{i+1}</span><div><b>{x[0]}</b><small>Was {x[1]} · Rollback {x[2]}</small></div><strong>{x[3]}</strong></div>)}</div>
      {dept==="Grocery"&&<div className="stackbaseRule"><span>▦</span><div><b>Action-alley stackbase rule</b><p>Bulky products such as bottled-water cases, charcoal, large pet food, and oversized paper goods are excluded from endcaps. Plan those as pallet stacks on stackbases in the action alley.</p></div></div>}
    </div>
- </section><OrderingIntelligence dept={dept} sellers={sellers} assignments={assignments}/><MonthlyPerformance scope={dept} scale={storeScale}/><CyclePlanner dept={dept} sellers={sellers}/></>
+ </section><FeaturePerformance dept={dept} sellers={sellers} assignments={assignments}/><OrderingIntelligence dept={dept} sellers={sellers} assignments={assignments}/><MonthlyPerformance scope={dept} scale={storeScale}/><CyclePlanner dept={dept} sellers={sellers}/></>
 }
 
 function EndcapSection({title,side,count,assignments,recommendations,sellers,rollbackItems,assignEndcap,statuses,setStatus,add,prefill,description}){
@@ -403,6 +456,30 @@ function EndcapSection({title,side,count,assignments,recommendations,sellers,rol
  })}<button className="addEndcap" onClick={add}><span>+</span><b>Add endcap</b><small>Expand this section</small></button></div></div>
 }
 
+function FeaturePerformance({dept,sellers,assignments}){
+ const features=[...new Set([...Object.values(assignments).filter(Boolean),...sellers.map(item=>item[0])])].slice(0,8);
+ const [selectedFeature,setSelectedFeature]=useState(features[0]||"No feature assigned");
+ useEffect(()=>{if(!features.includes(selectedFeature))setSelectedFeature(features[0]||"No feature assigned")},[dept,features.join("|")]);
+ const index=Math.max(0,features.indexOf(selectedFeature));
+ const planned=12600+index*1380;
+ const actual=Math.round(planned*[1.14,.96,1.08,.89,1.03][index%5]);
+ const sellThrough=[87,74,82,68,79][index%5];
+ const margin=[41.8,36.4,39.2,34.8,38.6][index%5];
+ const remaining=Math.max(12,Math.round((100-sellThrough)*3.4));
+ const locations=Object.values(assignments).filter(value=>value===selectedFeature).length||1;
+ return <section className="featurePerformance">
+   <div className="insightHeader"><div><span className="eyebrow">FEATURE-LEVEL PERFORMANCE</span><h2>See what each set actually delivered</h2><p>Compare planned sales with results, sell-through, margin, and remaining inventory.</p></div><label className="featureSelector"><span>Choose feature</span><select value={selectedFeature} onChange={event=>setSelectedFeature(event.target.value)}>{features.map(feature=><option key={feature}>{feature}</option>)}</select></label></div>
+   <div className="featureMetrics">
+     <div className="featureMetric"><small>Planned sales</small><b>{fmt(planned)}</b></div>
+     <div className="featureMetric"><small>Actual sales</small><b>{fmt(actual)}</b><span className="positive">{actual>=planned?"+":""}{Math.round((actual/planned-1)*100)}% to plan</span></div>
+     <div className="featureMetric"><small>Gross margin</small><b>{margin}%</b></div>
+     <div className="featureMetric"><small>Sell-through</small><b>{sellThrough}%</b><div className="sellThrough"><i style={{width:`${sellThrough}%`}}/></div></div>
+     <div className="featureMetric"><small>Inventory remaining</small><b>{remaining} units</b><span>{locations} planned location{locations===1?"":"s"}</span></div>
+   </div>
+   <div className="featureCallout"><p><b>AI read:</b> {actual>=planned?`${selectedFeature} is outperforming plan. Protect in-stock and keep the current placement.`:`${selectedFeature} is below plan. Reduce the next order and test a stronger front placement.`}</p><strong>{actual>=planned?"Scale this setup":"Review this set"} →</strong></div>
+ </section>
+}
+
 function OrderingIntelligence({dept,sellers,assignments}){
  const planned=[...new Set([...Object.values(assignments).filter(Boolean),...sellers.slice(0,4).map(item=>item[0])])].slice(0,4);
  const rows=planned.map((item,index)=>{const weekly=[46,38,31,25][index];const onHand=[68,42,26,51][index];const inbound=[24,48,36,0][index];const casePack=[12,12,6,8][index];const target=weekly*4;const order=Math.max(0,Math.ceil((target-onHand-inbound)/casePack)*casePack);const weeks=Number(((onHand+inbound)/weekly).toFixed(1));return {item,weekly,onHand,inbound,casePack,order,weeks,leftover:Math.max(0,onHand+inbound+order-target),reorder:`Aug ${8+index*3}`};});
@@ -417,8 +494,8 @@ function CyclePlanner({dept,sellers}){
    90:{feature:"Upcoming feature window",start:"2026-09-21",end:"2026-10-18",arrival:"2026-10-15",markdown:"2026-10-11",status:"Forecast"},
  };
  const [active,setActive]=useState(30);
- const [plans,setPlans]=useState(defaults);
- const [orders,setOrders]=useState({});
+ const [plans,setPlans]=useDemoSavedState(`swas-cycle-plans-${dept}-v1`,defaults);
+ const [orders,setOrders]=useDemoSavedState(`swas-cycle-orders-${dept}-v1`,{});
  const plan=plans[active];
  const update=(key,value)=>setPlans(old=>({...old,[active]:{...old[active],[key]:value}}));
  const dateBack=(date,days)=>{if(!date)return"";const d=new Date(`${date}T12:00:00`);d.setDate(d.getDate()-days);return d.toISOString().slice(0,10)};
