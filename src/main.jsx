@@ -9,6 +9,8 @@ import "./calendar-view.css";
 import "./store-feature-plan.css";
 import "./monthly-performance.css";
 import "./action-plan.css";
+import "./operational-upgrades.css";
+import "./calendar-edit.css";
 
 const DEPARTMENTS = {
   "Store Overview": { icon:"⌂", front: 34, back: 30, sales: 188420, margin: 37.2, score: 86 },
@@ -182,11 +184,11 @@ function App(){
         <Metric label="Average gross margin" value={`${current.margin}%`} sub="+2.4 pts vs aisle average" color="amber"/>
       </section>
 
-      {dept==="Store Overview"?<StoreView setDept={setDept} storeCount={storeCount} storeScale={storeScale} scoreOffset={averageStoreScore-86}/>:<DepartmentView key={dept} dept={dept} count={counts[dept]} adjust={adjust} assignments={assignments[dept]||{}} prefill={prefill} assignEndcap={assignEndcap} storeScale={storeScale}/>}
+      {dept==="Store Overview"?<><StoreView setDept={setDept} storeCount={storeCount} storeScale={storeScale} scoreOffset={averageStoreScore-86}/><RiskCenter setDept={setDept}/></>:<DepartmentView key={dept} dept={dept} count={counts[dept]} adjust={adjust} assignments={assignments[dept]||{}} prefill={prefill} assignEndcap={assignEndcap} storeScale={storeScale}/>}
 
       {dept==="Store Overview"?<StoreFeaturePlan counts={counts} storeCount={storeCount} setDept={setDept}/>:<><div className="sectionHead"><div><span className="eyebrow">AI-RANKED OPPORTUNITIES</span><h2>Recommended {dept} endcap concepts</h2></div><span>Ranked by demand · margin · seasonality</span></div><section className="concepts">{concepts.map((x,i)=>{const isAdded=(selected[dept]||[]).includes(x[0]);return <Concept key={x[0]} item={x} rank={i+1} added={isAdded} toggle={()=>toggle(x[0],dept)} overview={false}/>})}</section></>}
 
-      <section className="action"><span>✦</span><div><small>AI NEXT BEST ACTION</small><h2>{dept==="Store Overview"?"Close the highest-priority gaps in the next 30-day feature plan.":`Reserve a front endcap for “${concepts[0][0]}.”`}</h2><p>{dept==="Store Overview"?"Grocery, Automotive, and Apparel have the nearest transitions with unassigned space. Confirm ownership, inventory, and set dates before the next feature arrivals.":`The front placement is projected to deliver 18% more sales than a back endcap. Confirm inventory and set the display this week.`}</p></div><button onClick={()=>setActionPlanOpen(true)}>{actionAccepted?"Plan accepted ✓":"Review action plan →"}</button></section>
+      <section className="action"><span>✦</span><div><small>{dept==="Store Overview"?"AI LEADERSHIP GUIDE":"AI NEXT BEST ACTION"}</small><h2>{dept==="Store Overview"?"Review the departments falling behind before opening individual action plans.":`Reserve a front endcap for “${concepts[0][0]}.”`}</h2><p>{dept==="Store Overview"?"Use the guide to identify planning gaps, inventory risks, missed dates, and departments that need follow-up. Actions are accepted inside each department plan.":`The front placement is projected to deliver 18% more sales than a back endcap. Confirm inventory and set the display this week.`}</p></div><button onClick={()=>setActionPlanOpen(true)}>{dept==="Store Overview"?"Open help guide →":actionAccepted?"Plan accepted ✓":"Review action plan →"}</button></section>
       </>}
       {actionPlanOpen&&<ActionPlan dept={dept} concept={concepts[0]?.[0]} accepted={actionAccepted} close={()=>setActionPlanOpen(false)} accept={()=>setActionAccepted(true)}/>}
       <footer><span>SWAS Planning · Concept prototype</span><span>Fictional store and performance data · July 2026</span></footer>
@@ -199,10 +201,10 @@ function Metric({label,value,sub,color}){return <div className={`metric ${color}
 function ActionPlan({dept,concept,accepted,close,accept}){
  const overview=dept==="Store Overview";
  const steps=overview?[
-   ["Assign open locations","Confirm owners for Apparel’s three gaps and the two Automotive gaps."],
-   ["Validate inventory","Review on-hand and inbound quantities before committing each feature."],
-   ["Lock transition dates","Confirm set, arrival, markdown, and end dates in the 30-day calendar."],
-   ["Review execution","Check completion and performance during the next leadership walk."],
+   ["Find departments below plan","Start with low readiness, unassigned endcaps, and overdue milestones."],
+   ["Check inventory exposure","Look for low weeks of supply, late arrivals, and projected excess merchandise."],
+   ["Review transition timing","Compare set, arrival, markdown, and end dates for conflicts or missed work."],
+   ["Open the department plan","Work with the team lead and accept actions from that department’s page."],
  ]:[
    ["Reserve placement",`Assign “${concept}” to the next available front endcap.`],
    ["Confirm the order","Validate forecasted units, case pack, and the planned arrival date."],
@@ -210,11 +212,11 @@ function ActionPlan({dept,concept,accepted,close,accept}){
    ["Measure results","Review sales, margin, and score after the first seven days."],
  ];
  return <div className="actionPlanOverlay" role="presentation" onMouseDown={event=>{if(event.target===event.currentTarget)close()}}><section className="actionPlanModal" role="dialog" aria-modal="true" aria-labelledby="action-plan-title">
-   <div className="actionPlanTop"><span>✦</span><div><small>AI-GENERATED ACTION PLAN</small><h2 id="action-plan-title">{overview?"30-day total store feature plan":`${dept} feature action plan`}</h2><p>{overview?"Turn the highest-priority open decisions into confirmed, executable features.":`Move “${concept}” from recommendation to a confirmed endcap set.`}</p></div><button aria-label="Close action plan" onClick={close}>×</button></div>
-   <div className="actionPlanImpact"><div><small>OWNER</small><b>{overview?"Store leadership + team leads":`${dept} team lead`}</b></div><div><small>DUE DATE</small><b>{overview?"July 31, 2026":"Within 7 days"}</b></div><div><small>ESTIMATED IMPACT</small><b>{overview?"9 planning gaps closed":"+18% placement sales"}</b></div></div>
+   <div className="actionPlanTop"><span>✦</span><div><small>{overview?"AI LEADERSHIP HELP GUIDE":"AI-GENERATED ACTION PLAN"}</small><h2 id="action-plan-title">{overview?"How to review departments falling behind":`${dept} feature action plan`}</h2><p>{overview?"This overview provides review guidance only. Open the department page to create and accept its action plan.":`Move “${concept}” from recommendation to a confirmed endcap set.`}</p></div><button aria-label="Close action plan" onClick={close}>×</button></div>
+   <div className="actionPlanImpact"><div><small>{overview?"START WITH":"OWNER"}</small><b>{overview?"Apparel + Automotive":`${dept} team lead`}</b></div><div><small>{overview?"REVIEW WINDOW":"DUE DATE"}</small><b>{overview?"Next 7 days":"Within 7 days"}</b></div><div><small>{overview?"LOOK FOR":"ESTIMATED IMPACT"}</small><b>{overview?"Gaps, late inventory, missed dates":"+18% placement sales"}</b></div></div>
    <div className="actionSteps"><div className="actionStepsHead"><b>Recommended steps</b><span>{steps.length} actions</span></div>{steps.map((step,index)=><div key={step[0]}><span>{index+1}</span><div><b>{step[0]}</b><p>{step[1]}</p></div><em>{index===0?"Start now":"Next"}</em></div>)}</div>
    <div className="actionPlanNote"><span>i</span><p><b>Decision support only.</b> Confirm inventory, staffing, and local operating requirements before execution.</p></div>
-   <div className="actionPlanButtons"><button onClick={close}>Close</button><button className="acceptPlan" disabled={accepted} onClick={accept}>{accepted?"Plan accepted ✓":"Accept action plan"}</button></div>
+   <div className="actionPlanButtons"><button onClick={close}>{overview?"Close guide":"Close"}</button>{!overview&&<button className="acceptPlan" disabled={accepted} onClick={accept}>{accepted?"Plan accepted ✓":"Accept action plan"}</button>}</div>
  </section></div>
 }
 
@@ -262,6 +264,16 @@ function StoreFeaturePlan({counts,storeCount,setDept}){
  </section>
 }
 
+function RiskCenter({setDept}){
+ const risks=[
+   {level:"high",department:"Apparel",title:"3 endcaps still unassigned",detail:"The next feature window begins in 28 days.",action:"Assign locations"},
+   {level:"high",department:"Automotive",title:"Arrival date is after planned set",detail:"Winter Ready inventory is projected two days late.",action:"Review timing"},
+   {level:"medium",department:"Grocery",title:"Markdown date needs confirmation",detail:"Summer Hydration ends before the next inbound set.",action:"Confirm markdown"},
+   {level:"medium",department:"Electronics",title:"Low weeks of supply",detail:"Power banks may fall below feature demand in 9 days.",action:"Review order"},
+ ];
+ return <section className="riskCenter"><div className="riskCenterHead"><div><span className="eyebrow">NOTIFICATIONS + RISK</span><h2>Feature planning attention center</h2><p>AI flags timing, inventory, and execution risks that could delay a set or reduce sales.</p></div><span className="riskCount"><b>{risks.length}</b><small>open alerts</small></span></div><div className="riskRows">{risks.map(risk=><button key={risk.title} onClick={()=>setDept(risk.department)}><span className={`riskLevel ${risk.level}`}>{risk.level==="high"?"!":"i"}</span><div><small>{risk.department} · {risk.level} priority</small><b>{risk.title}</b><p>{risk.detail}</p></div><em>{risk.action} →</em></button>)}</div></section>
+}
+
 function PerformanceView({stores}){
  const storeCount=stores.length||1;
  const totalSales=stores.reduce((sum,store)=>sum+(188420*store.factor),0);
@@ -288,20 +300,23 @@ function PerformanceView({stores}){
 
 function CalendarView({stores}){
  const [windowDays,setWindowDays]=useState(30);
- const events=[
-   {day:28,month:"Jul",department:"Grocery",name:"Summer Hydration",type:"Set",window:30,color:"green"},
-   {day:31,month:"Jul",department:"Automotive",name:"Road Trip Ready",type:"Set",window:30,color:"blue"},
-   {day:4,month:"Aug",department:"Seasonal",name:"Back to School",type:"Arrival",window:30,color:"violet"},
-   {day:11,month:"Aug",department:"Home",name:"Dorm Room Reset",type:"Set",window:30,color:"green"},
-   {day:16,month:"Aug",department:"Grocery",name:"Summer Hydration",type:"Markdown",window:30,color:"amber"},
-   {day:23,month:"Aug",department:"Grocery",name:"Summer Hydration",type:"End",window:30,color:"red"},
-   {day:24,month:"Aug",department:"Apparel",name:"Back to Campus",type:"Set",window:60,color:"green"},
-   {day:3,month:"Sep",department:"Electronics",name:"Dorm Tech",type:"Arrival",window:60,color:"violet"},
-   {day:13,month:"Sep",department:"Seasonal",name:"Back to School",type:"Markdown",window:60,color:"amber"},
-   {day:20,month:"Sep",department:"Seasonal",name:"Back to School",type:"End",window:60,color:"red"},
-   {day:21,month:"Sep",department:"Home",name:"Fall Organization",type:"Set",window:90,color:"green"},
-   {day:15,month:"Oct",department:"Automotive",name:"Winter Ready",type:"Arrival",window:90,color:"violet"},
+ const initialEvents=[
+   {id:1,date:"2026-07-28",day:28,month:"Jul",department:"Grocery",name:"Summer Hydration",type:"Set",window:30,color:"green"},
+   {id:2,date:"2026-07-31",day:31,month:"Jul",department:"Automotive",name:"Road Trip Ready",type:"Set",window:30,color:"blue"},
+   {id:3,date:"2026-08-04",day:4,month:"Aug",department:"Seasonal",name:"Back to School",type:"Arrival",window:30,color:"violet"},
+   {id:4,date:"2026-08-11",day:11,month:"Aug",department:"Home",name:"Dorm Room Reset",type:"Set",window:30,color:"green"},
+   {id:5,date:"2026-08-16",day:16,month:"Aug",department:"Grocery",name:"Summer Hydration",type:"Markdown",window:30,color:"amber"},
+   {id:6,date:"2026-08-23",day:23,month:"Aug",department:"Grocery",name:"Summer Hydration",type:"End",window:30,color:"red"},
+   {id:7,date:"2026-08-24",day:24,month:"Aug",department:"Apparel",name:"Back to Campus",type:"Set",window:60,color:"green"},
+   {id:8,date:"2026-09-03",day:3,month:"Sep",department:"Electronics",name:"Dorm Tech",type:"Arrival",window:60,color:"violet"},
+   {id:9,date:"2026-09-13",day:13,month:"Sep",department:"Seasonal",name:"Back to School",type:"Markdown",window:60,color:"amber"},
+   {id:10,date:"2026-09-20",day:20,month:"Sep",department:"Seasonal",name:"Back to School",type:"End",window:60,color:"red"},
+   {id:11,date:"2026-09-21",day:21,month:"Sep",department:"Home",name:"Fall Organization",type:"Set",window:90,color:"green"},
+   {id:12,date:"2026-10-15",day:15,month:"Oct",department:"Automotive",name:"Winter Ready",type:"Arrival",window:90,color:"violet"},
  ];
+ const [events,setEvents]=useState(initialEvents);
+ const [editingEvent,setEditingEvent]=useState(null);
+ const saveEvent=draft=>{const date=new Date(`${draft.date}T12:00:00`);const month=date.toLocaleString("en-US",{month:"short"});const color={Set:"green",Arrival:"violet",Markdown:"amber",End:"red"}[draft.type]||"blue";const saved={...draft,id:draft.id==="new"?Date.now():draft.id,day:date.getDate(),month,color,window:Number(draft.window)};setEvents(old=>draft.id==="new"?[...old,saved]:old.map(event=>event.id===draft.id?saved:event));setEditingEvent(null)};
  const visible=events.filter(event=>event.window<=windowDays);
  const weeks=[
    ["27","28","29","30","31","1","2"],
@@ -318,8 +333,15 @@ function CalendarView({stores}){
      <div className="monthCalendar"><div className="monthHead"><button>‹</button><div><span className="eyebrow">PLANNING MONTH</span><h2>July–August 2026</h2></div><button>›</button></div><div className="weekdayRow">{["SUN","MON","TUE","WED","THU","FRI","SAT"].map(day=><span key={day}>{day}</span>)}</div><div className="calendarGrid">{weeks.flatMap((week,row)=>week.map((day,column)=>{const event=eventForDay(day,row);return <div className={`${row===0&&Number(day)>=27?"previous":""} ${event?"hasEvent":""}`} key={`${row}-${column}`}><b>{day}</b>{event&&<span className={event.color}><small>{event.type}</small>{event.department}</span>}</div>}))}</div></div>
      <div className="upcomingPanel"><div className="performancePanelHead"><div><span className="eyebrow">UPCOMING MILESTONES</span><h2>Next actions</h2></div><small>{windowDays}-day window</small></div><div className="milestoneList">{visible.slice(0,7).map((event,index)=><div key={`${event.month}-${event.day}-${event.name}`}><span className={`dateBadge ${event.color}`}><b>{event.day}</b><small>{event.month}</small></span><div><small>{event.department} · {event.type}</small><b>{event.name}</b></div><em>{index<2?"Due soon":"Planned"}</em></div>)}</div></div>
    </section>
-   <section className="calendarSchedule"><div className="performancePanelHead"><div><span className="eyebrow">TRANSITION CONTROL</span><h2>Set, markdown, and end-date schedule</h2></div><button>+ Add milestone</button></div><div className="scheduleTable"><div className="scheduleRow scheduleHead"><span>Department</span><span>Feature</span><span>Milestone</span><span>Date</span><span>Status</span></div>{visible.map(event=><div className="scheduleRow" key={`row-${event.month}-${event.day}-${event.name}`}><span><i>{DEPARTMENTS[event.department].icon}</i>{event.department}</span><b>{event.name}</b><span>{event.type}</span><span>{event.month} {event.day}, 2026</span><em className={event.color}>{event.type==="Set"?"Ready":event.type==="Arrival"?"Confirmed":event.type==="Markdown"?"Scheduled":"Planned"}</em></div>)}</div></section>
+   <section className="calendarSchedule"><div className="performancePanelHead"><div><span className="eyebrow">TRANSITION CONTROL</span><h2>Set, markdown, and end-date schedule</h2></div><button onClick={()=>setEditingEvent({id:"new",date:"2026-08-01",department:"Grocery",name:"New feature",type:"Set",window:30})}>+ Add milestone</button></div><div className="scheduleTable"><div className="scheduleRow scheduleHead"><span>Department</span><span>Feature</span><span>Milestone</span><span>Date</span><span>Status</span></div>{visible.map(event=><div className="scheduleRow" key={event.id}><span><i>{DEPARTMENTS[event.department].icon}</i>{event.department}</span><b>{event.name}</b><span>{event.type}</span><span>{event.month} {event.day}, 2026</span><span className="calendarRowActions"><em className={event.color}>{event.type==="Set"?"Ready":event.type==="Arrival"?"Confirmed":event.type==="Markdown"?"Scheduled":"Planned"}</em><button onClick={()=>setEditingEvent(event)}>Edit</button></span></div>)}</div></section>
+   {editingEvent&&<CalendarEventEditor event={editingEvent} save={saveEvent} remove={()=>{if(editingEvent.id!=="new")setEvents(old=>old.filter(event=>event.id!==editingEvent.id));setEditingEvent(null)}} close={()=>setEditingEvent(null)}/>}
  </div>
+}
+
+function CalendarEventEditor({event,save,remove,close}){
+ const [draft,setDraft]=useState(event);
+ const update=(key,value)=>setDraft(old=>({...old,[key]:value}));
+ return <div className="calendarEditorOverlay"><section className="calendarEditor" role="dialog" aria-modal="true"><div className="calendarEditorHead"><div><span className="eyebrow">EDITABLE CALENDAR</span><h2>{event.id==="new"?"Add milestone":"Edit milestone"}</h2></div><button onClick={close}>×</button></div><div className="calendarEditorForm"><label className="wide"><span>Feature name</span><input value={draft.name} onChange={e=>update("name",e.target.value)}/></label><label><span>Department</span><select value={draft.department} onChange={e=>update("department",e.target.value)}>{Object.keys(DEPARTMENTS).filter(name=>name!=="Store Overview").map(name=><option key={name}>{name}</option>)}</select></label><label><span>Milestone type</span><select value={draft.type} onChange={e=>update("type",e.target.value)}>{["Set","Arrival","Markdown","End"].map(type=><option key={type}>{type}</option>)}</select></label><label><span>Date</span><input type="date" value={draft.date} onChange={e=>update("date",e.target.value)}/></label><label><span>Planning window</span><select value={draft.window} onChange={e=>update("window",e.target.value)}>{[30,60,90].map(days=><option key={days} value={days}>{days} days</option>)}</select></label></div><div className="calendarEditorButtons"><button className="deleteEvent" onClick={remove}>{event.id==="new"?"Cancel":"Delete"}</button><span/><button onClick={close}>Close</button><button className="saveEvent" onClick={()=>save(draft)}>Save milestone</button></div></section></div>
 }
 
 function StoreView({setDept,storeCount,storeScale,scoreOffset}){
@@ -330,6 +352,7 @@ function StoreView({setDept,storeCount,storeScale,scoreOffset}){
 
 function DepartmentView({dept,count,adjust,assignments,prefill,assignEndcap,storeScale}){
  const [open,setOpen]=useState(true);
+ const [statuses,setStatuses]=useState({});
  const sellers=TOP_SELLERS[dept]||[];
  const recommendations=CONCEPTS[dept]||[];
  const stackbaseItems=STACKBASE_ITEMS[dept]||sellers;
@@ -338,9 +361,9 @@ function DepartmentView({dept,count,adjust,assignments,prefill,assignEndcap,stor
    <div className={`planBox ${open?"open":""}`}>
      <button className="planBoxHead" onClick={()=>setOpen(!open)}><div><span className="eyebrow">DEPARTMENT SETUP</span><h2>{dept} department plan</h2><p>Click to {open?"hide":"open"} your front and back endcap map.</p></div><span className="expand">{open?"−":"+"}</span></button>
      {open&&<div className="endcapSections">
-       <EndcapSection title="Front endcaps" side="front" count={count.front} assignments={assignments} recommendations={recommendations} sellers={sellers} rollbackItems={rollbackItems} assignEndcap={assignEndcap} add={()=>adjust("front",1)} prefill={()=>prefill("front")} description="Highest visibility and customer traffic"/>
-       <EndcapSection title="Back endcaps" side="back" count={count.back} assignments={assignments} recommendations={recommendations} sellers={sellers} rollbackItems={rollbackItems} assignEndcap={assignEndcap} add={()=>adjust("back",1)} prefill={()=>prefill("back")} description="Destination traffic and aisle transitions"/>
-       <EndcapSection title="Action-alley stackbases" side="stackbase" count={count.stackbases} assignments={assignments} recommendations={[]} sellers={stackbaseItems} rollbackItems={[]} assignEndcap={assignEndcap} add={()=>adjust("stackbases",1)} prefill={()=>prefill("stackbases")} description="Palletized and bulky seasonal merchandise"/>
+       <EndcapSection title="Front endcaps" side="front" count={count.front} assignments={assignments} recommendations={recommendations} sellers={sellers} rollbackItems={rollbackItems} assignEndcap={assignEndcap} statuses={statuses} setStatus={(slot,status)=>setStatuses(old=>({...old,[slot]:status}))} add={()=>adjust("front",1)} prefill={()=>prefill("front")} description="Highest visibility and customer traffic"/>
+       <EndcapSection title="Back endcaps" side="back" count={count.back} assignments={assignments} recommendations={recommendations} sellers={sellers} rollbackItems={rollbackItems} assignEndcap={assignEndcap} statuses={statuses} setStatus={(slot,status)=>setStatuses(old=>({...old,[slot]:status}))} add={()=>adjust("back",1)} prefill={()=>prefill("back")} description="Destination traffic and aisle transitions"/>
+       <EndcapSection title="Action-alley stackbases" side="stackbase" count={count.stackbases} assignments={assignments} recommendations={[]} sellers={stackbaseItems} rollbackItems={[]} assignEndcap={assignEndcap} statuses={statuses} setStatus={(slot,status)=>setStatuses(old=>({...old,[slot]:status}))} add={()=>adjust("stackbases",1)} prefill={()=>prefill("stackbases")} description="Palletized and bulky seasonal merchandise"/>
      </div>}
    </div>
    <div className="topSellers">
@@ -351,15 +374,16 @@ function DepartmentView({dept,count,adjust,assignments,prefill,assignEndcap,stor
      <div className="rollbackList">{rollbackItems.map((x,i)=><div className="rollbackItem" key={x[0]}><span>{i+1}</span><div><b>{x[0]}</b><small>Was {x[1]} · Rollback {x[2]}</small></div><strong>{x[3]}</strong></div>)}</div>
      {dept==="Grocery"&&<div className="stackbaseRule"><span>▦</span><div><b>Action-alley stackbase rule</b><p>Bulky products such as bottled-water cases, charcoal, large pet food, and oversized paper goods are excluded from endcaps. Plan those as pallet stacks on stackbases in the action alley.</p></div></div>}
    </div>
- </section><MonthlyPerformance scope={dept} scale={storeScale}/><CyclePlanner dept={dept} sellers={sellers}/></>
+ </section><OrderingIntelligence dept={dept} sellers={sellers} assignments={assignments}/><MonthlyPerformance scope={dept} scale={storeScale}/><CyclePlanner dept={dept} sellers={sellers}/></>
 }
 
-function EndcapSection({title,side,count,assignments,recommendations,sellers,rollbackItems,assignEndcap,add,prefill,description}){
+function EndcapSection({title,side,count,assignments,recommendations,sellers,rollbackItems,assignEndcap,statuses,setStatus,add,prefill,description}){
  const [openSlot,setOpenSlot]=useState(null);
  const choose=(slot,value)=>{assignEndcap(slot,value);setOpenSlot(null)};
  return <div className={`endcapSection ${side}`}><div className="endcapTitle"><div><i /><span><b>{title}</b><small>{description}</small></span></div><div><button onClick={prefill}>Prefill</button><strong>{count}</strong></div></div><div className="endcapGrid">{Array.from({length:count},(_,i)=>{
    const slot=`${side}-${i}`;
    const value=assignments[slot]||"";
+   const status=statuses[slot]||(value?"Planned":"Open");
    const isOpen=openSlot===slot;
    return <div className={`endcapSlot ${value?"filled":""} ${isOpen?"menuOpen":""}`} key={slot}>
      <button className="slotTrigger" aria-expanded={isOpen} onClick={()=>setOpenSlot(isOpen?null:slot)}>
@@ -368,6 +392,7 @@ function EndcapSection({title,side,count,assignments,recommendations,sellers,rol
        <small>{value?"✓ Feature saved":`Click to choose ${side==="stackbase"?"merchandise":"an AI feature"}`}</small>
        <em>{isOpen?"▲":"▼"}</em>
      </button>
+     <div className={`slotStatus status-${status.toLowerCase().replaceAll(" ","-")}`}><label>Plan status</label><select value={status} onChange={event=>setStatus(slot,event.target.value)}>{["Open","Recommended","Awaiting inventory","Ordered","Ready to set","Active","Markdown scheduled","Ending soon","Completed"].map(option=><option key={option}>{option}</option>)}</select></div>
      {isOpen&&<div className="featureMenu">
        <div className="menuLabel">✦ Two-year top sellers · seasonal fit</div>
        {sellers.map(x=><button className={value===x[0]?"selected":""} key={`seller-${x[0]}`} onClick={()=>choose(slot,x[0])}><span><b>{x[0]}</b><small>{x[1]} · {x[4]}</small></span><em>{x[3]}</em></button>)}
@@ -376,6 +401,12 @@ function EndcapSection({title,side,count,assignments,recommendations,sellers,rol
      </div>}
    </div>
  })}<button className="addEndcap" onClick={add}><span>+</span><b>Add endcap</b><small>Expand this section</small></button></div></div>
+}
+
+function OrderingIntelligence({dept,sellers,assignments}){
+ const planned=[...new Set([...Object.values(assignments).filter(Boolean),...sellers.slice(0,4).map(item=>item[0])])].slice(0,4);
+ const rows=planned.map((item,index)=>{const weekly=[46,38,31,25][index];const onHand=[68,42,26,51][index];const inbound=[24,48,36,0][index];const casePack=[12,12,6,8][index];const target=weekly*4;const order=Math.max(0,Math.ceil((target-onHand-inbound)/casePack)*casePack);const weeks=Number(((onHand+inbound)/weekly).toFixed(1));return {item,weekly,onHand,inbound,casePack,order,weeks,leftover:Math.max(0,onHand+inbound+order-target),reorder:`Aug ${8+index*3}`};});
+ return <section className="orderingIntelligence"><div className="orderingHead"><div><span className="eyebrow">PLANNED FEATURE ORDERING</span><h2>{dept} inventory intelligence</h2><p>AI balances feature demand, current inventory, inbound units, case packs, and expected leftovers.</p></div><button>Generate department order</button></div><div className="orderingColumns"><span>Planned item</span><span>On hand</span><span>Inbound</span><span>Weekly sales</span><span>Weeks supply</span><span>Suggested order</span><span>Reorder</span><span>Leftover</span></div><div className="orderingRows">{rows.map((row,index)=><div key={row.item}><span><i>{index+1}</i><b>{row.item}</b><small>Case pack {row.casePack}</small></span><b>{row.onHand}</b><b>{row.inbound}</b><b>{row.weekly}</b><em className={row.weeks<2?"risk":""}>{row.weeks}</em><strong>{row.order} units</strong><span>{row.reorder}</span><span>{row.leftover} units</span></div>)}</div><div className="orderingFooter"><p><b>AI recommendation:</b> Prioritize items below two weeks of supply, round orders to full case packs, and review any projected leftover above one case.</p><button>Send draft for approval →</button></div></section>
 }
 
 function CyclePlanner({dept,sellers}){
