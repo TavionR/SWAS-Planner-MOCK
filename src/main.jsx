@@ -42,6 +42,15 @@ const TOP_SELLERS = {
   "Electronics":[["Onn. USB-C Cable","36,820 units","$294K","$7.98 ea","Travel"],["Onn. Power Bank","23,520 units","$470K","$19.98 ea","Travel"],["JBL Wireless Earbuds","17,880 units","$716K","$39.98 ea","Back to school"],["Onn. Power Strip","16,240 units","$244K","$14.98 ea","Dorm"],["Xbox Gift Card","15,360 units","$384K","$25.00 ea","Gaming"],["Onn. Bluetooth Speaker","14,740 units","$295K","$19.98 ea","Summer"],["Onn. Wall Charger","13,920 units","$167K","$11.98 ea","Travel"],["LED Desk Lamp","12,860 units","$257K","$19.98 ea","Dorm"]],
 };
 
+const TOP_SELLER_ADDITIONS = {
+  "Grocery":[["Welch's Fruit Snacks","21,860 units","$174K","$7.98 ea","Back to school"],["Glad Sandwich Bags","20,440 units","$102K","$4.98 ea","Back to school"]],
+  "Home":[["Mainstays Storage Cube","12,280 units","$159K","$12.98 ea","Dorm"],["Command Picture Strips","11,940 units","$119K","$9.98 ea","Dorm"]],
+  "Seasonal":[["Pen+Gear Composition Books","17,980 units","$22K","$1.24 ea","Back to school"],["Way to Celebrate Gift Bags","16,740 units","$67K","$3.98 ea","Holiday"]],
+  "Automotive":[["Rain-X Wiper Fluid","11,980 units","$60K","$4.98 ea","Winter"],["Little Trees Air Freshener","11,420 units","$45K","$3.98 ea","Road trip"]],
+  "Apparel":[["Wonder Nation School Uniform Polo","12,940 units","$116K","$8.98 ea","Back to school"],["No Boundaries Backpack","11,860 units","$201K","$16.98 ea","Back to school"]],
+  "Electronics":[["Onn. Bluetooth Mouse","11,920 units","$155K","$12.98 ea","Back to school"],["Onn. Surge Protector","11,240 units","$191K","$16.98 ea","Dorm"]],
+};
+
 const DEPARTMENT_LETTERS = {
   "Grocery":"A",
   "Home":"H",
@@ -83,9 +92,10 @@ const EVENT_MERCHANDISE = {
 };
 
 function getEventSellers(dept,event,base){
-  const cross=(EVENT_MERCHANDISE[event]||[]).filter(item=>item[7].includes(dept));
+  // The active event and eligible-department list are the cross-merch guardrails.
+  const cross=(EVENT_MERCHANDISE[event]||[]).filter(item=>item[7].includes(dept)).map(item=>[...item,dept]);
   const normalized=base.map((item,index)=>[...item,dept,Math.max(31,46-index*2)]);
-  return [...cross,...normalized.filter(item=>item[4].toLowerCase().includes(event.split(" ")[0].toLowerCase())),...normalized].filter((item,index,list)=>list.findIndex(candidate=>candidate[0]===item[0])===index).slice(0,8);
+  return [...cross,...normalized.filter(item=>item[4].toLowerCase().includes(event.split(" ")[0].toLowerCase())),...normalized].filter((item,index,list)=>list.findIndex(candidate=>candidate[0]===item[0])===index).slice(0,10);
 }
 
 const CATALOG_ITEMS = {
@@ -121,6 +131,15 @@ const ROLLBACK_ITEMS = {
   "Automotive":[["Armor All Protectant","$7.44","$6.88","8% off"],["Auto Drive Phone Mount","$17.98","$15.98","11% off"],["Meguiar's Car Wash","$13.98","$12.48","11% off"],["Auto Drive USB Charger","$11.98","$10.98","8% off"]],
   "Apparel":[["Athletic Works Tee","$9.98","$8.98","10% off"],["Time and Tru Sandals","$15.98","$14.48","9% off"],["Hanes Sock Pack","$13.98","$12.48","11% off"],["No Boundaries Crossbody","$15.98","$14.98","6% off"]],
   "Electronics":[["Onn. Power Bank","$19.98","$17.98","10% off"],["Onn. Bluetooth Speaker","$19.98","$17.48","13% off"],["Onn. Power Strip","$14.98","$13.48","10% off"],["Onn. Wall Charger","$11.98","$10.98","8% off"]],
+};
+
+const ROLLBACK_ADDITIONS = {
+  "Grocery":[["Welch's Fruit Snacks","$7.98","$6.98","13% off"]],
+  "Home":[["Mainstays Storage Cube","$12.98","$11.48","12% off"]],
+  "Seasonal":[["Way to Celebrate Gift Bags","$3.98","$3.48","13% off"]],
+  "Automotive":[["Rain-X Wiper Fluid","$4.98","$4.48","10% off"]],
+  "Apparel":[["Wonder Nation School Uniform Polo","$8.98","$7.98","11% off"]],
+  "Electronics":[["Onn. Bluetooth Mouse","$12.98","$11.48","12% off"]],
 };
 
 const fmt = n => new Intl.NumberFormat("en-US",{style:"currency",currency:"USD",maximumFractionDigits:0}).format(n);
@@ -183,7 +202,7 @@ function App(){
     if(!already)setAssignments(old=>{
       const next={...(old[targetDept]||{})};
       const capacity=counts[targetDept];
-      const sellers=TOP_SELLERS[targetDept]||[];
+      const sellers=[...(TOP_SELLERS[targetDept]||[]),...(TOP_SELLER_ADDITIONS[targetDept]||[])];
       const fillOpen=(side,total,offset)=>{
         for(let i=0;i<total;i++){
           const slot=`${side}-${i}`;
@@ -196,7 +215,7 @@ function App(){
     });
   };
   const prefill=(where="both")=>{
-    const sellers=TOP_SELLERS[dept]||[];
+    const sellers=[...(TOP_SELLERS[dept]||[]),...(TOP_SELLER_ADDITIONS[dept]||[])];
     const next={...(assignments[dept]||{})};
     const fill=(side,total,offset)=>{for(let i=0;i<total;i++)next[`${side}-${i}`]=sellers[(i+offset)%sellers.length]?.[0]||"Open";};
     if(where==="both"||where==="front")fill("front",counts[dept].front,0);
@@ -206,7 +225,7 @@ function App(){
       for(let i=0;i<counts[dept].stackbases;i++)next[`stackbase-${i}`]=stackItems[i%stackItems.length]?.[0]||"Open";
     }
     if(where==="rollbacks"){
-      const rollbackItems=ROLLBACK_ITEMS[dept]||[];
+      const rollbackItems=[...(ROLLBACK_ITEMS[dept]||[]),...(ROLLBACK_ADDITIONS[dept]||[])];
       for(let i=0;i<counts[dept].front;i++)next[`front-${i}`]=rollbackItems[i%rollbackItems.length]?.[0]||"Open";
       for(let i=0;i<counts[dept].back;i++)next[`back-${i}`]=rollbackItems[(i+2)%rollbackItems.length]?.[0]||"Open";
     }
@@ -466,10 +485,10 @@ function StoreView({setDept,storeCount,storeScale,scoreOffset}){
 function LegacyDepartmentView({dept,count,adjust,assignments,prefill,assignEndcap,storeScale}){
  const [open,setOpen]=useState(true);
  const [statuses,setStatuses]=useDemoSavedState(`swas-statuses-${dept}-v1`,{});
- const sellers=TOP_SELLERS[dept]||[];
+ const sellers=[...(TOP_SELLERS[dept]||[]),...(TOP_SELLER_ADDITIONS[dept]||[])];
  const recommendations=CONCEPTS[dept]||[];
  const stackbaseItems=STACKBASE_ITEMS[dept]||sellers;
- const rollbackItems=ROLLBACK_ITEMS[dept]||[];
+ const rollbackItems=[...(ROLLBACK_ITEMS[dept]||[]),...(ROLLBACK_ADDITIONS[dept]||[])];
  return <><section className="departmentWorkspace">
    <div className={`planBox ${open?"open":""}`}>
      <button className="planBoxHead" onClick={()=>setOpen(!open)}><div><span className="eyebrow">DEPARTMENT SETUP</span><h2>{dept} department plan</h2><p>Click to {open?"hide":"open"} your front and back endcap map.</p></div><span className="expand">{open?"−":"+"}</span></button>
@@ -508,7 +527,7 @@ function LegacyEndcapSection({title,side,count,assignments,recommendations,selle
      <div className={`slotStatus status-${status.toLowerCase().replaceAll(" ","-")}`}><label>Plan status</label><select value={status} onChange={event=>setStatus(slot,event.target.value)}>{["Open","Recommended","Awaiting inventory","Ordered","Ready to set","Active","Markdown scheduled","Ending soon","Completed"].map(option=><option key={option}>{option}</option>)}</select></div>
      {isOpen&&<div className="featureMenu">
        <div className="menuLabel">✦ Two-year top sellers · seasonal fit</div>
-       {sellers.map(x=><button className={value===x[0]?"selected":""} key={`seller-${x[0]}`} onClick={()=>choose(slot,x[0])}><span><b>{x[0]}</b><small>{x[1]} · {x[4]}</small></span><em>{x[3]}</em></button>)}
+       {sellers.map(x=><button className={value===x[0]?"selected":""} key={`seller-${x[0]}`} onClick={()=>choose(slot,x[0])}><span><b>{x[7]&&x[5]!==x[8]?"★ ":""}{x[0]}</b><small>{x[1]} · {x[4]}</small></span><em>{x[3]}</em></button>)}
        {rollbackItems.length>0&&<><div className="menuLabel rollbackLabel">↓ Active rollbacks</div>{rollbackItems.map(x=><button className={value===x[0]?"selected":""} key={`rollback-${x[0]}`} onClick={()=>choose(slot,x[0])}><span><b>{x[0]}</b><small>Was {x[1]} · Rollback {x[2]}</small></span><em>{x[3]}</em></button>)}</>}
        {value&&<button className="clearFeature" onClick={()=>choose(slot,"")}>Clear this endcap</button>}
      </div>}
@@ -525,11 +544,11 @@ function DepartmentView({dept,count,adjust,assignments,prefill,assignEndcap,stor
  });
  const [eventPlans,setEventPlans]=useDemoSavedState(`swas-events-${dept}-v1`,AI_EVENT_RECOMMENDATIONS);
  const [activeEventWindow,setActiveEventWindow]=useState(30);
- const sellers=TOP_SELLERS[dept]||[];
+ const sellers=[...(TOP_SELLERS[dept]||[]),...(TOP_SELLER_ADDITIONS[dept]||[])];
  const eventSellers=getEventSellers(dept,eventPlans[activeEventWindow],sellers);
  const recommendations=CONCEPTS[dept]||[];
  const stackbaseItems=STACKBASE_ITEMS[dept]||sellers;
- const rollbackItems=ROLLBACK_ITEMS[dept]||[];
+ const rollbackItems=[...(ROLLBACK_ITEMS[dept]||[]),...(ROLLBACK_ADDITIONS[dept]||[])];
  const departmentLetter=DEPARTMENT_LETTERS[dept]||dept.slice(0,1);
  const endcapSlots=[...Array.from({length:count.front},(_,i)=>`front-${i}`),...Array.from({length:count.back},(_,i)=>`back-${i}`)];
  const allFeatureSlots=[...endcapSlots,...Array.from({length:count.stackbases},(_,i)=>`stackbase-${i}`)];
@@ -618,7 +637,7 @@ function DepartmentView({dept,count,adjust,assignments,prefill,assignEndcap,stor
    </div>
    <div className="topSellers">
      <div className="topSellersHead"><div><h2>Top-performing items</h2></div><button onClick={()=>prefillWithStatus("both")}>✦ Prefill {eventPlans[activeEventWindow]} theme</button></div>
-     <div className="sellerList">{eventSellers.map((x,i)=><div className={`seller ${x[5]!==dept?"crossMerch":""}`} key={x[0]}><span>{i+1}</span><div><b>{x[0]}</b><small>{x[1]} sold · Est. retail {x[3]} · {x[6]}% margin{x[5]!==dept?` · Cross-merch from ${x[5]}`:""}</small></div><strong>{x[2]}</strong></div>)}</div>
+     <div className="sellerList">{eventSellers.map((x,i)=><div className={`seller ${x[5]!==dept?"crossMerch":""}`} key={x[0]}><span>{i+1}</span><div><b>{x[5]!==dept?"★ ":""}{x[0]}</b><small>{x[1]} sold · Est. retail {x[3]} · {x[6]}% margin{x[5]!==dept?` · Cross-merch from ${x[5]} for ${eventPlans[activeEventWindow]}`:""}</small></div><strong>{x[2]}</strong></div>)}</div>
      <p className="prefillNote">Prefilled or manually selected features begin as Pending until the department plan is complete and its merchandise order is approved.</p>
      <div className="rollbackHead"><div><span className="eyebrow">ACTIVE ROLLBACKS</span><h2>Value-priced features</h2></div><button onClick={()=>prefillWithStatus("rollbacks")}>↓ Prefill rollbacks</button></div>
      <div className="rollbackList">{rollbackItems.map((x,i)=><div className="rollbackItem" key={x[0]}><span>{i+1}</span><div><b>{x[0]}</b><small>Was {x[1]} · Rollback {x[2]}</small></div><strong>{x[3]}</strong></div>)}</div>
