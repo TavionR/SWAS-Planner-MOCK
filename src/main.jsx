@@ -234,17 +234,18 @@ function App(){
   const prefill=(where="both")=>{
     const sellers=[...(TOP_SELLERS[dept]||[]),...(TOP_SELLER_ADDITIONS[dept]||[])];
     const next={...(assignments[dept]||{})};
-    const fill=(side,total,offset)=>{for(let i=0;i<total;i++)next[`${side}-${i}`]=sellers[(i+offset)%sellers.length]?.[0]||"Open";};
+    const fill=(side,total,offset)=>{let itemIndex=offset;for(let i=0;i<total;i++){const slot=`${side}-${i}`;if(!next[slot]){next[slot]=sellers[itemIndex%sellers.length]?.[0]||"Open";itemIndex++}}};
     if(where==="both"||where==="front")fill("front",counts[dept].front,0);
     if(where==="both"||where==="back")fill("back",counts[dept].back,2);
     if(where==="stackbases"){
       const stackItems=STACKBASE_ITEMS[dept]||sellers;
-      for(let i=0;i<counts[dept].stackbases;i++)next[`stackbase-${i}`]=stackItems[i%stackItems.length]?.[0]||"Open";
+      let itemIndex=0;
+      for(let i=0;i<counts[dept].stackbases;i++){const slot=`stackbase-${i}`;if(!next[slot]){next[slot]=stackItems[itemIndex%stackItems.length]?.[0]||"Open";itemIndex++}}
     }
     if(where==="rollbacks"){
       const rollbackItems=[...(ROLLBACK_ITEMS[dept]||[]),...(ROLLBACK_ADDITIONS[dept]||[])];
-      for(let i=0;i<counts[dept].front;i++)next[`front-${i}`]=rollbackItems[i%rollbackItems.length]?.[0]||"Open";
-      for(let i=0;i<counts[dept].back;i++)next[`back-${i}`]=rollbackItems[(i+2)%rollbackItems.length]?.[0]||"Open";
+      let rollbackIndex=0;
+      for(const side of ["front","back"])for(let i=0;i<counts[dept][side];i++){const slot=`${side}-${i}`;if(!next[slot]&&rollbackItems[rollbackIndex]){next[slot]=rollbackItems[rollbackIndex][0];rollbackIndex++}}
     }
     setAssignments(old=>({...old,[dept]:next}));
   };
@@ -588,31 +589,22 @@ function DepartmentView({dept,count,adjust,assignments,prefill,assignEndcap,stor
  const allFeatureSlots=[...endcapSlots,...Array.from({length:count.stackbases},(_,i)=>`stackbase-${i}`)];
  const plannedCount=endcapSlots.filter(slot=>assignments[slot]||corporateSlots[slot]).length;
  const allEndcapsPlanned=plannedCount===endcapSlots.length;
- const markAssignedPending=side=>setStatuses(old=>{
-   const next={...old};
-   endcapSlots.filter(slot=>side==="both"||slot.startsWith(`${side}-`)).forEach(slot=>{
-     if(corporateSlots[slot])next[slot]="H.O. planned";
-     else next[slot]="Pending";
-   });
-   return next;
- });
  const prefillWithStatus=where=>{
+   const newlyPrefilled=[];
    if(where==="rollbacks"){
      const prioritySlots=[
-       ...Array.from({length:count.front},(_,i)=>`front-${i}`).filter(slot=>!corporateSlots[slot]),
+       ...Array.from({length:count.front},(_,i)=>`front-${i}`),
        ...Array.from({length:count.stackbases},(_,i)=>`stackbase-${i}`),
-       ...Array.from({length:count.back},(_,i)=>`back-${i}`).filter(slot=>!corporateSlots[slot]),
-     ];
+       ...Array.from({length:count.back},(_,i)=>`back-${i}`),
+     ].filter(slot=>!corporateSlots[slot]&&!assignments[slot]);
      rollbackItems.forEach((item,index)=>{
        const slot=prioritySlots[index];
-       if(slot)assignEndcap(slot,item[0]);
+       if(slot){
+         assignEndcap(slot,item[0]);
+         newlyPrefilled.push(slot);
+       }
      });
-     setStatuses(old=>{
-       const next={...old};
-       prioritySlots.slice(0,rollbackItems.length).forEach(slot=>{next[slot]="Pending"});
-       return next;
-     });
-   }else if(["front","back","both"].includes(where)){
+   }else if(["front","back","both","all"].includes(where)){
      const event=eventPlans[activeEventWindow];
      const terms={
        "Back to School":["back to school","dorm","school"],
@@ -628,19 +620,45 @@ function DepartmentView({dept,count,adjust,assignments,prefill,assignEndcap,stor
        const score=item=>(terms.some(term=>item[4].toLowerCase().includes(term))?100:0)+(eventSellers.length-eventSellers.indexOf(item))*8+(item[6]||35);
        return score(b)-score(a);
      });
-     const fillSide=(side,total,offset)=>Array.from({length:total},(_,i)=>`${side}-${i}`).forEach((slot,i)=>{
-       if(!corporateSlots[slot])assignEndcap(slot,ranked[(i+offset)%ranked.length]?.[0]||"Open");
+     const fillSide=(side,total,offset)=>{
+       let itemIndex=offset;
+       Array.from({length:total},(_,i)=>`${side}-${i}`).forEach(slot=>{
+         if(!corporateSlots[slot]&&!assignments[slot]){
+           assignEndcap(slot,ranked[itemIndex%ranked.length]?.[0]||"Open");
+           newlyPrefilled.push(slot);
+           itemIndex++;
+         }
+       });
+     };
+     if(where==="front"||where==="both"||where==="all")fillSide("front",count.front,0);
+     if(where==="back"||where==="both"||where==="all")fillSide("back",count.back,Math.min(3,ranked.length-1));
+     if(where==="all"){
+       const stackItems=STACKBASE_ITEMS[dept]||ranked;
+       let stackIndex=0;
+       Array.from({length:count.stackbases},(_,i)=>`stackbase-${i}`).forEach(slot=>{
+         if(!assignments[slot]){
+           assignEndcap(slot,stackItems[stackIndex%stackItems.length]?.[0]||"Open");
+           newlyPrefilled.push(slot);
+           stackIndex++;
+         }
+       });
+     }
+   }else if(where==="stackbases"){
+     const stackItems=STACKBASE_ITEMS[dept]||eventSellers;
+     let itemIndex=0;
+     Array.from({length:count.stackbases},(_,i)=>`stackbase-${i}`).forEach(slot=>{
+       if(!assignments[slot]){
+         assignEndcap(slot,stackItems[itemIndex%stackItems.length]?.[0]||"Open");
+         newlyPrefilled.push(slot);
+         itemIndex++;
+       }
      });
-     if(where==="front"||where==="both")fillSide("front",count.front,0);
-     if(where==="back"||where==="both")fillSide("back",count.back,Math.min(3,ranked.length-1));
    }else prefill(where);
-   setUserChosenSlots(old=>{
+   if(newlyPrefilled.length)setStatuses(old=>{
      const next={...old};
-     const sides=where==="both"?["front","back"]:where==="rollbacks"?["front","stackbase","back"]:[where==="stackbases"?"stackbase":where];
-     Object.keys(next).forEach(slot=>{if(sides.some(side=>slot.startsWith(`${side}-`)))delete next[slot]});
+     newlyPrefilled.forEach(slot=>{next[slot]="Pending"});
      return next;
    });
-   if(where!=="rollbacks")markAssignedPending(where);
  };
  const assignWithStatus=(slot,value)=>{
    assignEndcap(slot,value);
@@ -685,7 +703,7 @@ function DepartmentView({dept,count,adjust,assignments,prefill,assignEndcap,stor
      </div>}
    </div>
    <div className="topSellers">
-     <div className="topSellersHead"><div><h2>Top-performing items</h2></div><button onClick={()=>prefillWithStatus("both")}>✦ {eventPlans[activeEventWindow]?`Prefill ${eventPlans[activeEventWindow]}`:"Prefill"}</button></div>
+     <div className="topSellersHead"><div><h2>Top-performing items</h2></div><button onClick={()=>prefillWithStatus("all")}>✦ {eventPlans[activeEventWindow]?`Prefill ${eventPlans[activeEventWindow]}`:"Prefill"}</button></div>
      <div className="sellerList">{eventSellers.map((x,i)=><div className={`seller ${x[5]!==dept?"crossMerch":""}`} key={x[0]}><span>{i+1}</span><div><b>{x[5]!==dept?"★ ":""}{x[0]}</b><small>{x[1]} sold · Est. retail {x[3]} · {x[6]}% margin{x[5]!==dept?` · Cross-merch from ${x[5]} for ${eventPlans[activeEventWindow]}`:""}</small></div><strong>{x[2]}</strong></div>)}</div>
      <p className="prefillNote">Prefilled or manually selected features begin as Pending until the department plan is complete and its merchandise order is approved.</p>
      <div className="rollbackHead"><div><span className="eyebrow">ACTIVE ROLLBACKS</span><h2>Value-priced features</h2></div><button onClick={()=>prefillWithStatus("rollbacks")}>↓ Prefill rollbacks</button></div>
