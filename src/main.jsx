@@ -3,7 +3,6 @@ import { createRoot } from "react-dom/client";
 import "./styles.css";
 import "./department-plan.css";
 import "./cycle-planner.css";
-import "./nav-dropdown.css";
 import "./store-lookup.css";
 import "./performance-view.css";
 import "./calendar-view.css";
@@ -66,7 +65,6 @@ function App(){
   const [placement,setPlacement]=useState("Front endcap");
   const [selected,setSelected]=useState({});
   const [view,setView]=useState("Dashboard");
-  const [departmentMenuOpen,setDepartmentMenuOpen]=useState(false);
   const [storeMenuOpen,setStoreMenuOpen]=useState(false);
   const [selectedStores,setSelectedStores]=useState(["2487"]);
   const [draftStores,setDraftStores]=useState(["2487"]);
@@ -161,15 +159,13 @@ function App(){
       </div>
       <nav>
         <button className={view==="Dashboard"?"active":""} onClick={()=>{setView("Dashboard");setDept("Store Overview")}}><i>⌂</i>Dashboard</button>
-        <button className={view==="Department plan"?"active":""} aria-expanded={departmentMenuOpen} onClick={()=>{setView("Department plan");setDepartmentMenuOpen(open=>!open)}}><i>✦</i>Department plan <em className="navChevron">{departmentMenuOpen?"▴":"▾"}</em></button>
-        {departmentMenuOpen&&<div className="deptNav departmentDropdown">{Object.entries(DEPARTMENTS).filter(([name])=>name!=="Store Overview").map(([name,d])=><button key={name} className={dept===name?"selected":""} onClick={()=>{setDept(name);setView("Department plan")}}><span>{d.icon}</span>{name}<em>{counts[name].front+counts[name].back}</em></button>)}</div>}
         <button className={view==="Performance"?"active":""} onClick={()=>setView("Performance")}><i>↗</i>Performance</button>
         <button className={view==="Calendar"?"active":""} onClick={()=>setView("Calendar")}><i>□</i>Calendar</button>
       </nav>
       <div className="profile"><span>TR</span><div><b>Tavion Robinson</b><small>Store leadership</small></div></div>
     </aside>
     <main>
-      <header><div><span className="eyebrow">{storeLabel.toUpperCase()}</span><h1>{view==="Performance"?"Performance insights":view==="Calendar"?"SWAS planning calendar":dept==="Store Overview"?(multiStore?"Combined store endcap performance":"Total store endcap performance"):`${dept} endcap plan`}</h1><p>{view==="Performance"?`Track scores, sales, margin, and opportunities across ${multiStore?`${storeCount} selected stores`:"the selected store"}.`:view==="Calendar"?`Coordinate set dates, end dates, markdowns, and feature arrivals across ${multiStore?`${storeCount} selected stores`:"the selected store"}.`:dept==="Store Overview"?(multiStore?`One combined dashboard for ${storeCount} selected stores.`:"See what is live, what is working, and where the next margin opportunity is."):"Set your endcap capacity and build a department-specific seasonal plan."}</p></div><div className="headerActions"><select value={dept} onChange={e=>setDept(e.target.value)}>{Object.keys(DEPARTMENTS).map(x=><option key={x}>{x}</option>)}</select><button onClick={()=>window.print()}>Export plan ↗</button></div></header>
+      <header><div><span className="eyebrow">{storeLabel.toUpperCase()}</span><h1>{view==="Performance"?"Performance insights":view==="Calendar"?"SWAS planning calendar":dept==="Store Overview"?(multiStore?"Combined store endcap performance":"Total store endcap performance"):`${dept} endcap plan`}</h1><p>{view==="Performance"?`Track scores, sales, margin, and opportunities across ${multiStore?`${storeCount} selected stores`:"the selected store"}.`:view==="Calendar"?`Coordinate set dates, end dates, markdowns, and feature arrivals across ${multiStore?`${storeCount} selected stores`:"the selected store"}.`:dept==="Store Overview"?(multiStore?`One combined dashboard for ${storeCount} selected stores.`:"See what is live, what is working, and where the next margin opportunity is."):"Set your endcap capacity and build a department-specific seasonal plan."}</p></div><div className="headerActions"><select aria-label="Choose department plan" value={dept} onChange={e=>{setDept(e.target.value);setView("Dashboard")}}>{Object.keys(DEPARTMENTS).map(x=><option key={x}>{x}</option>)}</select><button onClick={()=>window.print()}>Export plan ↗</button></div></header>
 
       {view==="Performance"?<PerformanceView stores={activeStores}/>:view==="Calendar"?<CalendarView stores={activeStores}/>:<>
       <section className="statusBar"><span className="live">● {isStoreOverview?(multiStore?`LIVE ${storeCount}-STORE VIEW`:"LIVE TOTAL STORE VIEW"):`LIVE ${dept.toUpperCase()} VIEW`}</span><div><b>{scopedEndcaps}</b><small>{isStoreOverview?"All store endcaps":"Department endcaps"}</small></div><div><b>{scopedActiveStackbases}/{scopedStackbases}</b><small>Active stackbases</small></div><div><b>{scopedOpen}</b><small>Open endcaps</small></div><div><b>{scopedUtilization}%</b><small>Endcap utilization</small></div><p>{isStoreOverview?(multiStore?`${storeCount} locations combined`:"All departments combined"):`${dept} department only`} · Fictional live data</p></section>
