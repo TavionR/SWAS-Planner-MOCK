@@ -53,6 +53,40 @@ const DEPARTMENT_LETTERS = {
 
 const EVENT_OPTIONS = ["Back to School","Labor Day Weekend","Football Season","Halloween","Holiday Entertaining","Winter Readiness","Spring Refresh","Summer Kickoff"];
 const AI_EVENT_RECOMMENDATIONS = {30:"Back to School",60:"Labor Day Weekend",90:"Halloween"};
+const EVENT_MERCHANDISE = {
+  "Back to School":[
+    ["Ziploc Sandwich Bags","31,840 units","$159K","$4.98 ea","Back to School","Grocery",39,["Seasonal","Grocery"]],
+    ["Five Star 1-Inch Binder","28,760 units","$172K","$5.98 ea","Back to School","Seasonal",42,["Seasonal","Home"]],
+    ["Ticonderoga Pencil 24 Pack","27,410 units","$137K","$4.98 ea","Back to School","Seasonal",45,["Seasonal","Grocery"]],
+    ["Crayola Marker 10 Pack","25,980 units","$103K","$3.97 ea","Back to School","Seasonal",43,["Seasonal","Home"]],
+    ["Rubbermaid TakeAlong Containers","21,640 units","$151K","$6.98 ea","Back to School","Home",37,["Seasonal","Grocery","Home"]],
+    ["Onn. USB-C Charging Cable","19,880 units","$159K","$7.98 ea","Back to School","Electronics",35,["Seasonal","Electronics"]],
+  ],
+  "Halloween":[
+    ["Plastic Pumpkin Pail","46,820 units","$93K","$1.98 ea","Halloween","Seasonal",51,["Seasonal"]],
+    ["Fun Size Candy Variety Bag","39,760 units","$397K","$9.98 ea","Halloween","Grocery",38,["Seasonal","Grocery"]],
+    ["LED Orange String Lights","22,480 units","$270K","$11.98 ea","Halloween","Home",44,["Seasonal","Home"]],
+    ["Halloween Face Paint Kit","18,930 units","$151K","$7.98 ea","Halloween","Apparel",47,["Seasonal","Apparel"]],
+    ["Onn. AA Battery 12 Pack","17,620 units","$176K","$9.98 ea","Halloween","Electronics",36,["Seasonal","Electronics"]],
+    ["Black Plastic Tablecloth","16,840 units","$50K","$2.98 ea","Halloween","Grocery",49,["Seasonal","Grocery"]],
+  ],
+  "Labor Day Weekend":[
+    ["Kingsford Match Light Charcoal","24,680 units","$370K","$14.98 ea","Labor Day","Grocery",34,["Seasonal","Grocery"]],
+    ["Reynolds Wrap Heavy Duty Foil","23,420 units","$187K","$7.98 ea","Labor Day","Grocery",41,["Seasonal","Grocery","Home"]],
+    ["Mainstays Disposable Tablecloth","19,640 units","$78K","$3.98 ea","Labor Day","Home",46,["Seasonal","Grocery","Home"]],
+  ],
+  "Football Season":[
+    ["Doritos Party Size","34,880 units","$209K","$5.98 ea","Football","Grocery",38,["Seasonal","Grocery"]],
+    ["Great Value Foam Plates","28,430 units","$142K","$4.98 ea","Football","Grocery",44,["Seasonal","Grocery","Home"]],
+    ["Onn. HDMI Cable","15,620 units","$187K","$11.98 ea","Football","Electronics",37,["Seasonal","Electronics"]],
+  ],
+};
+
+function getEventSellers(dept,event,base){
+  const cross=(EVENT_MERCHANDISE[event]||[]).filter(item=>item[7].includes(dept));
+  const normalized=base.map((item,index)=>[...item,dept,Math.max(31,46-index*2)]);
+  return [...cross,...normalized.filter(item=>item[4].toLowerCase().includes(event.split(" ")[0].toLowerCase())),...normalized].filter((item,index,list)=>list.findIndex(candidate=>candidate[0]===item[0])===index).slice(0,8);
+}
 
 const STORES = [
   { id:"2487", name:"Lakeview", factor:1, score:86, margin:37.2 },
@@ -479,6 +513,7 @@ function DepartmentView({dept,count,adjust,assignments,prefill,assignEndcap,stor
  const [eventPlans,setEventPlans]=useDemoSavedState(`swas-events-${dept}-v1`,AI_EVENT_RECOMMENDATIONS);
  const [activeEventWindow,setActiveEventWindow]=useState(30);
  const sellers=TOP_SELLERS[dept]||[];
+ const eventSellers=getEventSellers(dept,eventPlans[activeEventWindow],sellers);
  const recommendations=CONCEPTS[dept]||[];
  const stackbaseItems=STACKBASE_ITEMS[dept]||sellers;
  const rollbackItems=ROLLBACK_ITEMS[dept]||[];
@@ -508,8 +543,8 @@ function DepartmentView({dept,count,adjust,assignments,prefill,assignEndcap,stor
        "Spring Refresh":["organization","clean","spring"],
        "Summer Kickoff":["summer","pool","road trip","grilling"],
      }[event]||[];
-     const ranked=[...sellers].sort((a,b)=>{
-       const score=item=>(terms.some(term=>item[4].toLowerCase().includes(term))?100:0)+(sellers.length-sellers.indexOf(item))*8+Number(item[3].replace(/[^0-9.]/g,""))/5;
+     const ranked=[...eventSellers].sort((a,b)=>{
+       const score=item=>(terms.some(term=>item[4].toLowerCase().includes(term))?100:0)+(eventSellers.length-eventSellers.indexOf(item))*8+(item[6]||35);
        return score(b)-score(a);
      });
      const fillSide=(side,total,offset)=>Array.from({length:total},(_,i)=>`${side}-${i}`).forEach((slot,i)=>{
@@ -557,20 +592,20 @@ function DepartmentView({dept,count,adjust,assignments,prefill,assignEndcap,stor
    <div className={`planBox ${open?"open":""}`}>
      <button className="planBoxHead" onClick={()=>setOpen(!open)}><div><span className="eyebrow">DEPARTMENT SETUP</span><h2><i className="departmentLetter">{departmentLetter}</i>{dept} department plan</h2><p>{plannedCount}/{endcapSlots.length} endcaps assigned · Click to {open?"hide":"open"} the location map.</p></div><span className="expand">{open?"−":"+"}</span></button>
      {open&&<div className="endcapSections">
-       <EndcapSection title="Front endcaps" side="front" count={count.front} assignments={assignments} sellers={sellers} rollbackItems={rollbackItems} assignEndcap={assignWithStatus} statuses={statuses} setStatus={(slot,status)=>setStatuses(old=>({...old,[slot]:status}))} add={()=>adjust("front",1)} prefill={()=>prefillWithStatus("front")} description="Highest visibility and customer traffic" corporateSlots={corporateSlots} moveCorporate={moveCorporate} availableSlots={endcapSlots} userChosenSlots={userChosenSlots} moveFeature={moveFeature} featureSlots={allFeatureSlots.filter(slot=>!corporateSlots[slot])}/>
-       <EndcapSection title="Back endcaps" side="back" count={count.back} assignments={assignments} sellers={sellers} rollbackItems={rollbackItems} assignEndcap={assignWithStatus} statuses={statuses} setStatus={(slot,status)=>setStatuses(old=>({...old,[slot]:status}))} add={()=>adjust("back",1)} prefill={()=>prefillWithStatus("back")} description="Destination traffic and aisle transitions" corporateSlots={corporateSlots} moveCorporate={moveCorporate} availableSlots={endcapSlots} userChosenSlots={userChosenSlots} moveFeature={moveFeature} featureSlots={allFeatureSlots.filter(slot=>!corporateSlots[slot])}/>
+       <EndcapSection title="Front endcaps" side="front" count={count.front} assignments={assignments} sellers={eventSellers} rollbackItems={rollbackItems} assignEndcap={assignWithStatus} statuses={statuses} setStatus={(slot,status)=>setStatuses(old=>({...old,[slot]:status}))} add={()=>adjust("front",1)} prefill={()=>prefillWithStatus("front")} description="Highest visibility and customer traffic" corporateSlots={corporateSlots} moveCorporate={moveCorporate} availableSlots={endcapSlots} userChosenSlots={userChosenSlots} moveFeature={moveFeature} featureSlots={allFeatureSlots.filter(slot=>!corporateSlots[slot])}/>
+       <EndcapSection title="Back endcaps" side="back" count={count.back} assignments={assignments} sellers={eventSellers} rollbackItems={rollbackItems} assignEndcap={assignWithStatus} statuses={statuses} setStatus={(slot,status)=>setStatuses(old=>({...old,[slot]:status}))} add={()=>adjust("back",1)} prefill={()=>prefillWithStatus("back")} description="Destination traffic and aisle transitions" corporateSlots={corporateSlots} moveCorporate={moveCorporate} availableSlots={endcapSlots} userChosenSlots={userChosenSlots} moveFeature={moveFeature} featureSlots={allFeatureSlots.filter(slot=>!corporateSlots[slot])}/>
        <EndcapSection title="Action-alley stackbases" side="stackbase" count={count.stackbases} assignments={assignments} sellers={stackbaseItems} rollbackItems={[]} assignEndcap={assignWithStatus} statuses={statuses} setStatus={(slot,status)=>setStatuses(old=>({...old,[slot]:status}))} add={()=>adjust("stackbases",1)} prefill={()=>prefillWithStatus("stackbases")} description="Palletized and bulky seasonal merchandise" corporateSlots={{}} moveCorporate={()=>{}} availableSlots={[]} userChosenSlots={userChosenSlots} moveFeature={moveFeature} featureSlots={allFeatureSlots.filter(slot=>!corporateSlots[slot])}/>
      </div>}
    </div>
    <div className="topSellers">
      <div className="topSellersHead"><div><h2>Top-performing items</h2></div><button onClick={()=>prefillWithStatus("both")}>✦ Prefill {eventPlans[activeEventWindow]} theme</button></div>
-     <div className="sellerList">{sellers.map((x,i)=><div className="seller" key={x[0]}><span>{i+1}</span><div><b>{x[0]}</b><small>{x[1]} sold · Est. retail {x[3]} · {x[4]}</small></div><strong>{x[2]}</strong></div>)}</div>
+     <div className="sellerList">{eventSellers.map((x,i)=><div className={`seller ${x[5]!==dept?"crossMerch":""}`} key={x[0]}><span>{i+1}</span><div><b>{x[0]}</b><small>{x[1]} sold · Est. retail {x[3]} · {x[6]}% margin{x[5]!==dept?` · Cross-merch from ${x[5]}`:""}</small></div><strong>{x[2]}</strong></div>)}</div>
      <p className="prefillNote">Prefilled or manually selected features begin as Pending until the department plan is complete and its merchandise order is approved.</p>
      <div className="rollbackHead"><div><span className="eyebrow">ACTIVE ROLLBACKS</span><h2>Value-priced features</h2></div><button onClick={()=>prefillWithStatus("rollbacks")}>↓ Prefill rollbacks</button></div>
      <div className="rollbackList">{rollbackItems.map((x,i)=><div className="rollbackItem" key={x[0]}><span>{i+1}</span><div><b>{x[0]}</b><small>Was {x[1]} · Rollback {x[2]}</small></div><strong>{x[3]}</strong></div>)}</div>
      {dept==="Grocery"&&<div className="stackbaseRule"><span>◇</span><div><b>Action-alley stackbase rule</b><p>Bulky products such as bottled-water cases, charcoal, large pet food, and oversized paper goods are excluded from endcaps.</p></div></div>}
    </div>
- </section><FeaturePerformance dept={dept} sellers={sellers} assignments={assignments}/><OrderingIntelligence dept={dept} sellers={sellers} assignments={assignments} allEndcapsPlanned={allEndcapsPlanned} plannedCount={plannedCount} totalEndcaps={endcapSlots.length} onWorkflowStage={advanceStatuses}/><MonthlyPerformance scope={dept} scale={storeScale}/><CyclePlanner dept={dept} sellers={sellers} eventPlans={eventPlans}/></>
+ </section><FeaturePerformance dept={dept} sellers={eventSellers} assignments={assignments}/><OrderingIntelligence dept={dept} sellers={eventSellers} assignments={assignments} allEndcapsPlanned={allEndcapsPlanned} plannedCount={plannedCount} totalEndcaps={endcapSlots.length} onWorkflowStage={advanceStatuses}/><MonthlyPerformance scope={dept} scale={storeScale}/><CyclePlanner dept={dept} sellers={eventSellers} eventPlans={eventPlans}/></>
 }
 
 function EventPlanningBox({dept,eventPlans,setEventPlans,activeWindow,setActiveWindow}){
