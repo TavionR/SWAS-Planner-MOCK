@@ -51,6 +51,9 @@ const DEPARTMENT_LETTERS = {
   "Electronics":"E",
 };
 
+const EVENT_OPTIONS = ["Back to School","Labor Day Weekend","Football Season","Halloween","Holiday Entertaining","Winter Readiness","Spring Refresh","Summer Kickoff"];
+const AI_EVENT_RECOMMENDATIONS = {30:"Back to School",60:"Labor Day Weekend",90:"Halloween"};
+
 const STORES = [
   { id:"2487", name:"Lakeview", factor:1, score:86, margin:37.2 },
   { id:"1842", name:"Northgate", factor:.91, score:82, margin:35.9 },
@@ -473,12 +476,15 @@ function DepartmentView({dept,count,adjust,assignments,prefill,assignEndcap,stor
  const [corporateSlots,setCorporateSlots]=useDemoSavedState(`swas-ho-slots-${dept}-v1`,{
    "front-0":{feature:`${dept} H.O. seasonal feature`,program:"Home Office SWAS"}
  });
+ const [eventPlans,setEventPlans]=useDemoSavedState(`swas-events-${dept}-v1`,AI_EVENT_RECOMMENDATIONS);
+ const [activeEventWindow,setActiveEventWindow]=useState(30);
  const sellers=TOP_SELLERS[dept]||[];
  const recommendations=CONCEPTS[dept]||[];
  const stackbaseItems=STACKBASE_ITEMS[dept]||sellers;
  const rollbackItems=ROLLBACK_ITEMS[dept]||[];
  const departmentLetter=DEPARTMENT_LETTERS[dept]||dept.slice(0,1);
  const endcapSlots=[...Array.from({length:count.front},(_,i)=>`front-${i}`),...Array.from({length:count.back},(_,i)=>`back-${i}`)];
+ const allFeatureSlots=[...endcapSlots,...Array.from({length:count.stackbases},(_,i)=>`stackbase-${i}`)];
  const plannedCount=endcapSlots.filter(slot=>assignments[slot]||corporateSlots[slot]).length;
  const allEndcapsPlanned=plannedCount===endcapSlots.length;
  const markAssignedPending=side=>setStatuses(old=>{
@@ -490,7 +496,28 @@ function DepartmentView({dept,count,adjust,assignments,prefill,assignEndcap,stor
    return next;
  });
  const prefillWithStatus=where=>{
-   prefill(where);
+   if(["front","back","both"].includes(where)){
+     const event=eventPlans[activeEventWindow];
+     const terms={
+       "Back to School":["back to school","dorm","school"],
+       "Labor Day Weekend":["grilling","cookout","summer"],
+       "Football Season":["snack","game","tailgate"],
+       "Halloween":["seasonal","party","fall"],
+       "Holiday Entertaining":["organization","gift","entertaining"],
+       "Winter Readiness":["emergency","winter","travel"],
+       "Spring Refresh":["organization","clean","spring"],
+       "Summer Kickoff":["summer","pool","road trip","grilling"],
+     }[event]||[];
+     const ranked=[...sellers].sort((a,b)=>{
+       const score=item=>(terms.some(term=>item[4].toLowerCase().includes(term))?100:0)+(sellers.length-sellers.indexOf(item))*8+Number(item[3].replace(/[^0-9.]/g,""))/5;
+       return score(b)-score(a);
+     });
+     const fillSide=(side,total,offset)=>Array.from({length:total},(_,i)=>`${side}-${i}`).forEach((slot,i)=>{
+       if(!corporateSlots[slot])assignEndcap(slot,ranked[(i+offset)%ranked.length]?.[0]||"Open");
+     });
+     if(where==="front"||where==="both")fillSide("front",count.front,0);
+     if(where==="back"||where==="both")fillSide("back",count.back,Math.min(3,ranked.length-1));
+   }else prefill(where);
    setUserChosenSlots(old=>{
      const next={...old};
      const sides=where==="both"||where==="rollbacks"?["front","back"]:[where==="stackbases"?"stackbase":where];
@@ -510,6 +537,14 @@ function DepartmentView({dept,count,adjust,assignments,prefill,assignEndcap,stor
    delete next[from];
    return next;
  });
+ const moveFeature=(from,to)=>{
+   if(from===to||corporateSlots[to])return;
+   const fromValue=assignments[from]||"",toValue=assignments[to]||"";
+   assignEndcap(to,fromValue);
+   assignEndcap(from,toValue);
+   setStatuses(old=>({...old,[to]:old[from]||(fromValue?"Pending":"Open"),[from]:old[to]||(toValue?"Pending":"Open")}));
+   setUserChosenSlots(old=>({...old,[to]:Boolean(old[from]),[from]:Boolean(old[to])}));
+ };
  const advanceStatuses=stage=>setStatuses(old=>{
    const next={...old};
    endcapSlots.forEach(slot=>{
@@ -518,35 +553,40 @@ function DepartmentView({dept,count,adjust,assignments,prefill,assignEndcap,stor
    });
    return next;
  });
- return <><section className="departmentWorkspace">
+ return <><EventPlanningBox dept={dept} eventPlans={eventPlans} setEventPlans={setEventPlans} activeWindow={activeEventWindow} setActiveWindow={setActiveEventWindow}/><section className="departmentWorkspace">
    <div className={`planBox ${open?"open":""}`}>
      <button className="planBoxHead" onClick={()=>setOpen(!open)}><div><span className="eyebrow">DEPARTMENT SETUP</span><h2><i className="departmentLetter">{departmentLetter}</i>{dept} department plan</h2><p>{plannedCount}/{endcapSlots.length} endcaps assigned · Click to {open?"hide":"open"} the location map.</p></div><span className="expand">{open?"−":"+"}</span></button>
      {open&&<div className="endcapSections">
-       <EndcapSection title="Front endcaps" side="front" count={count.front} assignments={assignments} sellers={sellers} rollbackItems={rollbackItems} assignEndcap={assignWithStatus} statuses={statuses} setStatus={(slot,status)=>setStatuses(old=>({...old,[slot]:status}))} add={()=>adjust("front",1)} prefill={()=>prefillWithStatus("front")} description="Highest visibility and customer traffic" departmentLetter={departmentLetter} corporateSlots={corporateSlots} moveCorporate={moveCorporate} availableSlots={endcapSlots} userChosenSlots={userChosenSlots}/>
-       <EndcapSection title="Back endcaps" side="back" count={count.back} assignments={assignments} sellers={sellers} rollbackItems={rollbackItems} assignEndcap={assignWithStatus} statuses={statuses} setStatus={(slot,status)=>setStatuses(old=>({...old,[slot]:status}))} add={()=>adjust("back",1)} prefill={()=>prefillWithStatus("back")} description="Destination traffic and aisle transitions" departmentLetter={departmentLetter} corporateSlots={corporateSlots} moveCorporate={moveCorporate} availableSlots={endcapSlots} userChosenSlots={userChosenSlots}/>
-       <EndcapSection title="Action-alley stackbases" side="stackbase" count={count.stackbases} assignments={assignments} sellers={stackbaseItems} rollbackItems={[]} assignEndcap={assignWithStatus} statuses={statuses} setStatus={(slot,status)=>setStatuses(old=>({...old,[slot]:status}))} add={()=>adjust("stackbases",1)} prefill={()=>prefillWithStatus("stackbases")} description="Palletized and bulky seasonal merchandise" departmentLetter={departmentLetter} corporateSlots={{}} moveCorporate={()=>{}} availableSlots={[]} userChosenSlots={userChosenSlots}/>
+       <EndcapSection title="Front endcaps" side="front" count={count.front} assignments={assignments} sellers={sellers} rollbackItems={rollbackItems} assignEndcap={assignWithStatus} statuses={statuses} setStatus={(slot,status)=>setStatuses(old=>({...old,[slot]:status}))} add={()=>adjust("front",1)} prefill={()=>prefillWithStatus("front")} description="Highest visibility and customer traffic" corporateSlots={corporateSlots} moveCorporate={moveCorporate} availableSlots={endcapSlots} userChosenSlots={userChosenSlots} moveFeature={moveFeature} featureSlots={allFeatureSlots.filter(slot=>!corporateSlots[slot])}/>
+       <EndcapSection title="Back endcaps" side="back" count={count.back} assignments={assignments} sellers={sellers} rollbackItems={rollbackItems} assignEndcap={assignWithStatus} statuses={statuses} setStatus={(slot,status)=>setStatuses(old=>({...old,[slot]:status}))} add={()=>adjust("back",1)} prefill={()=>prefillWithStatus("back")} description="Destination traffic and aisle transitions" corporateSlots={corporateSlots} moveCorporate={moveCorporate} availableSlots={endcapSlots} userChosenSlots={userChosenSlots} moveFeature={moveFeature} featureSlots={allFeatureSlots.filter(slot=>!corporateSlots[slot])}/>
+       <EndcapSection title="Action-alley stackbases" side="stackbase" count={count.stackbases} assignments={assignments} sellers={stackbaseItems} rollbackItems={[]} assignEndcap={assignWithStatus} statuses={statuses} setStatus={(slot,status)=>setStatuses(old=>({...old,[slot]:status}))} add={()=>adjust("stackbases",1)} prefill={()=>prefillWithStatus("stackbases")} description="Palletized and bulky seasonal merchandise" corporateSlots={{}} moveCorporate={()=>{}} availableSlots={[]} userChosenSlots={userChosenSlots} moveFeature={moveFeature} featureSlots={allFeatureSlots.filter(slot=>!corporateSlots[slot])}/>
      </div>}
    </div>
    <div className="topSellers">
-     <div className="topSellersHead"><div><span className="eyebrow">PAST 2 YEARS + SEASON</span><h2>Top-selling {dept} items</h2></div><button onClick={()=>prefillWithStatus("both")}>✦ Prefill all endcaps</button></div>
+     <div className="topSellersHead"><div><span className="eyebrow">PAST 2 YEARS + SEASON</span><h2>Top-selling {dept} items</h2></div><button onClick={()=>prefillWithStatus("both")}>✦ Prefill {eventPlans[activeEventWindow]} theme</button></div>
      <div className="sellerList">{sellers.map((x,i)=><div className="seller" key={x[0]}><span>{i+1}</span><div><b>{x[0]}</b><small>{x[1]} sold · Est. retail {x[3]} · {x[4]}</small></div><strong>{x[2]}</strong></div>)}</div>
      <p className="prefillNote">Prefilled or manually selected features begin as Pending until the department plan is complete and its merchandise order is approved.</p>
      <div className="rollbackHead"><div><span className="eyebrow">ACTIVE ROLLBACKS</span><h2>Value-priced features</h2></div><button onClick={()=>prefillWithStatus("rollbacks")}>↓ Prefill rollbacks</button></div>
      <div className="rollbackList">{rollbackItems.map((x,i)=><div className="rollbackItem" key={x[0]}><span>{i+1}</span><div><b>{x[0]}</b><small>Was {x[1]} · Rollback {x[2]}</small></div><strong>{x[3]}</strong></div>)}</div>
      {dept==="Grocery"&&<div className="stackbaseRule"><span>◇</span><div><b>Action-alley stackbase rule</b><p>Bulky products such as bottled-water cases, charcoal, large pet food, and oversized paper goods are excluded from endcaps.</p></div></div>}
    </div>
- </section><FeaturePerformance dept={dept} sellers={sellers} assignments={assignments}/><OrderingIntelligence dept={dept} sellers={sellers} assignments={assignments} allEndcapsPlanned={allEndcapsPlanned} plannedCount={plannedCount} totalEndcaps={endcapSlots.length} onWorkflowStage={advanceStatuses}/><MonthlyPerformance scope={dept} scale={storeScale}/><CyclePlanner dept={dept} sellers={sellers}/></>
+ </section><FeaturePerformance dept={dept} sellers={sellers} assignments={assignments}/><OrderingIntelligence dept={dept} sellers={sellers} assignments={assignments} allEndcapsPlanned={allEndcapsPlanned} plannedCount={plannedCount} totalEndcaps={endcapSlots.length} onWorkflowStage={advanceStatuses}/><MonthlyPerformance scope={dept} scale={storeScale}/><CyclePlanner dept={dept} sellers={sellers} eventPlans={eventPlans}/></>
 }
 
-function EndcapSection({title,side,count,assignments,sellers,rollbackItems,assignEndcap,statuses,setStatus,add,prefill,description,departmentLetter,corporateSlots,moveCorporate,availableSlots,userChosenSlots}){
+function EventPlanningBox({dept,eventPlans,setEventPlans,activeWindow,setActiveWindow}){
+ const event=eventPlans[activeWindow];
+ return <section className="eventPlanningBox"><div className="eventPlanIntro"><span className="eyebrow">UPCOMING EVENTS + HOLIDAYS</span><h2>Plan themes around what customers will shop next</h2><p>AI combines two years of seasonal sales, estimated margin, and the timing of upcoming events.</p></div><div className="eventWindowTabs">{[30,60,90].map(days=><button className={activeWindow===days?"active":""} key={days} onClick={()=>setActiveWindow(days)}><b>{days}</b><span>days</span><small>{eventPlans[days]}</small></button>)}</div><div className="eventChoice"><label><span>{activeWindow}-day event</span><select value={event} onChange={e=>setEventPlans(old=>({...old,[activeWindow]:e.target.value}))}>{EVENT_OPTIONS.map(option=><option key={option}>{option}</option>)}</select></label><button onClick={()=>setEventPlans(old=>({...old,[activeWindow]:AI_EVENT_RECOMMENDATIONS[activeWindow]}))}>✦ Use AI recommendation</button><div><small>AI THEME FOR {dept.toUpperCase()}</small><b>{event}</b><span>Prioritize high-velocity items with strong seasonal fit and margin.</span></div></div></section>
+}
+
+function EndcapSection({title,side,count,assignments,sellers,rollbackItems,assignEndcap,statuses,setStatus,add,prefill,description,corporateSlots,moveCorporate,availableSlots,userChosenSlots,moveFeature,featureSlots}){
  const [openSlot,setOpenSlot]=useState(null);
  const choose=(slot,value)=>{assignEndcap(slot,value);setOpenSlot(null)};
- const locationLabel=slot=>`${departmentLetter}-${slot.startsWith("front")?"F":slot.startsWith("back")?"B":"S"}${Number(slot.split("-")[1])+1}`;
+ const locationLabel=slot=>`${slot.startsWith("front")?"F":slot.startsWith("back")?"B":"SB"}${Number(slot.split("-")[1])+1}`;
  return <div className={`endcapSection ${side}`}><div className="endcapTitle"><div><i/><span><b>{title}</b><small>{description}</small></span></div><div><button onClick={prefill}>Prefill</button><strong>{count}</strong></div></div><div className="endcapGrid">{Array.from({length:count},(_,i)=>{
    const slot=`${side}-${i}`;
    const corporate=corporateSlots[slot];
    const value=corporate?.feature||assignments[slot]||"";
-   const isRollback=rollbackItems.some(item=>item[0]===value);
+   const isRollback=Object.values(ROLLBACK_ITEMS).flat().some(item=>item[0]===value);
    const colorClass=corporate?"corporateSlot":isRollback?"rollbackSlot":userChosenSlots[slot]?"userChosenSlot":value?"topSellerSlot":"";
    const status=corporate?"H.O. planned":(statuses[slot]||(value?"Pending":"Open"));
    const isOpen=openSlot===slot;
@@ -556,7 +596,7 @@ function EndcapSection({title,side,count,assignments,sellers,rollbackItems,assig
        <small>{corporate?"Home Office-directed · location can be moved":value?"Feature selected · order pending":`Click to choose ${side==="stackbase"?"merchandise":"an AI feature"}`}</small>
        {!corporate&&<em>{isOpen?"▲":"▼"}</em>}
      </button>
-     {corporate?<div className="corporateControl"><span>H.O. planned</span><label>Move to <select value={slot} onChange={event=>moveCorporate(slot,event.target.value)}>{availableSlots.map(location=><option key={location} value={location}>{locationLabel(location)}</option>)}</select></label></div>:<div className={`slotStatus status-${status.toLowerCase().replaceAll(" ","-")}`}><label>Plan status</label><select value={status} onChange={event=>setStatus(slot,event.target.value)}>{["Open","Pending","Planned","In transit","Freight received","Ready to set","Active","Markdown scheduled","Ending soon","Completed"].map(option=><option key={option}>{option}</option>)}</select></div>}
+     {corporate?<div className="corporateControl"><span>H.O. planned</span><label>Move to <select value={slot} onChange={event=>moveCorporate(slot,event.target.value)}>{availableSlots.map(location=><option key={location} value={location}>{locationLabel(location)}</option>)}</select></label></div>:<div className="featureControls"><div className={`slotStatus status-${status.toLowerCase().replaceAll(" ","-")}`}><label>Plan status</label><select value={status} onChange={event=>setStatus(slot,event.target.value)}>{["Open","Pending","Planned","In transit","Freight received","Ready to set","Active","Markdown scheduled","Ending soon","Completed"].map(option=><option key={option}>{option}</option>)}</select></div>{value&&<label className="moveFeature">Move to <select value={slot} onChange={event=>moveFeature(slot,event.target.value)}>{featureSlots.map(location=><option key={location} value={location}>{locationLabel(location)}</option>)}</select></label>}</div>}
      {isOpen&&!corporate&&<div className="featureMenu"><div className="menuLabel">✦ Two-year top sellers · seasonal fit</div>
        {sellers.map(x=><button className={value===x[0]?"selected":""} key={`seller-${x[0]}`} onClick={()=>choose(slot,x[0])}><span><b>{x[0]}</b><small>{x[1]} · {x[4]}</small></span><em>{x[3]}</em></button>)}
        {rollbackItems.length>0&&<><div className="menuLabel rollbackLabel">↓ Active rollbacks</div>{rollbackItems.map(x=><button className={value===x[0]?"selected":""} key={`rollback-${x[0]}`} onClick={()=>choose(slot,x[0])}><span><b>{x[0]}</b><small>Was {x[1]} · Rollback {x[2]}</small></span><em>{x[3]}</em></button>)}</>}
@@ -640,7 +680,7 @@ function OrderingIntelligence({dept,sellers,assignments,allEndcapsPlanned,planne
  </section>
 }
 
-function CyclePlanner({dept,sellers}){
+function CyclePlanner({dept,sellers,eventPlans}){
  const periods=[30,60,90];
  const defaults={
    30:{feature:"Current priority set",start:"2026-07-28",end:"2026-08-23",arrival:"2026-08-20",markdown:"2026-08-16",status:"Order now"},
@@ -657,7 +697,7 @@ function CyclePlanner({dept,sellers}){
  const generateOrder=()=>setOrders(old=>({...old,[active]:sellers.slice(0,4).map((x,i)=>({item:x[0],cases:Math.max(4,12-i*2),units:Math.max(24,72-i*12),reason:i===0?"Top annual seller + front placement":"Historical velocity + seasonal fit"}))}));
  const order=orders[active]||[];
  return <section className="cyclePlanner">
-   <div className="cycleHead"><div><span className="eyebrow">30 / 60 / 90 DAY SWAS</span><h2>Plan each feature window</h2><p>Open a planning period, complete the set details, and let AI prepare the dates and suggested order.</p></div><div className="periodTabs">{periods.map(x=><button key={x} className={active===x?"active":""} onClick={()=>setActive(x)}><b>{x}</b><span>days</span><small>{plans[x].status}</small></button>)}</div></div>
+   <div className="cycleHead"><div><span className="eyebrow">30 / 60 / 90 DAY SWAS</span><h2>Plan each feature window</h2><p>{eventPlans?.[active]||"Seasonal event"} · Complete the set details and let AI prepare the dates and suggested order.</p></div><div className="periodTabs">{periods.map(x=><button key={x} className={active===x?"active":""} onClick={()=>setActive(x)}><b>{x}</b><span>days</span><small>{eventPlans?.[x]||plans[x].status}</small></button>)}</div></div>
    <div className="cycleBody">
      <div className="setForm"><div className="formTitle"><span><i>✦</i> AI-ASSISTED SET DETAILS</span><button onClick={()=>{changeArrival(plan.arrival);generateOrder()}}>Fill with AI</button></div>
        <label className="wide"><span>Feature or SWAS name</span><input value={plan.feature} onChange={e=>update("feature",e.target.value)}/></label>
