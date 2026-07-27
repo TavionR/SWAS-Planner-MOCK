@@ -469,6 +469,7 @@ function LegacyEndcapSection({title,side,count,assignments,recommendations,selle
 function DepartmentView({dept,count,adjust,assignments,prefill,assignEndcap,storeScale}){
  const [open,setOpen]=useState(true);
  const [statuses,setStatuses]=useDemoSavedState(`swas-statuses-${dept}-v2`,{});
+ const [userChosenSlots,setUserChosenSlots]=useDemoSavedState(`swas-user-chosen-${dept}-v1`,{});
  const [corporateSlots,setCorporateSlots]=useDemoSavedState(`swas-corporate-slots-${dept}-v1`,{
    "front-0":{feature:`${dept} corporate seasonal feature`,program:"Corporate SWAS"}
  });
@@ -490,10 +491,17 @@ function DepartmentView({dept,count,adjust,assignments,prefill,assignEndcap,stor
  });
  const prefillWithStatus=where=>{
    prefill(where);
+   setUserChosenSlots(old=>{
+     const next={...old};
+     const sides=where==="both"||where==="rollbacks"?["front","back"]:[where==="stackbases"?"stackbase":where];
+     Object.keys(next).forEach(slot=>{if(sides.some(side=>slot.startsWith(`${side}-`)))delete next[slot]});
+     return next;
+   });
    markAssignedPending(where==="rollbacks"?"both":where);
  };
  const assignWithStatus=(slot,value)=>{
    assignEndcap(slot,value);
+   setUserChosenSlots(old=>({...old,[slot]:Boolean(value)}));
    setStatuses(old=>({...old,[slot]:value?"Pending":"Open"}));
  };
  const moveCorporate=(from,to)=>setCorporateSlots(old=>{
@@ -514,9 +522,9 @@ function DepartmentView({dept,count,adjust,assignments,prefill,assignEndcap,stor
    <div className={`planBox ${open?"open":""}`}>
      <button className="planBoxHead" onClick={()=>setOpen(!open)}><div><span className="eyebrow">DEPARTMENT SETUP</span><h2><i className="departmentLetter">{departmentLetter}</i>{dept} department plan</h2><p>{plannedCount}/{endcapSlots.length} endcaps assigned · Click to {open?"hide":"open"} the location map.</p></div><span className="expand">{open?"−":"+"}</span></button>
      {open&&<div className="endcapSections">
-       <EndcapSection title="Front endcaps" side="front" count={count.front} assignments={assignments} sellers={sellers} rollbackItems={rollbackItems} assignEndcap={assignWithStatus} statuses={statuses} setStatus={(slot,status)=>setStatuses(old=>({...old,[slot]:status}))} add={()=>adjust("front",1)} prefill={()=>prefillWithStatus("front")} description="Highest visibility and customer traffic" departmentLetter={departmentLetter} corporateSlots={corporateSlots} moveCorporate={moveCorporate} availableSlots={endcapSlots}/>
-       <EndcapSection title="Back endcaps" side="back" count={count.back} assignments={assignments} sellers={sellers} rollbackItems={rollbackItems} assignEndcap={assignWithStatus} statuses={statuses} setStatus={(slot,status)=>setStatuses(old=>({...old,[slot]:status}))} add={()=>adjust("back",1)} prefill={()=>prefillWithStatus("back")} description="Destination traffic and aisle transitions" departmentLetter={departmentLetter} corporateSlots={corporateSlots} moveCorporate={moveCorporate} availableSlots={endcapSlots}/>
-       <EndcapSection title="Action-alley stackbases" side="stackbase" count={count.stackbases} assignments={assignments} sellers={stackbaseItems} rollbackItems={[]} assignEndcap={assignWithStatus} statuses={statuses} setStatus={(slot,status)=>setStatuses(old=>({...old,[slot]:status}))} add={()=>adjust("stackbases",1)} prefill={()=>prefillWithStatus("stackbases")} description="Palletized and bulky seasonal merchandise" departmentLetter={departmentLetter} corporateSlots={{}} moveCorporate={()=>{}} availableSlots={[]}/>
+       <EndcapSection title="Front endcaps" side="front" count={count.front} assignments={assignments} sellers={sellers} rollbackItems={rollbackItems} assignEndcap={assignWithStatus} statuses={statuses} setStatus={(slot,status)=>setStatuses(old=>({...old,[slot]:status}))} add={()=>adjust("front",1)} prefill={()=>prefillWithStatus("front")} description="Highest visibility and customer traffic" departmentLetter={departmentLetter} corporateSlots={corporateSlots} moveCorporate={moveCorporate} availableSlots={endcapSlots} userChosenSlots={userChosenSlots}/>
+       <EndcapSection title="Back endcaps" side="back" count={count.back} assignments={assignments} sellers={sellers} rollbackItems={rollbackItems} assignEndcap={assignWithStatus} statuses={statuses} setStatus={(slot,status)=>setStatuses(old=>({...old,[slot]:status}))} add={()=>adjust("back",1)} prefill={()=>prefillWithStatus("back")} description="Destination traffic and aisle transitions" departmentLetter={departmentLetter} corporateSlots={corporateSlots} moveCorporate={moveCorporate} availableSlots={endcapSlots} userChosenSlots={userChosenSlots}/>
+       <EndcapSection title="Action-alley stackbases" side="stackbase" count={count.stackbases} assignments={assignments} sellers={stackbaseItems} rollbackItems={[]} assignEndcap={assignWithStatus} statuses={statuses} setStatus={(slot,status)=>setStatuses(old=>({...old,[slot]:status}))} add={()=>adjust("stackbases",1)} prefill={()=>prefillWithStatus("stackbases")} description="Palletized and bulky seasonal merchandise" departmentLetter={departmentLetter} corporateSlots={{}} moveCorporate={()=>{}} availableSlots={[]} userChosenSlots={userChosenSlots}/>
      </div>}
    </div>
    <div className="topSellers">
@@ -530,7 +538,7 @@ function DepartmentView({dept,count,adjust,assignments,prefill,assignEndcap,stor
  </section><FeaturePerformance dept={dept} sellers={sellers} assignments={assignments}/><OrderingIntelligence dept={dept} sellers={sellers} assignments={assignments} allEndcapsPlanned={allEndcapsPlanned} plannedCount={plannedCount} totalEndcaps={endcapSlots.length} onWorkflowStage={advanceStatuses}/><MonthlyPerformance scope={dept} scale={storeScale}/><CyclePlanner dept={dept} sellers={sellers}/></>
 }
 
-function EndcapSection({title,side,count,assignments,sellers,rollbackItems,assignEndcap,statuses,setStatus,add,prefill,description,departmentLetter,corporateSlots,moveCorporate,availableSlots}){
+function EndcapSection({title,side,count,assignments,sellers,rollbackItems,assignEndcap,statuses,setStatus,add,prefill,description,departmentLetter,corporateSlots,moveCorporate,availableSlots,userChosenSlots}){
  const [openSlot,setOpenSlot]=useState(null);
  const choose=(slot,value)=>{assignEndcap(slot,value);setOpenSlot(null)};
  const locationLabel=slot=>`${departmentLetter}-${slot.startsWith("front")?"F":slot.startsWith("back")?"B":"S"}${Number(slot.split("-")[1])+1}`;
@@ -538,9 +546,11 @@ function EndcapSection({title,side,count,assignments,sellers,rollbackItems,assig
    const slot=`${side}-${i}`;
    const corporate=corporateSlots[slot];
    const value=corporate?.feature||assignments[slot]||"";
+   const isRollback=rollbackItems.some(item=>item[0]===value);
+   const colorClass=corporate?"corporateSlot":isRollback?"rollbackSlot":userChosenSlots[slot]?"userChosenSlot":value?"topSellerSlot":"";
    const status=corporate?"Corporate planned":(statuses[slot]||(value?"Pending":"Open"));
    const isOpen=openSlot===slot;
-   return <div className={`endcapSlot ${value?"filled":""} ${isOpen?"menuOpen":""} ${corporate?"corporateSlot":""}`} key={slot}>
+   return <div className={`endcapSlot ${value?"filled":""} ${isOpen?"menuOpen":""} ${colorClass}`} key={slot}>
      <button className="slotTrigger" aria-expanded={isOpen} onClick={()=>{if(!corporate)setOpenSlot(isOpen?null:slot)}}>
        <span>{locationLabel(slot)}</span><b>{value||`Open ${side==="stackbase"?"stackbase":"endcap"}`}</b>
        <small>{corporate?"Corporate-directed · location can be moved":value?"Feature selected · order pending":`Click to choose ${side==="stackbase"?"merchandise":"an AI feature"}`}</small>
